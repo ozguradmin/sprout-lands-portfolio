@@ -61,13 +61,6 @@ export const ArcadeView: React.FC = () => {
 
   const mainLinks = [
     { 
-      name: 'VSCO Galeri', 
-      icon: <Camera size={24} />, 
-      username: 'vscotr.vercel.app/ozgur', 
-      link: 'https://vscotr.vercel.app/ozgur',
-      color: 'hover:bg-white/10 hover:border-white/20 hover:text-white'
-    },
-    { 
       name: 'GitHub', 
       icon: <Github size={24} />, 
       username: '@ozguradmin', 
