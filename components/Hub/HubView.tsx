@@ -29,6 +29,10 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
   useEffect(() => {
     const handleWindowMove = (e: MouseEvent | TouchEvent) => {
       if (!active) return;
+      
+      // Varsayılan kaydırma hareketini engelle (Mobil tarayıcıda sayfa kaymasın)
+      if (e.cancelable) e.preventDefault();
+
       let clientX, clientY;
       if ('touches' in e) {
         clientX = e.touches[0].clientX;
@@ -61,9 +65,9 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
     };
 
     if (active) {
-      window.addEventListener('mousemove', handleWindowMove);
+      window.addEventListener('mousemove', handleWindowMove, { passive: false });
       window.addEventListener('mouseup', handleWindowEnd);
-      window.addEventListener('touchmove', handleWindowMove);
+      window.addEventListener('touchmove', handleWindowMove, { passive: false });
       window.addEventListener('touchend', handleWindowEnd);
     }
 
@@ -78,16 +82,17 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
   // Ekranın alt yarısını kaplayan görünmez tetikleyici alan
   return (
     <>
-      {/* Görünmez Tetikleyici Alan (Sadece pasifken) */}
-      {!active && (
-        <div 
-          className="fixed bottom-0 left-0 right-0 h-1/2 z-40 touch-none cursor-pointer"
-          onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
-          onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
-        />
-      )}
+      {/* Görünmez Tetikleyici Alan (Her zaman aktif olmalı ki ilk dokunuşu yakalasın) */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 h-1/2 z-40 touch-none"
+        onTouchStart={(e) => {
+          // İlk dokunuşta hem konumu ayarla hem de aktif et
+          handleStart(e.touches[0].clientX, e.touches[0].clientY);
+        }}
+        onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
+      />
 
-      {/* Joystick Görseli (Her zaman var, aktifliğe göre konumu ve opaklığı değişir) */}
+      {/* Joystick Görseli */}
       <div 
         ref={joystickRef}
         className="fixed w-32 h-32 rounded-full backdrop-blur-[1px] bg-white/10 border border-white/20 shadow-2xl z-50 pointer-events-none transition-all duration-300 ease-out"
