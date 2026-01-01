@@ -82,11 +82,17 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
   // Ekranın alt yarısını kaplayan görünmez tetikleyici alan
   return (
     <>
-      {/* Görünmez Tetikleyici Alan */}
+      {/* Görünmez Tetikleyici Alan - Arka plan kaydırmasını tamamen durdurur */}
       <div 
-        className="fixed bottom-0 left-0 right-0 h-1/2 z-40 touch-none"
-        style={{ pointerEvents: active ? 'none' : 'auto' }}
-        onTouchStart={(e) => handleStart(e, e.touches[0].clientX, e.touches[0].clientY)}
+        className="fixed bottom-0 left-0 right-0 h-1/2 z-40"
+        style={{ 
+          touchAction: 'none', 
+          pointerEvents: active ? 'none' : 'auto' 
+        }}
+        onTouchStart={(e) => {
+          if (e.cancelable) e.preventDefault();
+          handleStart(e, e.touches[0].clientX, e.touches[0].clientY);
+        }}
         onMouseDown={(e) => handleStart(e, e.clientX, e.clientY)}
       />
 
@@ -97,7 +103,8 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
           left: active ? basePosition.x - 64 : window.innerWidth / 2 - 64, 
           top: active ? basePosition.y - 64 : window.innerHeight - 180, // %20 yukarı çekildi
           opacity: active ? 1 : 0.5, // Daha belirgin hale getirildi
-          transform: active ? 'scale(1)' : 'scale(0.85)' 
+          transform: active ? 'scale(1)' : 'scale(0.85)',
+          touchAction: 'none'
         }}
       >
         {/* Knob (Topuz) */}
