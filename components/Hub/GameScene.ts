@@ -383,11 +383,26 @@ export class GameScene extends Phaser.Scene {
     if (Math.abs(this.joystickValues.x) > 0.1 || Math.abs(this.joystickValues.y) > 0.1) { vx = this.joystickValues.x * speed; vy = this.joystickValues.y * speed; }
     if (vx !== 0 && vy !== 0 && this.joystickValues.x === 0) { vx *= 0.7071; vy *= 0.7071; }
     this.player.setVelocity(vx, vy);
-    if (vy < -0.1) this.player.play('walk-up', true);
-    else if (vy > 0.1) this.player.play('walk-down', true);
-    else if (vx < -0.1) this.player.play('walk-left', true);
-    else if (vx > 0.1) this.player.play('walk-right', true);
-    else { this.player.stop(); this.player.setFrame(0); }
+    
+    // Animasyon Seçimi (Joystick ve Klavye uyumlu)
+    const absX = Math.abs(vx);
+    const absY = Math.abs(vy);
+
+    if (absX < 10 && absY < 10) {
+      this.player.stop();
+      this.player.setFrame(0); 
+    } else {
+      // Y ekseni hareketi X'ten belirgin şekilde büyükse dikey animasyon
+      // Yatay hareketi biraz daha öncelikli tutmak için Y eşiğini artırıyoruz
+      if (absY > absX * 1.2) {
+        if (vy < 0) this.player.play('walk-up', true);
+        else this.player.play('walk-down', true);
+      } else {
+        // Aksi halde yatay animasyon
+        if (vx < 0) this.player.play('walk-left', true);
+        else this.player.play('walk-right', true);
+      }
+    }
 
     // Derinlik güncelleme (Y-Sorting)
     this.player.setDepth(this.player.y + 48);

@@ -11,90 +11,84 @@ let hasSeenSession = false;
 
 // Ultra-Modern Dynamic Joystick
 const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({ onMove }) => {
-  const joystickRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
-  const [basePosition, setBasePosition] = useState({ x: 0, y: 0 }); // Başlangıç noktası
-  const [knobPosition, setKnobPosition] = useState({ x: 0, y: 0 }); // Topuzun konumu
+  const [basePosition, setBasePosition] = useState({ x: 0, y: 0 });
+  const [knobPosition, setKnobPosition] = useState({ x: 0, y: 0 });
+  
+  // Refs for immediate access in event handlers
+  const activeRef = useRef(false);
+  const basePosRef = useRef({ x: 0, y: 0 });
 
-  const handleStart = (clientX: number, clientY: number) => {
-    // Sadece ekranın alt yarısında çalışsın
-    if (clientY < window.innerHeight / 2) return;
+  const handleMove = (clientX: number, clientY: number) => {
+    const maxRadius = 50;
+    let dx = clientX - basePosRef.current.x;
+    let dy = clientY - basePosRef.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
 
-    setActive(true);
-    setBasePosition({ x: clientX, y: clientY });
-    setKnobPosition({ x: 0, y: 0 });
-    onMove(0, 0);
-  };
-
-  useEffect(() => {
-    const handleWindowMove = (e: MouseEvent | TouchEvent) => {
-      if (!active) return;
-      
-      // Varsayılan kaydırma hareketini engelle (Mobil tarayıcıda sayfa kaymasın)
-      if (e.cancelable) e.preventDefault();
-
-      let clientX, clientY;
-      if ('touches' in e) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-      } else {
-        clientX = (e as MouseEvent).clientX;
-        clientY = (e as MouseEvent).clientY;
-      }
-      
-      const maxRadius = 50; // Joystick yarıçapı
-      let dx = clientX - basePosition.x;
-      let dy = clientY - basePosition.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance > maxRadius) {
-        const angle = Math.atan2(dy, dx);
-        dx = Math.cos(angle) * maxRadius;
-        dy = Math.sin(angle) * maxRadius;
-      }
-
-      setKnobPosition({ x: dx, y: dy });
-      onMove(dx / maxRadius, dy / maxRadius);
-    };
-
-    const handleWindowEnd = () => {
-      if (!active) return;
-      setActive(false);
-      setKnobPosition({ x: 0, y: 0 });
-      onMove(0, 0);
-    };
-
-    if (active) {
-      window.addEventListener('mousemove', handleWindowMove, { passive: false });
-      window.addEventListener('mouseup', handleWindowEnd);
-      window.addEventListener('touchmove', handleWindowMove, { passive: false });
-      window.addEventListener('touchend', handleWindowEnd);
+    if (distance > maxRadius) {
+      const angle = Math.atan2(dy, dx);
+      dx = Math.cos(angle) * maxRadius;
+      dy = Math.sin(angle) * maxRadius;
     }
 
-    return () => {
-      window.removeEventListener('mousemove', handleWindowMove);
-      window.removeEventListener('mouseup', handleWindowEnd);
-      window.removeEventListener('touchmove', handleWindowMove);
-      window.removeEventListener('touchend', handleWindowEnd);
-    };
-  }, [active, basePosition, onMove]);
+    setKnobPosition({ x: dx, y: dy });
+    onMove(dx / maxRadius, dy / maxRadius);
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    if (!activeRef.current) return;
+    if (e.cancelable) e.preventDefault();
+    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+  };
+
+  const onMouseMove = (e: MouseEvent) => {
+    if (!activeRef.current) return;
+    handleMove(e.clientX, e.clientY);
+  };
+
+  const onEnd = () => {
+    activeRef.current = false;
+    setActive(false);
+    setKnobPosition({ x: 0, y: 0 });
+    onMove(0, 0);
+    
+    // Clean up listeners immediately
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onEnd);
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onEnd);
+  };
+
+  const handleStart = (clientX: number, clientY: number) => {
+    if (clientY < window.innerHeight / 2) return;
+
+    activeRef.current = true;
+    setActive(true);
+    setBasePosition({ x: clientX, y: clientY });
+    basePosRef.current = { x: clientX, y: clientY };
+    setKnobPosition({ x: 0, y: 0 });
+    onMove(0, 0);
+
+    // Attach listeners immediately to capture the CURRENT gesture
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onEnd);
+  };
 
   // Ekranın alt yarısını kaplayan görünmez tetikleyici alan
   return (
     <>
-      {/* Görünmez Tetikleyici Alan (Her zaman aktif olmalı ki ilk dokunuşu yakalasın) */}
+      {/* Görünmez Tetikleyici Alan */}
       <div 
         className="fixed bottom-0 left-0 right-0 h-1/2 z-40 touch-none"
-        onTouchStart={(e) => {
-          // İlk dokunuşta hem konumu ayarla hem de aktif et
-          handleStart(e.touches[0].clientX, e.touches[0].clientY);
-        }}
+        style={{ pointerEvents: active ? 'none' : 'auto' }}
+        onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
         onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
       />
 
       {/* Joystick Görseli */}
       <div 
-        ref={joystickRef}
         className="fixed w-32 h-32 rounded-full backdrop-blur-[1px] bg-white/10 border border-white/20 shadow-2xl z-50 pointer-events-none transition-all duration-300 ease-out"
         style={{ 
           left: active ? basePosition.x - 64 : window.innerWidth / 2 - 64, 
@@ -210,7 +204,7 @@ export const HubView: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           >
             <motion.div 
               initial={{ scale: 0.8, y: 20 }}
