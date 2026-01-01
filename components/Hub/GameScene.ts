@@ -383,10 +383,10 @@ export class GameScene extends Phaser.Scene {
     if (Math.abs(this.joystickValues.x) > 0.1 || Math.abs(this.joystickValues.y) > 0.1) { vx = this.joystickValues.x * speed; vy = this.joystickValues.y * speed; }
     if (vx !== 0 && vy !== 0 && this.joystickValues.x === 0) { vx *= 0.7071; vy *= 0.7071; }
     this.player.setVelocity(vx, vy);
-    if (vy < 0) this.player.play('walk-up', true);
-    else if (vy > 0) this.player.play('walk-down', true);
-    else if (vx < 0) this.player.play('walk-left', true);
-    else if (vx > 0) this.player.play('walk-right', true);
+    if (vy < -0.1) this.player.play('walk-up', true);
+    else if (vy > 0.1) this.player.play('walk-down', true);
+    else if (vx < -0.1) this.player.play('walk-left', true);
+    else if (vx > 0.1) this.player.play('walk-right', true);
     else { this.player.stop(); this.player.setFrame(0); }
 
     // Derinlik güncelleme (Y-Sorting)
