@@ -59,8 +59,11 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
     window.removeEventListener('mouseup', onEnd);
   };
 
-  const handleStart = (clientX: number, clientY: number) => {
+  const handleStart = (e: React.TouchEvent | React.MouseEvent, clientX: number, clientY: number) => {
     if (clientY < window.innerHeight / 2) return;
+    
+    // Tarayıcının bu dokunuşu bir "scroll" olarak algılamasını engelle
+    if (e.cancelable) e.preventDefault();
 
     activeRef.current = true;
     setActive(true);
@@ -69,7 +72,7 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
     setKnobPosition({ x: 0, y: 0 });
     onMove(0, 0);
 
-    // Attach listeners immediately to capture the CURRENT gesture
+    // Dinleyicileri hemen ekle
     window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onEnd);
     window.addEventListener('mousemove', onMouseMove);
@@ -83,8 +86,8 @@ const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({
       <div 
         className="fixed bottom-0 left-0 right-0 h-1/2 z-40 touch-none"
         style={{ pointerEvents: active ? 'none' : 'auto' }}
-        onTouchStart={(e) => handleStart(e.touches[0].clientX, e.touches[0].clientY)}
-        onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
+        onTouchStart={(e) => handleStart(e, e.touches[0].clientX, e.touches[0].clientY)}
+        onMouseDown={(e) => handleStart(e, e.clientX, e.clientY)}
       />
 
       {/* Joystick Görseli */}
@@ -204,7 +207,7 @@ export const HubView: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           >
             <motion.div 
               initial={{ scale: 0.8, y: 20 }}

@@ -393,8 +393,8 @@ export class GameScene extends Phaser.Scene {
       this.player.setFrame(0); 
     } else {
       // Y ekseni hareketi X'ten belirgin şekilde büyükse dikey animasyon
-      // Yatay hareketi biraz daha öncelikli tutmak için Y eşiğini artırıyoruz
-      if (absY > absX * 1.2) {
+      // Yatay hareketi çok daha öncelikli tutmak için dikey eşiği 1.6'ya çıkardık
+      if (absY > absX * 1.6) {
         if (vy < 0) this.player.play('walk-up', true);
         else this.player.play('walk-down', true);
       } else {
