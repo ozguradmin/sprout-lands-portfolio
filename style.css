@@ -1,0 +1,193 @@
+/* ============================================================================
+   RPG Portfolio - Style System
+   ============================================================================ */
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Color Palette - Retro/Fantasy Theme */
+    --color-bg-dark: #1a1a2e;
+    --color-bg-medium: #16213e;
+    --color-bg-light: #0f3460;
+    --color-accent: #e94560;
+    --color-accent-glow: #ff6b8a;
+    --color-gold: #ffd700;
+    --color-text: #ffffff;
+    --color-text-dim: #a0a0c0;
+    --color-success: #4ade80;
+    --color-glass: rgba(15, 52, 96, 0.85);
+    --color-glass-border: rgba(233, 69, 96, 0.3);
+    
+    /* Typography */
+    --font-pixel: 'Press Start 2P', monospace;
+    --font-retro: 'VT323', monospace;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Joystick */
+    --joystick-size: 120px;
+    --joystick-handle-size: 50px;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--color-bg-dark);
+    font-family: var(--font-retro);
+    color: var(--color-text);
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    cursor: default;
+}
+
+#joystickContainer {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+@media (pointer: coarse) {
+    #joystickContainer {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+#joystickBase {
+    width: var(--joystick-size);
+    height: var(--joystick-size);
+    background: radial-gradient(circle, rgba(233, 69, 96, 0.2) 0%, rgba(15, 52, 96, 0.6) 100%);
+    border: 3px solid var(--color-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(233, 69, 96, 0.4);
+}
+
+#joystickHandle {
+    width: var(--joystick-handle-size);
+    height: var(--joystick-handle-size);
+    background: linear-gradient(145deg, var(--color-accent-glow), var(--color-accent));
+    border-radius: 50%;
+}
+
+#interactButton {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(145deg, var(--color-gold), #cc9900);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    font-family: var(--font-pixel);
+    font-size: 10px;
+}
+
+@media (pointer: coarse) {
+    #interactButton { display: flex; }
+}
+
+#keyPrompt {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-glass);
+    border: 2px solid var(--color-glass-border);
+    border-radius: 8px;
+    font-family: var(--font-pixel);
+    font-size: 12px;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+
+#modalOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+#modalOverlay.hidden {
+    opacity: 0; pointer-events: none;
+}
+
+#modalContent {
+    position: relative;
+    width: 90%; max-width: 500px; max-height: 80vh;
+    background: linear-gradient(180deg, var(--color-bg-medium) 0%, var(--color-bg-dark) 100%);
+    border: 3px solid var(--color-accent);
+    border-radius: 16px;
+    padding: var(--spacing-xl);
+    overflow-y: auto;
+}
+
+#modalClose {
+    position: absolute; top: 12px; right: 12px;
+    width: 36px; height: 36px;
+    background: transparent; border: 2px solid var(--color-text-dim);
+    border-radius: 50%; color: var(--color-text-dim);
+    font-size: 24px; cursor: pointer;
+}
+
+#modalBody {
+    font-family: var(--font-retro);
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+#loadingScreen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--color-bg-dark);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000;
+    transition: opacity 0.5s ease;
+}
+
+#loadingScreen.hidden { opacity: 0; pointer-events: none; }
+
+.pixel-spinner {
+    width: 48px; height: 48px;
+    background: var(--color-accent);
+    animation: pixelSpin 0.8s steps(4) infinite;
+}
+
+@keyframes pixelSpin { 100% { transform: rotate(360deg); } }
+
+.hidden { display: none !important; }

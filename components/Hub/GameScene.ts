@@ -395,7 +395,7 @@ export class GameScene extends Phaser.Scene {
       // Y ekseni hareketi X'ten belirgin şekilde büyükse dikey animasyon
       // Yatay hareketi çok daha öncelikli tutmak için dikey eşiği 1.6'ya çıkardık
       if (absY > absX * 1.6) {
-        if (vy < 0) this.player.play('walk-up', true);
+    if (vy < 0) this.player.play('walk-up', true);
         else this.player.play('walk-down', true);
       } else {
         // Aksi halde yatay animasyon

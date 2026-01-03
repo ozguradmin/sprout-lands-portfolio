@@ -1,19 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Özgür'ün Portfolyosu</title>
-    <meta name="description" content="Özgür Güler'in interaktif 2D piksel dünyasını keşfedin; projeler, sosyal medya ve çok daha fazlası." />
-    <link rel="icon" type="image/png" href="/assets/ben.png" />
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-primary text-gray-100 antialiased overflow-hidden">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Portfolio Island - Explore My Work</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Main Game Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Virtual Joystick (Mobile Only) -->
+  <div id="joystickContainer">
+    <div id="joystickBase">
+      <div id="joystickHandle"></div>
+    </div>
+  </div>
+
+  <!-- Interaction Button (Mobile) -->
+  <button id="interactButton" class="hidden">
+    <span>Interact</span>
+  </button>
+
+  <!-- Keyboard Prompt (Desktop) -->
+  <div id="keyPrompt" class="hidden">
+    <span class="key">E</span> to interact
+  </div>
+
+  <!-- Modal Overlay -->
+  <div id="modalOverlay" class="hidden">
+    <div id="modalContent">
+      <button id="modalClose">&times;</button>
+      <h2 id="modalTitle">Title</h2>
+      <div id="modalBody">
+        <!-- Content injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <div class="loader">
+      <div class="pixel-spinner"></div>
+      <p>Loading assets...</p>
+    </div>
+  </div>
+
+  <!-- Controls Help (Toggle) -->
+  <div id="controlsHelp">
+    <div class="help-icon">?</div>
+    <div class="help-content hidden">
+      <h3>Controls</h3>
+      <p><strong>Desktop:</strong> WASD or Arrow Keys to move</p>
+      <p><strong>Mobile:</strong> Use the joystick (bottom-left)</p>
+      <p>Press <span class="key">E</span> or tap Interact near buildings</p>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+
 </html>
