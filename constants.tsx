@@ -13,16 +13,6 @@ export const PROJECTS: Project[] = [
     link: 'https://cografist.app/'
   },
   {
-    id: '2',
-    title: 'VSCO TR',
-    category: 'Web',
-    description: 'Fotoğraflarını paylaş, keşfet ve yaratıcı topluluğa katıl. Tamamen ücretsiz VSCO alternatifi.',
-    techStack: [],
-    thumbnail: '/assets/projects/vscotr.png',
-    details: 'vscotr.vercel.app adresinde yayında.',
-    link: 'https://vscotr.vercel.app/'
-  },
-  {
     id: '3',
     title: 'Dosya Paylaş',
     category: 'Web',
@@ -39,8 +29,8 @@ export const PROJECTS: Project[] = [
     description: 'Kürtçe çeviri web sitesi.',
     techStack: [],
     thumbnail: '/assets/projects/kurdishai.png',
-    details: 'kurdishtranslate.netlify.app adresinde yayında.',
-    link: 'https://kurdishtranslate.netlify.app/'
+    details: 'kurtceviri.netlify.app adresinde yayında.',
+    link: 'https://kurtceviri.netlify.app/'
   },
   {
     id: '5',
@@ -61,6 +51,16 @@ export const PROJECTS: Project[] = [
     thumbnail: '/assets/projects/birlikteizle.jpg',
     details: 'birlikteizle.ozgurguler.workers.dev adresinde yayında.',
     link: 'https://birlikteizle.ozgurguler.workers.dev/'
+  },
+  {
+    id: '2',
+    title: 'VSCO TR',
+    category: 'Web',
+    description: 'Fotoğraflarını paylaş, keşfet ve yaratıcı topluluğa katıl. Tamamen ücretsiz VSCO alternatifi.',
+    techStack: [],
+    thumbnail: '/assets/projects/vscotr.png',
+    details: 'vscotr.vercel.app adresinde yayında.',
+    link: 'https://vscotr.vercel.app/'
   },
   {
     id: '7',
