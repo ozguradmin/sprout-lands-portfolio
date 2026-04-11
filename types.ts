@@ -11,7 +11,7 @@ export enum ViewState {
 export interface Project {
   id: string;
   title: string;
-  category: 'Web' | 'Mobile' | 'Oyun' | 'Design';
+  category: 'Web' | 'Mobile' | 'Uygulama/Oyun' | 'Design';
   description: string;
   techStack: string[];
   thumbnail: string;
