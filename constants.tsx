@@ -4,6 +4,16 @@ import { Project, Photo } from './types';
 export const PROJECTS: Project[] = [
   {
     id: '1',
+    title: 'Coğrafist',
+    category: 'Uygulama/Oyun',
+    description: 'Coğrafya öğrenme uygulaması.',
+    techStack: [],
+    thumbnail: '/assets/projects/cografist.png',
+    details: 'cografist.app adresinde yayında.',
+    link: 'https://cografist.app/'
+  },
+  {
+    id: '2',
     title: 'VSCO TR',
     category: 'Web',
     description: 'Fotoğraflarını paylaş, keşfet ve yaratıcı topluluğa katıl. Tamamen ücretsiz VSCO alternatifi.',
@@ -11,16 +21,6 @@ export const PROJECTS: Project[] = [
     thumbnail: '/assets/projects/vscotr.png',
     details: 'vscotr.vercel.app adresinde yayında.',
     link: 'https://vscotr.vercel.app/'
-  },
-  {
-    id: '2',
-    title: 'Portal Dash',
-    category: 'Oyun',
-    description: 'Mobil oyun hem Google Play Store hem App Store için geliştirildi.',
-    techStack: [],
-    thumbnail: '/assets/projects/portaldash.jpg',
-    details: 'Çok Yakında',
-    link: '#'
   },
   {
     id: '3',
@@ -33,14 +33,44 @@ export const PROJECTS: Project[] = [
     link: 'https://dosyapaylas.vercel.app/'
   },
   {
-      id: '4',
-      title: 'Kurdish Translate',
-      category: 'Web',
-      description: 'Kürtçe çeviri web sitesi.',
-      techStack: [],
-      thumbnail: '/assets/projects/kurdishai.png',
-      details: 'kurdishtranslate.netlify.app adresinde yayında.',
-      link: 'https://kurdishtranslate.netlify.app/'
+    id: '4',
+    title: 'Kurdish Translate',
+    category: 'Web',
+    description: 'Kürtçe çeviri web sitesi.',
+    techStack: [],
+    thumbnail: '/assets/projects/kurdishai.png',
+    details: 'kurdishtranslate.netlify.app adresinde yayında.',
+    link: 'https://kurdishtranslate.netlify.app/'
+  },
+  {
+    id: '5',
+    title: 'Galaktik Uzay',
+    category: 'Web',
+    description: 'Uzayla alakalı web sitem.',
+    techStack: [],
+    thumbnail: '/assets/projects/galaktikuzay.png',
+    details: 'galaktikuzay.com adresinde yayında.',
+    link: 'https://galaktikuzay.com/'
+  },
+  {
+    id: '6',
+    title: 'Birlikte İzle',
+    category: 'Web',
+    description: 'Discord yayın paylaşma benzeri web sitesi. Birlikte oda kurup yayın açıp izleyip sohbet edin.',
+    techStack: [],
+    thumbnail: '/assets/projects/birlikteizle.jpg',
+    details: 'birlikteizle.ozgurguler.workers.dev adresinde yayında.',
+    link: 'https://birlikteizle.ozgurguler.workers.dev/'
+  },
+  {
+    id: '7',
+    title: 'Portal Dash',
+    category: 'Uygulama/Oyun',
+    description: 'Mobil oyun hem Google Play Store hem App Store için geliştirildi.',
+    techStack: [],
+    thumbnail: '/assets/projects/portaldash.jpg',
+    details: 'Çok Yakında',
+    link: '#'
   }
 ];
 

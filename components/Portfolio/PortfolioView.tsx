@@ -7,7 +7,7 @@ import { ArrowLeft, ExternalLink, Github, Layers, Zap, Smartphone, Gamepad, X } 
 
 export const PortfolioView: React.FC = () => {
   const { setCurrentView } = useApp();
-  const [filter, setFilter] = useState<'Tümü' | 'Web' | 'Oyun'>('Tümü');
+  const [filter, setFilter] = useState<'Tümü' | 'Web' | 'Uygulama/Oyun'>('Tümü');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const getCategoryFilter = (cat: string) => {
@@ -15,7 +15,7 @@ export const PortfolioView: React.FC = () => {
       case 'Tümü': return 'All';
       case 'Web': return 'Web';
       case 'Mobil': return 'Mobile';
-      case 'Oyun': return 'Oyun';
+      case 'Uygulama/Oyun': return 'Uygulama/Oyun';
       case 'Tasarım': return 'Design';
       default: return 'All';
     }
@@ -28,7 +28,7 @@ export const PortfolioView: React.FC = () => {
     switch (cat) {
       case 'Web': return <Layers size={14} />;
       case 'Mobile': return <Smartphone size={14} />;
-      case 'Oyun': return <Gamepad size={14} />;
+      case 'Uygulama/Oyun': return <Gamepad size={14} />;
       default: return <Zap size={14} />;
     }
   };
@@ -71,7 +71,7 @@ export const PortfolioView: React.FC = () => {
               className="flex overflow-x-auto pb-2 md:pb-0 gap-2 no-scrollbar"
             >
               <div className="flex gap-2 bg-secondary/50 p-1 rounded-xl backdrop-blur-sm border border-white/5">
-                {['Tümü', 'Web', 'Oyun'].map((cat) => (
+                {['Tümü', 'Web', 'Uygulama/Oyun'].map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setFilter(cat as any)}
