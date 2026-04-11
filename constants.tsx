@@ -34,7 +34,7 @@ export const PROJECTS: Project[] = [
   },
   {
       id: '4',
-      title: 'Kurdish Translate',
+      title: 'Kurdish Translate AI',
       category: 'Web',
       description: 'Kürtçe çeviri web sitesi.',
       techStack: [],
