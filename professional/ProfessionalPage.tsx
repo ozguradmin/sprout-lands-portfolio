@@ -255,7 +255,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
           <div className="pro-container">
             <div className="pro-hero-grid">
               <img className="pro-avatar" src={PROFILE.avatar} width={132} height={132} alt="" fetchPriority="high" />
-              <div>
+              <div className="pro-hero-head">
                 <h1 id="pro-name">{PROFILE.name}</h1>
                 <p className="pro-role">
                   {PROFILE.role[lang]}
@@ -264,6 +264,8 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
                     {PROFILE.location[lang]}
                   </span>
                 </p>
+              </div>
+              <div className="pro-hero-body">
                 {PROFILE.intro[lang].map((p) => (
                   <p className="pro-intro" key={p}>
                     {p}

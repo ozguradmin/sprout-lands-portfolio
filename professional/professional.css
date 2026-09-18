@@ -249,18 +249,24 @@ html[data-theme='dark'] .pro {
 .pro-hero {
   padding: 40px 0 8px;
 }
+/* Mobilde portre solda, isim/unvan/konum sağında; metin ve düğmeler altta tam genişlik. */
 .pro-hero-grid {
   display: grid;
-  gap: 20px;
+  grid-template-columns: 76px minmax(0, 1fr);
+  column-gap: 16px;
+  align-items: center;
+}
+.pro-hero-body {
+  grid-column: 1 / -1;
 }
 .pro-avatar {
-  width: 84px;
-  height: 84px;
+  width: 76px;
+  height: 76px;
   filter: drop-shadow(0 6px 14px rgba(35, 40, 64, 0.16));
 }
 .pro-hero h1 {
   font-family: var(--font-head);
-  font-size: clamp(40px, 6.4vw, 64px);
+  font-size: clamp(32px, 6.4vw, 64px);
   line-height: 1.02;
   letter-spacing: -0.03em;
   font-weight: 800;
@@ -269,10 +275,11 @@ html[data-theme='dark'] .pro {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 14px;
-  margin-top: 10px;
+  gap: 2px 14px;
+  margin-top: 6px;
   font-family: var(--font-head);
-  font-size: clamp(19px, 2.6vw, 23px);
+  font-size: clamp(16px, 2.6vw, 23px);
+  line-height: 1.3;
   font-weight: 600;
 }
 .pro-location {
@@ -839,8 +846,14 @@ html[data-theme='dark'] .pro {
   }
   .pro-hero-grid {
     grid-template-columns: 132px minmax(0, 1fr);
-    gap: 36px;
+    column-gap: 36px;
     align-items: start;
+  }
+  .pro-avatar {
+    grid-row: 1 / span 2;
+  }
+  .pro-hero-body {
+    grid-column: 2;
   }
   .pro-avatar {
     width: 132px;
