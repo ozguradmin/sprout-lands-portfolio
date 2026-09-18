@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { ViewState, AppContextType } from '../types';
 
+import { G } from '../i18n/game';
 interface ExtendedAppContextType extends AppContextType {
   loadingProgress: number;
   loadingStatus: string;
@@ -19,7 +20,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingStatus, setLoadingStatus] = useState('Sistemler başlatılıyor...');
+  const [loadingStatus, setLoadingStatus] = useState<string>(G.loadingInitial);
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
@@ -27,13 +28,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     if (currentView !== ViewState.LOADING) return;
 
-    const steps = [
-      { p: 10, s: 'Doku haritaları yükleniyor...' },
-      { p: 30, s: 'Asset kütüphanesi optimize ediliyor...' },
-      { p: 60, s: 'Oyun motoru hazırlanıyor...' },
-      { p: 85, s: 'Dünya sınırları çiziliyor...' },
-      { p: 100, s: 'Evren hazır!' }
-    ];
+    const steps = [10, 30, 60, 85, 100].map((p, i) => ({ p, s: G.loadingSteps[i] }));
 
     let currentStep = 0;
     const interval = setInterval(() => {

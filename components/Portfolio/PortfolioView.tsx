@@ -4,6 +4,14 @@ import { useApp } from '../../context/AppContext';
 import { ViewState, Project } from '../../types';
 import { PROJECTS } from '../../constants';
 import { ArrowLeft, ExternalLink, Github, Layers, Zap, Smartphone, Gamepad, X } from 'lucide-react';
+import { G, GAME_LANG } from '../../i18n/game';
+
+// Filtre anahtarları Türkçe kalır; yalnızca görünen etiket çevrilir.
+const filterLabel = (cat: string) =>
+  cat === 'Tümü' ? G.filterAll : cat === 'Web' ? G.filterWeb : cat === 'Uygulama/Oyun' ? G.filterApps : cat;
+const categoryLabel = (cat: Project['category']) => (cat === 'Uygulama/Oyun' ? G.filterApps : cat);
+const localized = (p: Project) =>
+  GAME_LANG === 'en' && p.en ? { description: p.en.description, details: p.en.details } : { description: p.description, details: p.details };
 
 export const PortfolioView: React.FC = () => {
   const { setCurrentView } = useApp();
@@ -49,7 +57,7 @@ export const PortfolioView: React.FC = () => {
             className="flex items-center gap-2 text-gray-400 hover:text-accent transition-all mb-6 group text-sm font-medium"
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-mono text-xs uppercase tracking-widest">Geri Dön</span>
+            <span className="font-mono text-xs uppercase tracking-widest">{G.back}</span>
           </motion.button>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
@@ -59,7 +67,7 @@ export const PortfolioView: React.FC = () => {
               transition={{ delay: 0.1 }}
             >
               <h1 className="text-4xl md:text-6xl font-heading font-bold text-white mb-4">
-                Projelerim
+                {G.projectsTitle}
               </h1>
             </motion.div>
 
@@ -85,7 +93,7 @@ export const PortfolioView: React.FC = () => {
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
-                    <span className="relative z-10">{cat}</span>
+                    <span className="relative z-10">{filterLabel(cat)}</span>
                   </button>
                 ))}
               </div>
@@ -126,14 +134,14 @@ export const PortfolioView: React.FC = () => {
                 <div className="absolute top-4 left-4 z-20">
                   <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
                     {getCategoryIcon(project.category)}
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-white">{project.category}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-white">{categoryLabel(project.category)}</span>
                   </div>
                 </div>
 
                 <div className="absolute bottom-4 left-4 right-4 z-20">
                   <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-lg group-hover:border-accent/30 transition-colors">
                     <h3 className="text-lg font-heading font-bold text-white mb-1 group-hover:text-accent transition-colors">{project.title}</h3>
-                    <p className="text-gray-300 text-xs line-clamp-2 mb-3">{project.description}</p>
+                    <p className="text-gray-300 text-xs line-clamp-2 mb-3">{localized(project).description}</p>
 
                     <div className="flex flex-wrap gap-2">
                       {project.techStack.slice(0, 3).map(s => (
@@ -193,18 +201,18 @@ export const PortfolioView: React.FC = () => {
                 <div className="mb-6">
                   <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider mb-4 border border-accent/20">
                     {getCategoryIcon(selectedProject.category)}
-                    {selectedProject.category}
+                    {categoryLabel(selectedProject.category)}
                   </span>
                   <h2 className="text-3xl font-heading font-bold text-white mb-4">{selectedProject.title}</h2>
                   <p className="text-gray-300 leading-relaxed text-sm">
-                    {selectedProject.details}
+                    {localized(selectedProject).details}
                   </p>
                 </div>
 
                 <div className="space-y-6 pb-8 md:pb-0">
                   {selectedProject.techStack.length > 0 && (
                     <div>
-                      <h4 className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-3">Teknolojiler</h4>
+                      <h4 className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-3">{G.technologies}</h4>
                       <div className="flex flex-wrap gap-2">
                         {selectedProject.techStack.map(s => (
                           <span key={s} className="px-3 py-1.5 bg-white/5 text-gray-300 border border-white/5 rounded-lg text-xs font-medium">
@@ -223,11 +231,11 @@ export const PortfolioView: React.FC = () => {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 bg-accent text-white py-3 rounded-xl font-bold text-sm tracking-wide hover:brightness-110 transition-all"
                       >
-                        <ExternalLink size={18} /> CANLI ÖNİZLEME
+                        <ExternalLink size={18} /> {G.livePreview}
                       </a>
                     ) : (
                       <button disabled className="flex-1 flex items-center justify-center gap-2 bg-gray-700 text-gray-400 py-3 rounded-xl font-bold text-sm tracking-wide cursor-not-allowed">
-                        Çok Yakında
+                        {G.comingSoon}
                       </button>
                     )}
                   </div>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { ViewState } from './types';
 import { HubView } from './components/Hub/HubView';
@@ -7,10 +7,46 @@ import { ArcadeView } from './components/Arcade/ArcadeView';
 import { GalleryView } from './components/Gallery/GalleryView';
 import { LoadingScreen } from './components/UI/LoadingScreen';
 import { AdminView } from './components/Admin/AdminView';
+import { ProfessionalButton } from './components/UI/ProfessionalButton';
+import { isProPath, setProOverlayOpen } from './professional/overlayBridge';
+import { GAME_LANG, professionalPath, villagePath } from './i18n/game';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const ProfessionalOverlay = lazy(() => import('./professional/ProfessionalOverlay'));
 
 const Main: React.FC = () => {
   const { currentView } = useApp();
+
+  // Profesyonel görünüm: köyün üstünde tam ekran katman, adresi /professional.
+  const [proOpen, setProOpen] = useState(() => typeof window !== 'undefined' && isProPath(window.location.pathname));
+
+  const openPro = useCallback(() => {
+    if (!isProPath(window.location.pathname)) {
+      window.history.pushState({ pro: true }, '', professionalPath(GAME_LANG));
+    }
+    setProOpen(true);
+  }, []);
+
+  const closePro = useCallback(() => {
+    if (window.history.state?.pro) {
+      window.history.back();
+    } else {
+      window.history.replaceState(null, '', villagePath(GAME_LANG));
+      setProOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPop = () => setProOpen(isProPath(window.location.pathname));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  useEffect(() => {
+    setProOverlayOpen(proOpen);
+  }, [proOpen]);
+
+  const showProButton = !proOpen && (currentView === ViewState.LOADING || currentView === ViewState.HUB);
 
   const renderView = () => {
     switch (currentView) {
@@ -46,6 +82,12 @@ const Main: React.FC = () => {
           {renderView()}
         </motion.main>
       </AnimatePresence>
+      {showProButton && <ProfessionalButton onOpen={openPro} />}
+      {proOpen && (
+        <Suspense fallback={<div className="fixed inset-0 z-[10050] bg-[#faf6ee] dark:bg-[#161a2b]" />}>
+          <ProfessionalOverlay onClose={closePro} />
+        </Suspense>
+      )}
     </div>
   );
 };

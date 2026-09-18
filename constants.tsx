@@ -10,7 +10,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/cografist.png',
     details: 'cografist.app adresinde yayında.',
-    link: 'https://cografist.app/'
+    link: 'https://cografist.app/',
+    en: { description: 'A geography learning app.', details: 'Live at cografist.app.' }
   },
   {
     id: '3',
@@ -20,7 +21,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/dosyapaylas.png',
     details: 'dosyapaylas.vercel.app adresinde yayında.',
-    link: 'https://dosyapaylas.vercel.app/'
+    link: 'https://dosyapaylas.vercel.app/',
+    en: { description: 'Simple, secure, free and ad-free file sharing.', details: 'Live at dosyapaylas.vercel.app.' }
   },
   {
     id: '4',
@@ -30,7 +32,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/kurdishai.png',
     details: 'kurtceviri.netlify.app adresinde yayında.',
-    link: 'https://kurtceviri.netlify.app/'
+    link: 'https://kurtceviri.netlify.app/',
+    en: { description: 'A Kurdish translation website.', details: 'Live at kurtceviri.netlify.app.' }
   },
   {
     id: '5',
@@ -40,7 +43,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/galaktikuzay.png',
     details: 'galaktikuzay.com adresinde yayında.',
-    link: 'https://galaktikuzay.com/'
+    link: 'https://galaktikuzay.com/',
+    en: { description: 'My space and astronomy website.', details: 'Live at galaktikuzay.com.' }
   },
   {
     id: '6',
@@ -50,7 +54,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/birlikteizle.jpg',
     details: 'birlikteizle.ozgurguler.workers.dev adresinde yayında.',
-    link: 'https://birlikteizle.ozgurguler.workers.dev/'
+    link: 'https://birlikteizle.ozgurguler.workers.dev/',
+    en: { description: 'A Discord-style watch-together site. Create a room, share a stream, watch and chat together.', details: 'Live at birlikteizle.ozgurguler.workers.dev.' }
   },
   {
     id: '2',
@@ -60,7 +65,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/vscotr.png',
     details: 'vscotr.vercel.app adresinde yayında.',
-    link: 'https://vscotr.vercel.app/'
+    link: 'https://vscotr.vercel.app/',
+    en: { description: 'Share your photos, explore and join a creative community. A completely free VSCO alternative.', details: 'Live at vscotr.vercel.app.' }
   },
   {
     id: '7',
@@ -70,7 +76,8 @@ export const PROJECTS: Project[] = [
     techStack: [],
     thumbnail: '/assets/projects/portaldash.jpg',
     details: 'Çok Yakında',
-    link: '#'
+    link: '#',
+    en: { description: 'A mobile game built for both Google Play and the App Store.', details: 'Coming soon' }
   }
 ];
 

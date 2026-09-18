@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--pro-head-->
+    <meta name="theme-color" content="#faf6ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#161a2b" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/pro/img/favicon-64.png" />
+    <link rel="apple-touch-icon" href="/pro/img/apple-touch-icon.png" />
+    <link rel="preload" href="/pro/fonts/inter-tr.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/pro/fonts/outfit-tr.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      try {
+        var t = localStorage.getItem('pro-theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
+    <style>
+      html, body { margin: 0; background: #faf6ee; }
+      @media (prefers-color-scheme: dark) { html:not([data-theme='light']), html:not([data-theme='light']) body { background: #161a2b; } }
+      html[data-theme='dark'], html[data-theme='dark'] body { background: #161a2b; }
+    </style>
+  </head>
+  <body>
+    <div id="pro-root"><!--pro-app--></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>

@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { ArrowLeft, Instagram, Github, Linkedin, Mail, Youtube, Camera, Globe, MessageSquare, Send, X } from 'lucide-react';
 
+import { G } from '../../i18n/game';
 export const ArcadeView: React.FC = () => {
   const { setCurrentView } = useApp();
   const [isMessageOpen, setIsMessageOpen] = useState(false);
@@ -16,30 +17,17 @@ export const ArcadeView: React.FC = () => {
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  // Telegram Konfigürasyonu (Netlify Environment Variables)
-  const T_B_T = import.meta.env.VITE_TELEGRAM_BOT_TOKEN;
-  const T_C_I = import.meta.env.VITE_TELEGRAM_CHAT_ID;
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.message.trim()) return;
 
     setIsSending(true);
     try {
-      const text = `📬 *Yeni Mesaj:*\n\n` +
-        `👤 *İsim:* ${formData.name || 'Belirtilmedi'}\n` +
-        `📞 *Tel:* ${formData.phone || 'Belirtilmedi'}\n` +
-        `📸 *IG:* ${formData.instagram || 'Belirtilmedi'}\n\n` +
-        `💬 *Mesaj:*\n${formData.message}`;
-
-      const response = await fetch(`https://api.telegram.org/bot${T_B_T}/sendMessage`, {
+      // Mesaj Worker üzerinden Telegram'a gider; bot token'ı tarayıcıya hiç inmez (worker/index.ts).
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: T_C_I,
-          text: text,
-          parse_mode: 'Markdown'
-        })
+        body: JSON.stringify(formData)
       });
 
       if (response.ok) {
@@ -104,10 +92,10 @@ export const ArcadeView: React.FC = () => {
             }}
             className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-6 text-sm font-medium"
           >
-            <ArrowLeft size={18} /> Geri Dön
+            <ArrowLeft size={18} /> {G.back}
           </button>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">Sosyal Hesaplarım</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">{G.socialTitle}</h1>
         </header>
 
         {/* Ana Linkler */}
@@ -148,7 +136,7 @@ export const ArcadeView: React.FC = () => {
             <Mail size={24} />
           </div>
           <div>
-            <h3 className="font-bold text-emerald-700 group-hover:text-emerald-600 text-lg transition-colors">E-posta Gönder</h3>
+            <h3 className="font-bold text-emerald-700 group-hover:text-emerald-600 text-lg transition-colors">{G.sendEmail}</h3>
             <p className="text-sm text-emerald-800/70 font-mono group-hover:text-emerald-700/80 transition-colors">ozgurglr256@gmail.com</p>
           </div>
         </motion.a>
@@ -159,7 +147,7 @@ export const ArcadeView: React.FC = () => {
         <div className="space-y-6">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Globe size={20} className="text-indigo-400" />
-            Sosyal Medya Sayfalarım
+            {G.socialPages}
           </h2>
 
           <div className="grid gap-3">
@@ -202,7 +190,7 @@ export const ArcadeView: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
                 </span>
-                Bana mesaj gönder!
+                {G.messageMe}
               </p>
               {/* Arrow - More realistic pointing arrow */}
               <div className="absolute -bottom-1.5 right-4 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white/30"></div>
@@ -244,7 +232,7 @@ export const ArcadeView: React.FC = () => {
                     <div className="p-2 bg-white/10 rounded-xl">
                       <Send size={20} className="text-white" />
                     </div>
-                    İLETİŞİME GEÇ
+                    {G.contactTitle}
                   </h3>
                 </div>
                 <button
@@ -259,23 +247,23 @@ export const ArcadeView: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* İsim */}
                   <div className="space-y-1.5">
-                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">İsim (Opsiyonel)</label>
+                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.nameLabel}</label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Adın Soyadın"
+                      placeholder={G.namePlaceholder}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all"
                     />
                   </div>
                   {/* Instagram */}
                   <div className="space-y-1.5">
-                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">Instagram (Opsiyonel)</label>
+                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.instagramLabel}</label>
                     <input
                       type="text"
                       value={formData.instagram}
                       onChange={e => setFormData({ ...formData, instagram: e.target.value })}
-                      placeholder="@kullaniciadi"
+                      placeholder={G.instagramPlaceholder}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all"
                     />
                   </div>
@@ -283,7 +271,7 @@ export const ArcadeView: React.FC = () => {
 
                 {/* Telefon */}
                 <div className="space-y-1.5">
-                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">Telefon (Opsiyonel)</label>
+                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.phoneLabel}</label>
                   <input
                     type="tel"
                     value={formData.phone}
@@ -295,12 +283,12 @@ export const ArcadeView: React.FC = () => {
 
                 {/* Mesaj */}
                 <div className="space-y-1.5">
-                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">Mesajın</label>
+                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.messageLabel}</label>
                   <textarea
                     required
                     value={formData.message}
                     onChange={e => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Mesajını yaz..."
+                    placeholder={G.messagePlaceholder}
                     className="w-full h-24 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all resize-none"
                   ></textarea>
                 </div>
@@ -317,21 +305,21 @@ export const ArcadeView: React.FC = () => {
                     {isSending ? (
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     ) : status === 'success' ? (
-                      'İLETİLDİ!'
+                      G.sent
                     ) : (
-                      <>GÖNDER <Send size={16} /></>
+                      <>{G.send} <Send size={16} /></>
                     )}
                   </button>
                 </div>
 
                 {status === 'error' && (
                   <p className="text-red-400 text-[8px] text-center font-medium bg-red-400/10 py-2 rounded-lg border border-red-400/20">
-                    BİR HATA OLUŞTU!
+                    {G.error}
                   </p>
                 )}
 
                 <p className="text-[8px] text-gray-500 text-center px-4 leading-normal">
-                  Senle iletişime geçmemi istiyorsan iletişim bilgilerini yazmayı unutma.
+                  {G.contactNote}
                 </p>
               </form>
             </motion.div>

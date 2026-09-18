@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { ArrowLeft } from 'lucide-react';
 
+import { G } from '../../i18n/game';
 export const GalleryView: React.FC = () => {
   const { setCurrentView } = useApp();
 
@@ -17,10 +18,10 @@ export const GalleryView: React.FC = () => {
             }}
             className="group flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-all text-xs font-bold uppercase tracking-widest shadow-md active:scale-95"
           >
-            <ArrowLeft size={16} /> Köye Dön
+            <ArrowLeft size={16} /> {G.backToVillage}
           </button>
           
-          <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">VSCO Galeri</h1>
+          <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">{G.galleryTitle}</h1>
       </div>
 
       {/* VSCO Embed */}

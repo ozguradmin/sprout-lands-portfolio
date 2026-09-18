@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle, Cpu } from 'lucide-react';
 
+import { G } from '../../i18n/game';
 export const LoadingScreen: React.FC = () => {
   const { loadingProgress, loadingStatus } = useApp();
 
@@ -51,17 +52,17 @@ export const LoadingScreen: React.FC = () => {
                  {/* Title */}
                  <div className="text-center mb-8">
                     <h2 className="text-[#5d4037] font-extrabold text-2xl tracking-wide uppercase drop-shadow-sm mb-2">
-                       Özgür'ün
+                       {G.loadingTitle}
                     </h2>
                     <div className="bg-[#b86f50] text-[#ead4aa] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest inline-block transform -rotate-2">
-                       PORTFOLYOSU
+                       {G.loadingBadge}
                     </div>
                  </div>
 
                  {/* Loading Bar Container */}
                  <div className="w-full space-y-2">
                     <div className="flex justify-between text-[8px] font-bold text-[#8d5d42] uppercase tracking-wider px-1">
-                       <span>KÖY YÜKLENİYOR...</span>
+                       <span>{G.loadingBar}</span>
                        <span>{Math.round(loadingProgress)}%</span>
                     </div>
                     

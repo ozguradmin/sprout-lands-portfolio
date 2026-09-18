@@ -5,7 +5,9 @@ import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Hand } from 'lucide-react';
+import { PRO_OVERLAY_EVENT, isProOverlayOpen } from '../../professional/overlayBridge';
 
+import { G } from '../../i18n/game';
 // Oturum süresince (refresh hariç) hoşgeldin mesajını takip etmek için modül dışı değişken
 let hasSeenSession = false;
 
@@ -144,7 +146,7 @@ export const HubView: React.FC = () => {
       physics: {
         default: 'arcade',
         arcade: { 
-            gravity: { y: 0 },
+            gravity: { x: 0, y: 0 },
             debug: false // HATA AYIKLAMA MODU KAPATILDI
         }
       },
@@ -176,6 +178,21 @@ export const HubView: React.FC = () => {
       gameRef.current = null;
     };
   }, [setCurrentView]);
+
+  // Profesyonel görünüm katmanı açıkken oyunu duraklat: ok/boşluk tuşlarını yakalamasın, döngü uyusun.
+  useEffect(() => {
+    const apply = (open: boolean) => {
+      const game = gameRef.current;
+      if (!game) return;
+      if (game.input.keyboard) game.input.keyboard.enabled = !open;
+      if (open) game.loop.sleep();
+      else game.loop.wake();
+    };
+    const onChange = (e: Event) => apply((e as CustomEvent<boolean>).detail);
+    window.addEventListener(PRO_OVERLAY_EVENT, onChange);
+    gameRef.current?.events.once(Phaser.Core.Events.READY, () => apply(isProOverlayOpen()));
+    return () => window.removeEventListener(PRO_OVERLAY_EVENT, onChange);
+  }, []);
 
   useEffect(() => {
     if (!showWelcome && gameRef.current) {
@@ -245,16 +262,16 @@ export const HubView: React.FC = () => {
 
                     {/* Title */}
                     <div className="flex items-center gap-2 mb-2">
-                       <h2 className="text-[#5d4037] font-bold text-xl tracking-wider uppercase drop-shadow-sm">MERHABA!</h2>
+                       <h2 className="text-[#5d4037] font-bold text-xl tracking-wider uppercase drop-shadow-sm">{G.welcomeTitle}</h2>
                     </div>
                     
                     <div className="h-0.5 w-16 bg-[#b86f50]/40 rounded-full mb-4"></div>
 
                     {/* Text */}
                     <div className="text-[#5d4037] text-center font-medium leading-relaxed mb-6 text-sm">
-                      Ben <span className="font-bold">Özgür</span>, 23 yaşındayım.<br/>
-                      Dijital köyüme hoş geldin!<br/><br/>
-                      <span className="text-[#5d4037]/80 text-[10px] leading-tight block">Buradan karakteri hareket ettirerek benimle ilgili bilgilere ulaşabilirsin.</span>
+                      {G.welcomeLine1} <span className="font-bold">Özgür</span>{G.welcomeLine1b}<br/>
+                      {G.welcomeLine2}<br/><br/>
+                      <span className="text-[#5d4037]/80 text-[10px] leading-tight block">{G.welcomeHint}</span>
                     </div>
                     
                     {/* Action Button */}
@@ -264,7 +281,7 @@ export const HubView: React.FC = () => {
                     >
                       <div className="absolute inset-0 bg-[#b86f50] rounded-xl translate-y-1.5 transition-transform group-active:translate-y-0"></div>
                       <div className="relative bg-[#e4a672] border-2 border-[#b86f50] text-[#5d4037] font-extrabold py-3 rounded-xl hover:brightness-110 transition-all uppercase tracking-wider flex items-center justify-center gap-2 group-active:translate-y-1.5">
-                        KÖYÜ KEŞFET <Hand size={18} className="rotate-12" />
+                        {G.welcomeButton} <Hand size={18} className="rotate-12" />
                       </div>
                     </button>
 
@@ -291,7 +308,7 @@ export const HubView: React.FC = () => {
                 <span className="w-6 h-6 flex items-center justify-center border border-white/20 rounded text-[10px] font-bold text-white bg-white/5">S</span>
                 <span className="w-6 h-6 flex items-center justify-center border border-white/20 rounded text-[10px] font-bold text-white bg-white/5">D</span>
               </div>
-              <span className="text-[10px] font-mono text-gray-200 uppercase tracking-widest">YÜRÜ</span>
+              <span className="text-[10px] font-mono text-gray-200 uppercase tracking-widest">{G.walk}</span>
             </div>
           </div>
       </div>

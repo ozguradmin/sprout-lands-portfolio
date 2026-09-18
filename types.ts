@@ -17,6 +17,8 @@ export interface Project {
   thumbnail: string;
   details: string;
   link?: string;
+  /** İngilizce sürüm (/en) için açıklamalar. */
+  en?: { description: string; details: string };
 }
 
 export interface Photo {
