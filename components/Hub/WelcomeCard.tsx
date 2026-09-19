@@ -113,8 +113,8 @@ export const WelcomeCard: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </div>
 
               <button ref={startRef} type="button" onClick={onClose} className="group relative mt-5 w-full outline-none">
-                <span className="absolute inset-0 translate-y-1.5 rounded-xl bg-[#b86f50] transition-transform group-active:translate-y-0" />
-                <span className="relative flex items-center justify-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#7ec45b] py-3 font-pixel text-sm uppercase tracking-wider text-[#2f4a22] transition-transform group-hover:brightness-105 group-focus-visible:ring-4 group-focus-visible:ring-[#4a2f22]/40 group-active:translate-y-1.5">
+                <span className="absolute inset-0 translate-y-1.5 rounded-xl bg-[#b86f50]" />
+                <span className="relative flex items-center justify-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] py-3 font-pixel text-sm uppercase tracking-wider text-[#4a2f22] shadow-[inset_0_2px_0_#ffce9e] transition-transform group-hover:bg-[#ebb383] group-focus-visible:ring-4 group-focus-visible:ring-[#4a2f22]/40 group-active:translate-y-1.5">
                   {G.welcomeButton}
                 </span>
               </button>

@@ -19,7 +19,7 @@ export const Interior: React.FC<{
           onClick={onBack}
           className="group relative"
         >
-          <span className="absolute inset-0 translate-y-[3px] rounded-lg bg-[#b86f50] transition-transform group-active:translate-y-0" />
+          <span className="absolute inset-0 translate-y-[3px] rounded-lg bg-[#b86f50]" />
           <span className="relative flex h-10 items-center gap-2 rounded-lg border-2 border-[#b86f50] bg-[#e4a672] px-3 font-pixel text-[10px] text-[#4a2f22] transition-transform group-hover:brightness-105 group-active:translate-y-[3px]">
             <ArrowLeft size={14} strokeWidth={3} aria-hidden="true" />
             {G.backToVillage}

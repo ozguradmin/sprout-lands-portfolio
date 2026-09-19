@@ -7,7 +7,7 @@ const prefetch = () => {
   void import('../../professional/ProfessionalOverlay');
 };
 
-const woodBack = 'absolute inset-0 rounded-xl bg-[#b86f50] translate-y-1 transition-transform group-active:translate-y-0';
+const woodBack = 'absolute inset-0 rounded-xl bg-[#b86f50] translate-y-1';
 const woodFace =
   'relative flex items-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] text-[#4a2f22] font-heading font-bold leading-none shadow-lg transition-transform group-hover:brightness-105 group-active:translate-y-1';
 
