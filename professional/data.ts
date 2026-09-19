@@ -509,6 +509,7 @@ export const UI = {
     cvEn: 'CV (İngilizce, PDF)',
     villageNote: 'Bu portfolyonun bir de oynanabilir hali var: karakterle köyü gezip binalara girerek projelere ulaşabilirsiniz.',
     villageCta: 'Dijital köye git',
+    credit: 'Köy görselleri: Sprout Lands · Cup Nooble',
   },
   en: {
     skip: 'Skip to content',
@@ -551,6 +552,7 @@ export const UI = {
     cvEn: 'CV (English, PDF)',
     villageNote: 'There’s also a playable version of this portfolio: walk around the village and step into the buildings to see my projects.',
     villageCta: 'Go to the village',
+    credit: 'Village art: Sprout Lands by Cup Nooble',
   },
 };
 

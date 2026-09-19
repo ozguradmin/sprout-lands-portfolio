@@ -87,7 +87,15 @@ export const LoadingScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Version Tag Removed */}
+      {/* Sprout Lands lisansı kaynak belirtmeyi istiyor */}
+      <a
+        href="https://cupnooble.itch.io/sprout-lands-asset-pack"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-4 left-0 right-0 text-center font-sans text-[11px] text-[#ead4aa]/60 hover:text-[#ead4aa]"
+      >
+        {G.credit}
+      </a>
     </div>
   );
 };

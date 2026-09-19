@@ -787,6 +787,20 @@ html[data-theme='dark'] .pro {
   font-size: 14px;
   color: var(--muted);
 }
+.pro-credit:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.pro-footer-theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.pro-footer-theme:hover {
+  color: var(--ink);
+}
 .pro-footer-inner {
   display: flex;
   flex-wrap: wrap;
@@ -835,19 +849,50 @@ html[data-theme='dark'] .pro {
 .pro-village-short {
   display: none;
 }
-/* Çok dar ekranda köy düğmesi kısa etiketle ("Köy" / "Village"), portre görünür kalsın. */
-@media (max-width: 399px) {
+/* Dar ekranda isim hep görünsün: tema düğmesi alt bilgiye iner, köy düğmesi kısalır. */
+@media (max-width: 599px) {
+  .pro-header-inner {
+    gap: 8px;
+  }
+  .pro-brand {
+    font-size: 15.5px;
+    gap: 8px;
+  }
+  .pro-theme-btn {
+    display: none;
+  }
   .pro-village-label {
     display: none;
   }
   .pro-village-short {
     display: inline;
   }
+  .pro-langs > * {
+    min-width: 27px;
+    padding: 0 3px;
+  }
+  .pro-village-btn {
+    gap: 6px;
+    padding: 0 9px;
+    margin-left: 2px;
+  }
 }
-/* Dar ekranda isim köy düğmesine çarpmasın (İngilizcede "Digital Village" daha uzun). */
-@media (max-width: 579px) {
-  .pro-brand-name {
+@media (max-width: 359px) {
+  .pro-container {
+    padding: 0 16px;
+  }
+}
+@media (max-width: 339px) {
+  .pro-village-btn svg {
     display: none;
+  }
+}
+@media (max-width: 379px) {
+  .pro-village-btn {
+    font-size: 9px;
+  }
+  .pro-brand {
+    font-size: 15px;
   }
 }
 .pro-brand-name {

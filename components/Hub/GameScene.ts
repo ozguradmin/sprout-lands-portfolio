@@ -1,22 +1,34 @@
 import Phaser from 'phaser';
 import { GAME_LANG } from '../../i18n/game';
+import { WORLD } from './world/worldData';
+
+// Dünya scripts/village/build_village.py ile üretilir (karo katmanları, nesneler, çarpışma, kapılar).
+// Bu sahne o veriyi çizer ve karakteri, hayvanları, kapıları yönetir.
 
 // Bina görsellerinde (doğal çözünürlük, piksel) kapı eşiğinin alt kenarı.
 const BUILDING_DOOR_BOTTOM: Record<string, number> = { projeler: 76, sosyal: 89, galeri: 78 };
+const BUILDING_SCALE = 2;
+const S = WORLD.scale;
+const WORLD_W = WORLD.width * WORLD.tile;
+const WORLD_H = WORLD.height * WORLD.tile;
 
-interface MapConfig {
-  mapConfig: {
-    width: number;
-    height: number;
-    spawnX: number;
-    spawnY: number;
-    scale: number;
-    borderAssetId?: string;
-  };
-  assets: any[];
-  objects: any[];
-  collisions: any[];
-  portals: any[];
+// Kapıya bu kadar yaklaşınca ipucu balonu çıkar; giriş için kapının dibindeki küçük alana yukarı yürümek gerekir.
+const DOOR_HINT_DISTANCE = 90;
+
+type Animal = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody & {
+  nextAction: number;
+  area: { x: number; y: number; w: number; h: number };
+  kind: 'chicken' | 'cow';
+  nextEmote: number;
+};
+
+interface Door {
+  target: string;
+  x: number;
+  y: number;
+  zone: Phaser.Geom.Rectangle;
+  hint: Phaser.GameObjects.Image;
+  hintShown: boolean;
 }
 
 export class GameScene extends Phaser.Scene {
@@ -28,376 +40,394 @@ export class GameScene extends Phaser.Scene {
 
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private buildings!: Phaser.Physics.Arcade.StaticGroup;
-  private portals!: Phaser.Physics.Arcade.StaticGroup;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
-  private chickens!: Phaser.Physics.Arcade.Group;
+  private animals!: Phaser.Physics.Arcade.Group;
+  private doors: Door[] = [];
+  private chest!: Phaser.GameObjects.Sprite;
+  private chestOpen = false;
+  private entering = false;
 
-  private wasd!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key; };
+  private wasd!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key };
   private onPortalEnter: (target: string) => void;
   private joystickValues = { x: 0, y: 0 };
-
-  // --- HARİTA VERİSİ ---
-  private externalMapData: MapConfig | null = null;
 
   constructor(onPortalEnter: (target: string) => void) {
     super('HubScene');
     this.onPortalEnter = onPortalEnter;
   }
 
-  public updateJoystick(x: number, y: number) { this.joystickValues = { x, y }; }
+  public updateJoystick(x: number, y: number) {
+    this.joystickValues = { x, y };
+  }
 
   preload() {
     this.load.setBaseURL('');
     this.load.spritesheet('player', '/assets/characters/player.png', { frameWidth: 48, frameHeight: 48 });
-    this.load.spritesheet('chicken_anim', '/assets/sprout-lands/Characters/Free Chicken Sprites.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.json('mapData', '/assets/map.json');
+    this.load.spritesheet('chicken', '/assets/sprout-lands/Characters/Free Chicken Sprites.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.spritesheet('cow', '/assets/sprout-lands/Characters/Free Cow Sprites.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('water', '/assets/sprout-lands/Tilesets/Water.png', { frameWidth: 16, frameHeight: 16 });
+    this.load.image('tiles-grass', '/assets/sprout-lands/Tilesets/Grass.png');
+    this.load.image('tiles-dirt', '/assets/sprout-lands/Tilesets/Tilled_Dirt_Wide_v2.png');
+    this.load.image('tiles-hills', '/assets/sprout-lands/Tilesets/Hills.png');
+    this.load.atlas('village', '/assets/village/atlas.png', '/assets/village/atlas.json');
     // Tabela yazısı görsele işli; dile göre TR ya da EN sürüm yüklenir.
-    this.load.image('galeri', `/assets/buildings/galeri-${GAME_LANG}.png`);
-    this.load.image('sosyal', `/assets/buildings/sosyal-${GAME_LANG}.png`);
-    this.load.image('projeler', `/assets/buildings/projeler-${GAME_LANG}.png`);
-
-    const packs = [
-      'Characters/Basic Charakter Actions.png',
-      'Characters/Basic Charakter Spritesheet.png',
-      'Characters/Free Chicken Sprites.png',
-      'Characters/Free Cow Sprites.png',
-      'Objects/Basic Furniture.png',
-      'Objects/Basic Grass Biom things 1.png',
-      'Objects/Basic_Furniture.png',
-      'Objects/Basic_Grass_Biom_things.png',
-      'Objects/Basic Plants.png',
-      'Objects/Basic_Plants.png',
-      'Objects/Basic tools and meterials.png',
-      'Objects/Basic_tools_and_meterials.png',
-      'Objects/Chest.png',
-      'Objects/Egg_item.png',
-      'Objects/Free_Chicken_House.png',
-      'Objects/Paths.png',
-      'Objects/Wood_Bridge.png',
-      'Tilesets/Grass.png',
-      'Tilesets/Hills.png',
-      'Tilesets/Tilled Dirt.png',
-      'Tilesets/Water.png',
-      'Tilesets/Wooden House.png',
-      'Tilesets/Doors.png',
-      'Tilesets/Fences.png'
-    ];
-    packs.forEach(p => this.load.image(p, `/assets/sprout-lands/${p}`));
+    for (const key of ['projeler', 'sosyal', 'galeri']) {
+      this.load.image(key, `/assets/buildings/${key}-${GAME_LANG}.png`);
+    }
   }
 
   create() {
-    this.externalMapData = this.cache.json.get('mapData');
-    const config = this.externalMapData?.mapConfig || { width: 1200, height: 1200, spawnX: 600, spawnY: 600, scale: 3 };
-    this.physics.world.setBounds(0, 0, config.width, config.height);
-    // Arka plan rengi artık water tile'ları ile doldurulacak
-    this.cameras.main.setBackgroundColor('#1a1a1a');
-
-    this.buildings = this.physics.add.staticGroup();
-    this.portals = this.physics.add.staticGroup();
+    this.physics.world.setBounds(0, 0, WORLD_W, WORLD_H);
+    this.cameras.main.setBackgroundColor('#9bd4c3');
     this.obstacles = this.physics.add.staticGroup();
 
     this.createAnimations();
+    this.buildGround();
+    this.buildObjects();
+    this.buildBuildings();
+    this.buildColliders();
+    this.buildChest();
 
-    if (this.externalMapData) {
-      this.loadExternalMap();
-    }
-
-    // Spawn Noktası Ayarı:
-    // Eğer 'lastView' varsa (bir binadan geri döndüysek), o binanın kapısının önüne spawn et.
-    // Yoksa varsayılan spawn noktasını kullan.
+    // Başlangıç: bir binadan dönüldüyse o binanın kapısının önü, yoksa meydan.
     const lastView = sessionStorage.getItem('lastView');
-    let spawnX = config.spawnX;
-    let spawnY = config.spawnY;
+    let spawn: { x: number; y: number } = WORLD.spawn;
+    const door = WORLD.buildings.find((b) => b.target === lastView);
+    if (door) spawn = { x: door.doorX, y: door.doorY + 70 };
+    sessionStorage.removeItem('lastView');
 
-    if (lastView) {
-      const portal = this.externalMapData?.portals.find(p => p.target === lastView);
-      if (portal) {
-        // Binanın kapısının önüne (y + h + biraz boşluk) spawn et
-        // Kapının tam üstüne değil, aşağısına (y ekseninde +)
-        spawnX = portal.x + portal.w / 2;
-        spawnY = portal.y + portal.h + 60; // 60px aşağısı (kapıdan güvenli uzaklık)
-      }
-      // Spawn olduktan sonra lastView'i temizle ki sayfa yenilenince ana yere dönsün (isteğe bağlı)
-      sessionStorage.removeItem('lastView');
-    }
-
-    this.player = this.physics.add.sprite(spawnX, spawnY, 'player');
+    this.player = this.physics.add.sprite(spawn.x, spawn.y, 'player');
     this.player.setScale(2.5);
     this.player.setCollideWorldBounds(true);
-    this.player.setBodySize(16, 16); // %35 küçültüldü (24 -> 16)
-    this.player.setOffset(16, 20); // Konum ayarlandı (yukarıdan taşmaması için)
-    this.player.setDepth(config.spawnY + 48); // Başlangıç derinliği
-
-    this.physics.add.collider(this.player, this.buildings);
+    // Çarpışma yalnız ayaklarda: karakter ağaç taçlarının ve çatıların arkasına geçebilir.
+    this.player.setBodySize(12, 8);
+    this.player.setOffset(18, 28);
     this.physics.add.collider(this.player, this.obstacles);
-
-    this.physics.add.overlap(this.player, this.portals, (obj1, obj2) => {
-      const portalZone = obj2 as any;
-      // Portal tetiklendiğinde hedefi kaydet
-      sessionStorage.setItem('lastView', portalZone.targetView);
-      this.tweens.add({ targets: this.player, alpha: 0, scale: 0, duration: 500, onComplete: () => this.onPortalEnter(portalZone.targetView) });
-    });
+    if (door) this.player.play('idle-up');
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.wasd = this.input.keyboard!.addKeys('W,A,S,D') as any;
 
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-    this.cameras.main.setZoom(2.0);
-    this.cameras.main.setBounds(0, 0, config.width, config.height);
+    this.spawnAnimals();
+    this.buildAmbient();
 
-    // --- TAVUKLARI OLUŞTUR ---
-    this.chickens = this.physics.add.group({
-      collideWorldBounds: true,
-      bounceX: 0.2,
-      bounceY: 0.2
-    });
-
-    // Tavukları oluşturma fonksiyonu
-    const createChicken = (x: number, y: number) => {
-      const chicken = this.chickens.create(x, y, 'chicken_anim');
-      chicken.setScale(2.1);
-      chicken.setBodySize(10, 10);
-      chicken.setOffset(3, 3);
-      chicken.play('chicken-idle');
-      chicken.setDepth(9999);
-
-      (chicken as any).nextAction = 0;
-      (chicken as any).moveSpeed = 30;
-    };
-
-    // 2 adet tavuk ekle (Spawn noktasına yakın)
-    createChicken(spawnX + 100, spawnY + 50);
-    createChicken(spawnX - 80, spawnY + 120);
-
-    this.physics.add.collider(this.chickens, this.buildings);
-    this.physics.add.collider(this.chickens, this.obstacles);
-    this.physics.add.collider(this.chickens, this.player);
-    this.physics.add.collider(this.chickens, this.chickens);
+    const cam = this.cameras.main;
+    cam.setBounds(0, 0, WORLD_W, WORLD_H);
+    cam.startFollow(this.player, true, 0.12, 0.12);
+    this.applyZoom();
+    this.scale.on('resize', this.applyZoom, this);
   }
 
-  private loadExternalMap() {
-    if (!this.externalMapData) return;
+  /** Dar ekranlarda biraz uzaklaş ki telefonda köy sıkışık görünmesin. */
+  private applyZoom() {
+    const w = this.scale.width;
+    this.cameras.main.setZoom(w < 500 ? 1.2 : w < 900 ? 1.5 : 2);
+  }
 
-    // Mavi arka planı water asset'i ile doldur
-    const config = this.externalMapData.mapConfig;
-    const waterAsset = this.externalMapData.assets.find((a: any) => a.name && a.name.toLowerCase().includes('water'));
-    if (waterAsset) {
-      const tileSize = 16 * config.scale; // 16px * scale (genelde 3) = 48px
-      const tilesX = Math.ceil(config.width / tileSize);
-      const tilesY = Math.ceil(config.height / tileSize);
+  // ---------------------------------------------------------------- dünya
+  private buildGround() {
+    // Su: tüm dünyayı kaplayan, 4 kareli animasyonlu karo deseni
+    const water = this.add.tileSprite(0, 0, WORLD_W / S, WORLD_H / S, 'water', 0).setOrigin(0).setScale(S).setDepth(-20);
+    let frame = 0;
+    this.time.addEvent({ delay: 280, loop: true, callback: () => water.setFrame((frame = (frame + 1) % 4)) });
 
-      const waterFrameKey = `f_${waterAsset.id}`;
-      if (!this.textures.get(waterAsset.source).has(waterFrameKey)) {
-        this.textures.get(waterAsset.source).add(waterFrameKey, 0, waterAsset.x, waterAsset.y, waterAsset.w, waterAsset.h);
+    const map = this.make.tilemap({ tileWidth: 16, tileHeight: 16, width: WORLD.width, height: WORLD.height });
+    const layers: [string, string, readonly number[], number][] = [
+      ['grass', 'tiles-grass', WORLD.grass, -12],
+      ['dirt', 'tiles-dirt', WORLD.dirt, -11],
+      ['hills', 'tiles-hills', WORLD.hills, -10],
+    ];
+    for (const [name, key, data, depth] of layers) {
+      const ts = map.addTilesetImage(name, key, 16, 16, 0, 0)!;
+      const layer = map.createBlankLayer(name, ts)!.setScale(S).setDepth(depth);
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] >= 0) layer.putTileAt(data[i], i % WORLD.width, Math.floor(i / WORLD.width));
       }
+    }
+  }
 
-      // Tüm haritayı water tile'ları ile doldur (mavi arka plan yerine) - SADECE GÖRSEL, ÇARPIŞMA YOK
-      // Çarpışma zaten water objelerinden geliyor, bu tile'lar sadece arka plan görseli
-      for (let ty = 0; ty < tilesY; ty++) {
-        for (let tx = 0; tx < tilesX; tx++) {
-          const x = tx * tileSize;
-          const y = ty * tileSize;
-          this.add.sprite(x, y, waterAsset.source, waterFrameKey)
-            .setOrigin(0, 0)
-            .setScale(config.scale)
-            .setDepth(-10); // En altta, sadece görsel
+  private buildObjects() {
+    for (const o of WORLD.objects) {
+      const sprite = this.add.image(o.x, o.y, 'village', o.f).setOrigin(0.5, 1).setScale(S);
+      // Zemin seviyesindeki nesneler (nilüfer, köprü, ekin) hep karakterin altında; diğerleri tabanına göre sıralanır.
+      sprite.setDepth(o.flat ? -5 : o.y);
+    }
+  }
+
+  private buildBuildings() {
+    for (const b of WORLD.buildings) {
+      const img = this.add.image(b.doorX, b.doorY, b.key).setScale(BUILDING_SCALE);
+      img.setOrigin(0.5, BUILDING_DOOR_BOTTOM[b.key] / img.height);
+      img.setDepth(b.doorY);
+
+      // Duvarlar: görselin alt kısmı engel; çatı bölgesinde karakter binanın arkasından geçebilir.
+      const bw = img.displayWidth * 0.9;
+      const bh = img.displayHeight * 0.4;
+      this.addBlock(b.doorX - bw / 2, b.doorY - 2 - bh, bw, bh);
+
+      // Giriş alanı: kapının hemen dibi, kapı genişliği kadar.
+      const zone = new Phaser.Geom.Rectangle(b.doorX - 20, b.doorY - 4, 40, 22);
+      const hint = this.add
+        // Çatının hemen üstünde: tabela yazısını kapatmasın.
+        .image(b.doorX, b.doorY - BUILDING_DOOR_BOTTOM[b.key] * BUILDING_SCALE - 14, 'village', 'emoji_excl')
+        .setScale(1.5)
+        .setDepth(100000)
+        .setAlpha(0);
+      this.tweens.add({ targets: hint, y: hint.y - 6, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      this.doors.push({ target: b.target, x: b.doorX, y: b.doorY, zone, hint, hintShown: false });
+    }
+  }
+
+  private buildColliders() {
+    for (const [x, y, w, h] of WORLD.blocked) this.addBlock(x, y, w, h);
+  }
+
+  private addBlock(x: number, y: number, w: number, h: number) {
+    const r = this.add.rectangle(x + w / 2, y + h / 2, w, h, 0xff0000, 0);
+    this.physics.add.existing(r, true);
+    this.obstacles.add(r);
+  }
+
+  private buildChest() {
+    const { x, y } = WORLD.chest;
+    this.chest = this.add.sprite(x, y, 'village', 'chest_0').setOrigin(0.5, 1).setScale(S).setDepth(y);
+  }
+
+  private spawnAnimals() {
+    this.animals = this.physics.add.group();
+    const add = (kind: 'chicken' | 'cow', area: { x: number; y: number; w: number; h: number }, count: number) => {
+      for (let i = 0; i < count; i++) {
+        const x = area.x + 20 + Math.random() * (area.w - 40);
+        const y = area.y + 20 + Math.random() * (area.h - 40);
+        const a = this.animals.create(x, y, kind) as Animal;
+        a.kind = kind;
+        a.area = area;
+        a.nextAction = 0;
+        a.nextEmote = 0;
+        a.setScale(2.5);
+        if (kind === 'chicken') {
+          a.setBodySize(10, 6).setOffset(3, 9);
+        } else {
+          a.setBodySize(20, 8).setOffset(6, 20);
         }
+        a.play(`${kind}-idle`);
+      }
+    };
+    add('chicken', WORLD.chickens, 3);
+    add('cow', WORLD.cows, 2);
+    this.physics.add.collider(this.animals, this.obstacles);
+    this.physics.add.collider(this.animals, this.player);
+    this.physics.add.collider(this.animals, this.animals);
+  }
+
+  /** Kelebekler, bulut gölgeleri ve su pırıltıları: dünyanın kıpırdadığını hissettiren küçük şeyler. */
+  private buildAmbient() {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    // Kelebekler: çiçeklerin çevresinde dolaşır, kanat çırpar
+    const colors = ['pink', 'yellow', 'blue'];
+    const homes = Phaser.Utils.Array.Shuffle([...WORLD.flowers]).slice(0, 6);
+    homes.forEach(([hx, hy], i) => {
+      const color = colors[i % colors.length];
+      const b = this.add.image(hx, hy - 30, 'village', `bfly_${color}_0`).setScale(S).setDepth(60000);
+      let open = 0;
+      this.time.addEvent({ delay: 140 + i * 13, loop: true, callback: () => b.setFrame(`bfly_${color}_${(open ^= 1)}`) });
+      const wander = () => {
+        const tx = hx + Phaser.Math.Between(-70, 70);
+        const ty = hy - Phaser.Math.Between(18, 60);
+        this.tweens.add({ targets: b, x: tx, y: ty, duration: Phaser.Math.Between(1400, 2600), ease: 'Sine.inOut', onComplete: wander });
+      };
+      if (!reduceMotion) wander();
+    });
+
+    // Bulut gölgeleri: çok soluk, yavaşça doğuya kayar
+    if (!reduceMotion) {
+      const g = this.add.graphics();
+      g.fillStyle(0x263c30, 1);
+      g.fillEllipse(120, 60, 220, 90);
+      g.fillEllipse(210, 70, 160, 80);
+      g.fillEllipse(60, 80, 130, 60);
+      g.generateTexture('cloud-shadow', 300, 140);
+      g.destroy();
+      for (let i = 0; i < 4; i++) {
+        const c = this.add
+          .image(Phaser.Math.Between(-300, WORLD_W), Phaser.Math.Between(0, WORLD_H), 'cloud-shadow')
+          .setAlpha(0.045)
+          .setScale(Phaser.Math.FloatBetween(1.2, 2))
+          .setDepth(90000);
+        const drift = () => {
+          const d = (WORLD_W + 600 - c.x) / 0.018;
+          this.tweens.add({
+            targets: c,
+            x: WORLD_W + 300,
+            duration: d,
+            onComplete: () => {
+              c.setPosition(-400, Phaser.Math.Between(0, WORLD_H));
+              drift();
+            },
+          });
+        };
+        drift();
       }
     }
 
-    this.externalMapData.objects.forEach(obj => {
-      const asset = this.externalMapData?.assets.find(a => a.id === obj.assetId);
-      if (!asset) return;
-
-      // Custom asset'leri (base64/data URL) render etme - bunlar dosya sisteminde yok
-      if (asset.isCustom || (asset.source && (asset.source.startsWith('data:') || asset.source.startsWith('blob:')))) {
-        return; // Bu custom asset'i render etme
-      }
-
-      const frameKey = `f_${asset.id}`;
-      if (!this.textures.get(asset.source).has(frameKey)) { this.textures.get(asset.source).add(frameKey, 0, asset.x, asset.y, asset.w, asset.h); }
-
-      // --- PLANT ve GRASS AYARLARI ---
-      const assetName = asset.name.toLowerCase();
-      // Sadece 'grass' olanlar zemin süsüdür, altta kalır.
-      // 'plant' olanlar (ağaç gibi) karakterle derinlik ilişkisine girmeli (Y-sort).
-      const isFloorDecoration = assetName.includes('grass') && !assetName.includes('plant');
-      const isSolidPlant = ['plant3', 'plant4', 'plant5', 'plant6', 'plant13'].some(p => assetName.includes(p));
-      const isWater = assetName.includes('water');
-
-      // Derinlik Ayarı:
-      // Zemin süsleri (-5) ve su (-10) en altta; diğer her şey (bitkiler, binalar, karakter)
-      // tabanının Y konumuna göre sıralanır: aşağıda olan önde görünür.
-      let depth = isFloorDecoration ? -5 : (isWater ? -10 : obj.y + (obj.h * obj.scale));
-
-      // Belirtilen özel plantler için derinliği biraz daha artırıp karakterin önüne geçmesini garantileyelim
-      if (isSolidPlant) {
-        depth += 10; // Hafif bir öncelik
-      }
-
-      const sprite = this.add.sprite(obj.x, obj.y, asset.source, frameKey).setOrigin(0, 0).setScale(obj.scale).setDepth(depth);
-
-      // --- ÇARPIŞMA KUTULARI (HITBOX) ---
-      // Görsele göre daha küçük, "içeride" kalan bloklar oluşturuyoruz.
-      if (isWater || isSolidPlant) {
-        // Kutuyu objenin merkezine alıp, boyutlarını %60'a düşürüyoruz (Padding)
-        const hitW = (obj.w * obj.scale) * 0.6;
-        const hitH = (obj.h * obj.scale) * 0.4;
-        const hitX = obj.x + (obj.w * obj.scale) / 2;
-        const hitY = obj.y + (obj.h * obj.scale) - (hitH / 2) - 5; // Alt tarafa hizalı
-
-        // alpha: 0 ile görünmez yapıyoruz
-        const solidBlock = this.add.rectangle(hitX, hitY, hitW, hitH, 0xff0000, 0);
-        this.physics.add.existing(solidBlock, true);
-        this.obstacles.add(solidBlock);
-      }
-    });
-
-    this.externalMapData.collisions.forEach(c => {
-      // Çarpışma kutularını 1 blok (48px) aşağı kaydırıyoruz (eğer kayma varsa)
-      // Tasarımındaki 1 blok kaymasını gidermek için y koordinatına tw veya th kadar ekleme yapıyoruz.
-      // Genelde tile size 16px, scale 3 olduğu için 48px ekliyoruz.
-      // alpha: 0 ile tamamen görünmez
-      const block = this.add.rectangle(c.x + c.w / 2, (c.y + 48) + c.h / 2, c.w, c.h, 0xff0000, 0);
-      this.physics.add.existing(block, true);
-      this.obstacles.add(block);
-    });
-
-    this.externalMapData.portals.forEach(p => {
-      // Portal tetikleyicisi için Zone kullanıyoruz (Daha kararlı fizik algılaması için)
-      const portalZone = this.add.zone(p.x + p.w / 2, p.y + p.h / 2, p.w, p.h);
-      this.physics.add.existing(portalZone, true); // Statik (hareketsiz) fizik gövdesi
-      (portalZone as any).targetView = p.target;
-      this.portals.add(portalZone);
-
-      // Debug için: Fizik gövdesinin boyutlarını netleştirelim
-      (portalZone.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
-
-      // Portalların üzerine kendi görsellerini koyalım (eğer portal adı eşleşiyorsa)
-
-      // Portalların üzerine kendi görsellerini koyalım (eğer portal adı eşleşiyorsa)
-      let textureKey = '';
-      if (p.name === 'GALERİ') textureKey = 'galeri';
-      if (p.name === 'SOSYAL') textureKey = 'sosyal';
-      if (p.name === 'PROJELER') textureKey = 'projeler';
-
-      if (textureKey) {
-        // Binalar 2x çizilir: 3x'te (haritanın ölçeği) ağaçların yanında fazla büyük kalıyorlardı.
-        // Kapının alt kenarı giriş alanının
-        // üst kısmına oturur; karakter kapıya yürüyünce giriş alanına girer.
-        const doorBottom = BUILDING_DOOR_BOTTOM[textureKey];
-        const doorY = p.y + 16;
-        const bImg = this.add.image(p.x + p.w / 2, doorY, textureKey).setScale(2);
-        bImg.setOrigin(0.5, doorBottom / bImg.height);
-        // Derinlik = zemin çizgisi: önündeki karakter ve ağaçlar binanın önünde, arkasındakiler arkasında.
-        bImg.setDepth(doorY);
-
-        // Çarpışma yalnızca duvarlara: görselin alt kısmı. Çatı bölgesinde karakter binanın arkasından geçebilir.
-        const bw = bImg.displayWidth * 0.9;
-        const bh = bImg.displayHeight * 0.42;
-        const body = this.add.rectangle(p.x + p.w / 2, doorY - 4 - bh / 2, bw, bh, 0xff0000, 0);
-        this.physics.add.existing(body, true);
-        this.obstacles.add(body);
-
-        // GİRİŞ KAPISI GÖRÜNÜRLÜĞÜ: Sadece grass'ın üstünde, plant'lerin ve binaların altında
-        this.add.rectangle(p.x + p.w / 2, p.y + p.h / 2, p.w * 0.6, p.h * 0.8, 0x00ff00, 0.15)
-          .setStrokeStyle(3, 0x00ff00, 0.6)
-          .setDepth(-4); // Grass'ın üstünde (-5) ama plant'lerin ve binaların altında
-      } else {
-        // Giriş kapısı kutusu: Hafif görünür (alpha: 0.1) ve stroke ile belirgin
-        this.add.rectangle(p.x + p.w / 2, p.y + p.h / 2, p.w, p.h, 0xffffff, 0.15)
-          .setStrokeStyle(3, 0xffffff, 0.6)
-          .setDepth(-4); // Grass'ın üstünde ama plant'lerin ve binaların altında
-      }
+    // Su pırıltıları: kıyıya yakın sularda ara ara beliren iki piksellik parıltı
+    const water = WORLD.water;
+    this.time.addEvent({
+      delay: 220,
+      loop: true,
+      callback: () => {
+        const [wx, wy] = water[Math.floor(Math.random() * water.length)];
+        const px = wx * WORLD.tile + Phaser.Math.Between(6, WORLD.tile - 10);
+        const py = wy * WORLD.tile + Phaser.Math.Between(6, WORLD.tile - 8);
+        const sp = this.add.rectangle(px, py, S * 2, S, 0xf3f4e7, 1).setDepth(-15).setAlpha(0);
+        this.tweens.add({ targets: sp, alpha: 0.9, duration: 350, yoyo: true, hold: 200, onComplete: () => sp.destroy() });
+      },
     });
   }
 
   private createAnimations() {
-    this.anims.create({ key: 'idle-down', frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }), frameRate: 4, repeat: -1 });
-    this.anims.create({ key: 'idle-up', frames: this.anims.generateFrameNumbers('player', { start: 4, end: 5 }), frameRate: 4, repeat: -1 });
-    this.anims.create({ key: 'idle-right', frames: this.anims.generateFrameNumbers('player', { start: 12, end: 13 }), frameRate: 4, repeat: -1 });
-    this.anims.create({ key: 'idle-left', frames: this.anims.generateFrameNumbers('player', { start: 8, end: 9 }), frameRate: 4, repeat: -1 });
-    this.anims.create({ key: 'walk-down', frames: this.anims.generateFrameNumbers('player', { start: 2, end: 3 }), frameRate: 8, repeat: -1 });
-    this.anims.create({ key: 'walk-up', frames: this.anims.generateFrameNumbers('player', { start: 6, end: 7 }), frameRate: 8, repeat: -1 });
-    this.anims.create({ key: 'walk-right', frames: this.anims.generateFrameNumbers('player', { start: 14, end: 15 }), frameRate: 8, repeat: -1 });
-    this.anims.create({ key: 'walk-left', frames: this.anims.generateFrameNumbers('player', { start: 10, end: 11 }), frameRate: 8, repeat: -1 });
-
-    // Chicken Animations
-    this.anims.create({ key: 'chicken-idle', frames: this.anims.generateFrameNumbers('chicken_anim', { start: 0, end: 1 }), frameRate: 3, repeat: -1 });
-    this.anims.create({ key: 'chicken-walk', frames: this.anims.generateFrameNumbers('chicken_anim', { start: 4, end: 7 }), frameRate: 8, repeat: -1 });
+    const a = this.anims;
+    const n = (key: string, start: number, end: number) => a.generateFrameNumbers(key, { start, end });
+    a.create({ key: 'idle-down', frames: n('player', 0, 1), frameRate: 4, repeat: -1 });
+    a.create({ key: 'idle-up', frames: n('player', 4, 5), frameRate: 4, repeat: -1 });
+    a.create({ key: 'idle-left', frames: n('player', 8, 9), frameRate: 4, repeat: -1 });
+    a.create({ key: 'idle-right', frames: n('player', 12, 13), frameRate: 4, repeat: -1 });
+    a.create({ key: 'walk-down', frames: n('player', 2, 3), frameRate: 8, repeat: -1 });
+    a.create({ key: 'walk-up', frames: n('player', 6, 7), frameRate: 8, repeat: -1 });
+    a.create({ key: 'walk-left', frames: n('player', 10, 11), frameRate: 8, repeat: -1 });
+    a.create({ key: 'walk-right', frames: n('player', 14, 15), frameRate: 8, repeat: -1 });
+    a.create({ key: 'chicken-idle', frames: n('chicken', 0, 1), frameRate: 3, repeat: -1 });
+    a.create({ key: 'chicken-walk', frames: n('chicken', 4, 7), frameRate: 8, repeat: -1 });
+    a.create({ key: 'cow-idle', frames: n('cow', 0, 2), frameRate: 2, repeat: -1 });
+    a.create({ key: 'cow-walk', frames: n('cow', 3, 4), frameRate: 4, repeat: -1 });
   }
 
-  update() {
-    // --- TAVUK YAPAY ZEKASI ---
-    if (this.chickens) {
-      this.chickens.children.iterate((c: Phaser.GameObjects.GameObject) => {
-        const chicken = c as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-        if (!chicken || !chicken.body) return true;
+  // ---------------------------------------------------------------- canlılar
+  private emote(x: number, y: number, frame: string) {
+    const e = this.add.image(x, y, 'village', frame).setScale(1.2).setDepth(100000).setAlpha(0);
+    this.tweens.add({ targets: e, alpha: 1, y: y - 10, duration: 250, ease: 'Sine.out' });
+    this.tweens.add({ targets: e, alpha: 0, y: y - 30, delay: 1100, duration: 400, onComplete: () => e.destroy() });
+  }
 
-        const now = this.time.now;
+  private updateAnimals(now: number) {
+    this.animals.children.iterate((child) => {
+      const a = child as Animal;
+      if (!a?.body) return true;
+      const r = a.area;
 
-        // Derinlik güncelleme (DEBUG İÇİN KALDIRILDI - YERİNE SABİT YÜKSEK DEPTH)
-        // chicken.setDepth(chicken.y + chicken.height);
-        chicken.setDepth(9999);
-
-        if (now > ((chicken as any).nextAction || 0)) {
-          // Yeni bir eylem seç
-          const action = Math.random() > 0.4 ? 'walk' : 'idle';
-          const duration = Math.random() * 2000 + 1000; // 1-3 saniye
-          (chicken as any).nextAction = now + duration;
-
-          if (action === 'walk') {
-            // Rastgele yön
-            const angle = Math.random() * Math.PI * 2;
-            const speed = (chicken as any).moveSpeed || 30;
-            chicken.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
-            chicken.play('chicken-walk', true);
-
-            // Yönüne göre çevir
-            chicken.setFlipX(chicken.body.velocity.x < 0);
-          } else {
-            // Dur
-            chicken.setVelocity(0, 0);
-            chicken.play('chicken-idle', true);
-          }
+      // Alanın dışına kaçtıysa içeri yönel
+      const outside = a.x < r.x + 10 || a.x > r.x + r.w - 10 || a.y < r.y + 10 || a.y > r.y + r.h - 6;
+      if (outside) {
+        const ang = Phaser.Math.Angle.Between(a.x, a.y, r.x + r.w / 2, r.y + r.h / 2);
+        const sp = a.kind === 'cow' ? 18 : 30;
+        a.setVelocity(Math.cos(ang) * sp, Math.sin(ang) * sp);
+        a.play(`${a.kind}-walk`, true);
+        a.nextAction = now + 600;
+      } else if (now > a.nextAction) {
+        const walk = Math.random() > (a.kind === 'cow' ? 0.6 : 0.4);
+        a.nextAction = now + (a.kind === 'cow' ? 2500 + Math.random() * 3000 : 1000 + Math.random() * 2000);
+        if (walk) {
+          const ang = Math.random() * Math.PI * 2;
+          const sp = a.kind === 'cow' ? 16 : 30;
+          a.setVelocity(Math.cos(ang) * sp, Math.sin(ang) * sp);
+          a.play(`${a.kind}-walk`, true);
+        } else {
+          a.setVelocity(0, 0);
+          a.play(`${a.kind}-idle`, true);
         }
-        return true;
-      });
-    }
+      }
+      if (Math.abs(a.body.velocity.x) > 1) a.setFlipX(a.body.velocity.x < 0);
+      a.setDepth(a.body.bottom);
 
-    if (!this.player.active) return;
-    const speed = 200; this.player.setVelocity(0);
-    let vx = 0; let vy = 0;
+      // Karakter yaklaşınca küçük bir tepki
+      if (now > a.nextEmote && Phaser.Math.Distance.Between(a.x, a.y, this.player.x, this.player.y) < 80) {
+        a.nextEmote = now + 5000;
+        this.emote(a.x, a.y - (a.kind === 'cow' ? 50 : 30), a.kind === 'cow' ? 'emoji_heart' : 'emoji_note');
+      }
+      return true;
+    });
+  }
+
+  private updateChest() {
+    const near = Phaser.Math.Distance.Between(this.player.x, this.player.body.bottom, this.chest.x, this.chest.y) < 80;
+    if (near === this.chestOpen) return;
+    this.chestOpen = near;
+    const frames = near ? [1, 2, 3, 4] : [3, 2, 1, 0];
+    frames.forEach((f, i) => this.time.delayedCall(i * 70, () => this.chest.setFrame(`chest_${f}`)));
+    if (near) this.emote(this.chest.x, this.chest.y - 60, 'emoji_star');
+  }
+
+  private updateDoors(movingUp: boolean) {
+    const feetX = this.player.x;
+    const feetY = this.player.body.bottom;
+    for (const d of this.doors) {
+      const near = Phaser.Math.Distance.Between(feetX, feetY, d.x, d.y) < DOOR_HINT_DISTANCE;
+      if (near !== d.hintShown) {
+        d.hintShown = near;
+        this.tweens.add({ targets: d.hint, alpha: near ? 1 : 0, duration: 180 });
+      }
+      if (!this.entering && movingUp && d.zone.contains(feetX, feetY)) {
+        this.entering = true;
+        sessionStorage.setItem('lastView', d.target);
+        this.player.setVelocity(0, 0);
+        this.tweens.add({
+          targets: this.player,
+          alpha: 0,
+          y: this.player.y - 16,
+          duration: 380,
+          ease: 'Sine.in',
+          onComplete: () => this.onPortalEnter(d.target),
+        });
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------- döngü
+  update() {
+    const now = this.time.now;
+    this.updateAnimals(now);
+    if (!this.player?.active || this.entering) return;
+
+    const speed = 200;
+    let vx = 0;
+    let vy = 0;
     if (this.cursors.left.isDown || this.wasd.A.isDown) vx = -speed;
     else if (this.cursors.right.isDown || this.wasd.D.isDown) vx = speed;
     if (this.cursors.up.isDown || this.wasd.W.isDown) vy = -speed;
     else if (this.cursors.down.isDown || this.wasd.S.isDown) vy = speed;
-    if (Math.abs(this.joystickValues.x) > 0.1 || Math.abs(this.joystickValues.y) > 0.1) { vx = this.joystickValues.x * speed; vy = this.joystickValues.y * speed; }
-    if (vx !== 0 && vy !== 0 && this.joystickValues.x === 0) { vx *= 0.7071; vy *= 0.7071; }
+    const joy = Math.abs(this.joystickValues.x) > 0.1 || Math.abs(this.joystickValues.y) > 0.1;
+    if (joy) {
+      vx = this.joystickValues.x * speed;
+      vy = this.joystickValues.y * speed;
+    } else if (vx !== 0 && vy !== 0) {
+      vx *= 0.7071;
+      vy *= 0.7071;
+    }
+    // Köprüye yaklaşırken ayakları yumuşakça köprünün ortasına yönlendir (dar şeride denk getirmek zorunda kalmasın).
+    const br = WORLD.bridge;
+    const feet = this.player.body.bottom;
+    if (vx !== 0 && this.player.x > br.x0 - 60 && this.player.x < br.x1 + 60) {
+      const laneMid = (br.laneTop + br.laneBottom) / 2;
+      const off = laneMid - (feet - 4);
+      if (Math.abs(off) > 2 && Math.abs(off) < 70) vy += Phaser.Math.Clamp(off * 6, -speed, speed);
+    }
     this.player.setVelocity(vx, vy);
 
-    // Animasyon Seçimi (Joystick ve Klavye uyumlu)
     const absX = Math.abs(vx);
     const absY = Math.abs(vy);
-
     if (absX < 10 && absY < 10) {
-      this.player.stop();
-      this.player.setFrame(0);
+      const cur = this.player.anims.currentAnim?.key ?? 'idle-down';
+      this.player.play(cur.replace('walk', 'idle'), true);
+    } else if (absY > absX * 1.6) {
+      this.player.play(vy < 0 ? 'walk-up' : 'walk-down', true);
     } else {
-      // Y ekseni hareketi X'ten belirgin şekilde büyükse dikey animasyon
-      // Yatay hareketi çok daha öncelikli tutmak için dikey eşiği 1.6'ya çıkardık
-      if (absY > absX * 1.6) {
-        if (vy < 0) this.player.play('walk-up', true);
-        else this.player.play('walk-down', true);
-      } else {
-        // Aksi halde yatay animasyon
-        if (vx < 0) this.player.play('walk-left', true);
-        else this.player.play('walk-right', true);
-      }
+      this.player.play(vx < 0 ? 'walk-left' : 'walk-right', true);
     }
 
-    // Derinlik güncelleme (Y-Sorting)
-    this.player.setDepth(this.player.y + 48);
+    // Derinlik: ayakların hizası. Ağacın arkasındayken taç, önündeyken karakter üstte görünür.
+    this.player.setDepth(this.player.body.bottom);
+
+    this.updateChest();
+    this.updateDoors(vy < -40 && absY >= absX * 0.5);
   }
 }

@@ -246,7 +246,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
             </div>
             <button
               type="button"
-              className="pro-icon-btn"
+              className="pro-icon-btn pro-theme-btn"
               onClick={toggleTheme}
               aria-label={theme === 'dark' ? t.themeToLight : t.themeToDark}
               title={theme === 'dark' ? t.themeToLight : t.themeToDark}
@@ -473,8 +473,17 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
 
       <footer className="pro-footer">
         <div className="pro-container pro-footer-inner">
-          <span>© {new Date().getFullYear()} Özgür Güler</span>
-          <span>ozgurguler.tech</span>
+          <span>
+            © {new Date().getFullYear()} Özgür Güler ·{' '}
+            <a href="https://cupnooble.itch.io/sprout-lands-asset-pack" target="_blank" rel="noopener noreferrer" className="pro-credit">
+              {t.credit}
+            </a>
+          </span>
+          {/* Dar ekranda üst çubukta yer yok; tema düğmesi burada da var. */}
+          <button type="button" className="pro-footer-theme" onClick={toggleTheme}>
+            {theme === 'dark' ? <Sun size={15} aria-hidden="true" /> : <Moon size={15} aria-hidden="true" />}
+            {theme === 'dark' ? t.themeToLight : t.themeToDark}
+          </button>
         </div>
       </footer>
 
