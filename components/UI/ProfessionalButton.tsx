@@ -13,9 +13,20 @@ const woodFace =
 // Köyün ahşap tabelalarıyla aynı paletten, okunaklı yazıyla sabit köşe düğmeleri.
 export const ProfessionalButton: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
   <div className="fixed top-3 right-3 md:top-5 md:right-5 z-[10000] flex items-center gap-2 select-none">
+    {/* İki dil yan yana; seçili olan koyu. Düğmeye basınca diğer dile geçilir. */}
     <a href={villagePath(GAME_LANG === 'en' ? 'tr' : 'en')} lang={GAME_LANG === 'en' ? 'tr' : 'en'} className="relative group" aria-label={G.langSwitchAria}>
       <span className={woodBack} />
-      <span className={`${woodFace} px-2.5 py-2 md:py-2.5 text-sm md:text-[15px]`}>{G.langSwitch}</span>
+      <span className={`${woodFace} gap-0.5 p-1 text-xs md:text-[13px]`}>
+        {(['tr', 'en'] as const).map((l) => (
+          <span
+            key={l}
+            aria-hidden="true"
+            className={`rounded-md px-1.5 py-1 md:py-1.5 ${l === GAME_LANG ? 'bg-[#4a2f22] text-[#f3e5c2]' : 'text-[#4a2f22]/70'}`}
+          >
+            {l.toUpperCase()}
+          </span>
+        ))}
+      </span>
     </a>
     <a
       href={professionalPath(GAME_LANG)}

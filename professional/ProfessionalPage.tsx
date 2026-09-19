@@ -230,9 +230,20 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
             <a href="#contact">{t.nav.contact}</a>
           </nav>
           <div className="pro-header-actions">
-            <a className="pro-icon-btn pro-lang" href={counterpartPath(lang, activeSlug)} hrefLang={otherLang} lang={otherLang} aria-label={t.langSwitchAria}>
-              {t.langSwitchShort}
-            </a>
+            {/* İki dil yan yana: seçili olan vurgulu, diğeri o sayfanın karşılığına gider. */}
+            <div className="pro-langs" role="group" aria-label="Dil / Language">
+              {(['tr', 'en'] as Lang[]).map((l) =>
+                l === lang ? (
+                  <span key={l} className="is-current" aria-current="true">
+                    {l.toUpperCase()}
+                  </span>
+                ) : (
+                  <a key={l} href={counterpartPath(lang, activeSlug)} hrefLang={otherLang} lang={otherLang} aria-label={t.langSwitchAria}>
+                    {l.toUpperCase()}
+                  </a>
+                ),
+              )}
+            </div>
             <button
               type="button"
               className="pro-icon-btn"
@@ -245,6 +256,9 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
             <VillageLink lang={lang} t={t} onBack={onBack} className="pro-village-btn">
               <ArrowLeft size={14} aria-hidden="true" />
               <span className="pro-village-label">{t.village}</span>
+              <span className="pro-village-short" aria-hidden="true">
+                {t.villageShort}
+              </span>
             </VillageLink>
           </div>
         </div>

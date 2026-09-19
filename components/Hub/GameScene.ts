@@ -283,11 +283,12 @@ export class GameScene extends Phaser.Scene {
       if (p.name === 'PROJELER') textureKey = 'projeler';
 
       if (textureKey) {
-        // Binalar Sprout Lands ile aynı piksel ölçeğinde (3x). Kapının alt kenarı giriş alanının
+        // Binalar 2x çizilir: 3x'te (haritanın ölçeği) ağaçların yanında fazla büyük kalıyorlardı.
+        // Kapının alt kenarı giriş alanının
         // üst kısmına oturur; karakter kapıya yürüyünce giriş alanına girer.
         const doorBottom = BUILDING_DOOR_BOTTOM[textureKey];
         const doorY = p.y + 16;
-        const bImg = this.add.image(p.x + p.w / 2, doorY, textureKey).setScale(3);
+        const bImg = this.add.image(p.x + p.w / 2, doorY, textureKey).setScale(2);
         bImg.setOrigin(0.5, doorBottom / bImg.height);
         // Derinlik = zemin çizgisi: önündeki karakter ve ağaçlar binanın önünde, arkasındakiler arkasında.
         bImg.setDepth(doorY);

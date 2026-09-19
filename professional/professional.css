@@ -214,10 +214,31 @@ html[data-theme='dark'] .pro {
   color: var(--ink);
   background: var(--surface-2);
 }
-.pro-lang {
-  font-size: 13px;
+.pro-langs {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+.pro-langs > * {
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  height: 30px;
+  padding: 0 6px;
+  border-radius: 7px;
+  color: var(--muted);
+}
+.pro-langs a:hover {
+  color: var(--ink);
+}
+.pro-langs .is-current {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(35, 40, 64, 0.12);
 }
 
 /* Köy düğmesi: ahşap çerçeve ve piksel yazı, oyundaki tabelalarla aynı dil */
@@ -811,6 +832,18 @@ html[data-theme='dark'] .pro {
 }
 
 /* ---------- Dar telefonlar ---------- */
+.pro-village-short {
+  display: none;
+}
+/* Çok dar ekranda köy düğmesi kısa etiketle ("Köy" / "Village"), portre görünür kalsın. */
+@media (max-width: 399px) {
+  .pro-village-label {
+    display: none;
+  }
+  .pro-village-short {
+    display: inline;
+  }
+}
 /* Dar ekranda isim köy düğmesine çarpmasın (İngilizcede "Digital Village" daha uzun). */
 @media (max-width: 579px) {
   .pro-brand-name {

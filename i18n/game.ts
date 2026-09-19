@@ -7,6 +7,13 @@ export const detectLang = (pathname: string): Lang =>
 
 export const GAME_LANG: Lang = typeof window !== 'undefined' ? detectLang(window.location.pathname) : 'tr';
 
+// Yaş doğum tarihinden hesaplanır; her yıl elle güncellemek gerekmez.
+const BIRTH = { year: 2002, month: 11, day: 2 };
+export const currentAge = (now = new Date()) => {
+  const hadBirthday = now.getMonth() + 1 > BIRTH.month || (now.getMonth() + 1 === BIRTH.month && now.getDate() >= BIRTH.day);
+  return now.getFullYear() - BIRTH.year - (hadBirthday ? 0 : 1);
+};
+
 export const villagePath = (lang: Lang) => (lang === 'en' ? '/en' : '/');
 export const professionalPath = (lang: Lang) => (lang === 'en' ? '/professional/en' : '/professional');
 
@@ -25,7 +32,7 @@ const STRINGS = {
     loadingBar: 'KÖY YÜKLENİYOR...',
     welcomeTitle: 'MERHABA!',
     welcomeLine1: 'Ben',
-    welcomeLine1b: ', 23 yaşındayım.',
+    welcomeLine1b: `, ${currentAge()} yaşındayım.`,
     welcomeLine2: 'Dijital köyüme hoş geldin!',
     welcomeHint: 'Buradan karakteri hareket ettirerek benimle ilgili bilgilere ulaşabilirsin.',
     welcomeButton: 'KÖYÜ KEŞFET',
@@ -93,7 +100,7 @@ const STRINGS = {
     loadingBar: 'LOADING VILLAGE...',
     welcomeTitle: 'HELLO!',
     welcomeLine1: "I'm",
-    welcomeLine1b: ', 23 years old.',
+    welcomeLine1b: `, ${currentAge()} years old.`,
     welcomeLine2: 'Welcome to my digital village!',
     welcomeHint: 'Walk the character around to find out more about me.',
     welcomeButton: 'EXPLORE',
