@@ -275,7 +275,8 @@ FRAMES = {
 for name, (tx, ty) in FENCE_TILES.items():
     FRAMES[f'fence_{name}'] = (SL / 'Tilesets' / 'Fences.png', tx * 16, ty * 16, 16, 16)
 for i in range(5):
-    FRAMES[f'chest_{i}'] = (SL / 'Objects' / 'Chest.png', i * 48, 0, 48, 48)
+    # sandık karenin üst 32 pikselinde; alttaki boşluğu at ki taban çarpışma kutusuyla hizalı olsun
+    FRAMES[f'chest_{i}'] = (SL / 'Objects' / 'Chest.png', i * 48, 0, 48, 32)
 
 # Çarpışma kutuları (sanat pikseli, sprite'ın alt-orta noktasına göre: dx, dy yukarı, w, h)
 # Ağaçlarda yalnız gövde çarpar; karakter tacın arkasından geçebilir.
