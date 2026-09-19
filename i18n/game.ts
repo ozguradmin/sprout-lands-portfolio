@@ -55,7 +55,7 @@ const STRINGS = {
     welcomePlaces: [
       { key: 'projeler', name: 'Projeler', desc: 'Yaptığım işler ve sonuçları' },
       { key: 'sosyal', name: 'Sosyal', desc: 'Hesaplarım, bana ulaş' },
-      { key: 'galeri', name: 'Galeri', desc: 'VSCO fotoğraflarım' },
+      { key: 'galeri', name: 'Galeri', desc: 'Çektiğim fotoğraflar' },
     ],
     welcomeMoveKeys: 'ile yürü',
     welcomeMoveTouch: 'Ekrana dokunup sürükleyerek yürü',
@@ -147,7 +147,7 @@ const STRINGS = {
     welcomePlaces: [
       { key: 'projeler', name: 'Projects', desc: 'What I built and how it went' },
       { key: 'sosyal', name: 'Social', desc: 'My accounts, get in touch' },
-      { key: 'galeri', name: 'Gallery', desc: 'My VSCO photos' },
+      { key: 'galeri', name: 'Gallery', desc: 'Photos I took' },
     ],
     welcomeMoveKeys: 'to walk',
     welcomeMoveTouch: 'Touch and drag anywhere to walk',

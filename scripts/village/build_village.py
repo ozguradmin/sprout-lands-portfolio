@@ -322,7 +322,7 @@ for tx, ty in [(26, 3), (28, 3), (27, 4)]:
 
 # Bina çevresi: kapı yanlarında çalı/çiçek, arkalarında ağaçlar
 place('tree_fruit', 5, 8); place('tree', 13, 9); place('bush_berry', 8, 10, 0.3); place('flower_pink', 11, 10, 0.6)
-place('tree_tall', 23, 11); place('bush', 28, 13, 0.4); place('flower_blue', 24, 13, 0.5)
+place('bush', 28, 13, 0.4); place('flower_blue', 24, 13, 0.5)  # (23, 11)'deki ağaç kaldırıldı: dere o kareden geçiyor
 place('tree', 5, 20); place('tree_fruit', 12, 20); place('bush_berry', 11, 22, 0.4); place('flower_y', 7, 23)
 
 # Meydan: sandık (oyunda yaklaşınca açılır; burada yalnız yer ayırma ve çarpışma)
