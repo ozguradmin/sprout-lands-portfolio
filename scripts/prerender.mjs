@@ -41,19 +41,19 @@ for (const route of routes) {
 const gameIndex = await readFile(join(dist, 'index.html'), 'utf8');
 const gameEn = gameIndex
   .replace('<html lang="tr">', '<html lang="en">')
-  .replace(/<title>[^<]*<\/title>/, "<title>Özgür's Portfolio · Digital Village</title>")
+  .replace(/<title>[^<]*<\/title>/, "<title>Özgür Güler · Virtual Village</title>")
   .replace(
     /<meta name="description" content="[^"]*"\s*\/>/,
-    `<meta name="description" content="Explore Özgür Güler's interactive 2D pixel village: projects, social accounts and more." />`,
+    `<meta name="description" content="I make games, apps and websites. My projects, accounts and the photos I took are in the houses of this little village." />`,
   );
 const enMeta = [
   ['<link rel="canonical" href="https://ozgurguler.tech/" />', '<link rel="canonical" href="https://ozgurguler.tech/en" />'],
   ['content="tr_TR"', 'content="en_US"'],
   ['<meta property="og:url" content="https://ozgurguler.tech/" />', '<meta property="og:url" content="https://ozgurguler.tech/en" />'],
-  [/content="Özgür'ün Dijital Köyü"/g, `content="Özgür's Digital Village"`],
-  [/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="Walk around Özgür Güler's pixel village; projects, social accounts and a gallery live in the houses. There is a plain Professional View too."`],
-  [/<meta name="twitter:description" content="[^"]*"/, `<meta name="twitter:description" content="Walk around Özgür Güler's pixel village; projects, social accounts and a gallery live in the houses."`],
-  [/og-village\.png/g, 'og-village-en.png'],
+  [/content="Özgür'ün sanal köyü"/g, `content="Özgür's virtual village"`],
+  [/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="I make games, apps and websites. My projects, accounts and the photos I took are in the houses of this little village."`],
+  [/<meta name="twitter:description" content="[^"]*"/, `<meta name="twitter:description" content="I make games, apps and websites. My projects, accounts and the photos I took are in the houses of this little village."`],
+  [/og-village-v2\.png/g, 'og-village-v2-en.png'],
   [/<meta property="og:image:alt" content="[^"]*"/, `<meta property="og:image:alt" content="Özgür's pixel village: houses, a pond and dirt paths"`],
 ];
 let gameEnMeta = gameEn;
