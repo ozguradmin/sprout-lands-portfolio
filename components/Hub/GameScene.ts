@@ -1,4 +1,8 @@
 import Phaser from 'phaser';
+import { GAME_LANG } from '../../i18n/game';
+
+// Bina görsellerinde (doğal çözünürlük, piksel) kapı eşiğinin alt kenarı.
+const BUILDING_DOOR_BOTTOM: Record<string, number> = { projeler: 76, sosyal: 89, galeri: 78 };
 
 interface MapConfig {
   mapConfig: {
@@ -48,9 +52,10 @@ export class GameScene extends Phaser.Scene {
     this.load.spritesheet('player', '/assets/characters/player.png', { frameWidth: 48, frameHeight: 48 });
     this.load.spritesheet('chicken_anim', '/assets/sprout-lands/Characters/Free Chicken Sprites.png', { frameWidth: 16, frameHeight: 16 });
     this.load.json('mapData', '/assets/map.json');
-    this.load.image('galeri', '/assets/buildings/galeri.png');
-    this.load.image('sosyal', '/assets/buildings/sosyal.png');
-    this.load.image('projeler', '/assets/buildings/projeler.png');
+    // Tabela yazısı görsele işli; dile göre TR ya da EN sürüm yüklenir.
+    this.load.image('galeri', `/assets/buildings/galeri-${GAME_LANG}.png`);
+    this.load.image('sosyal', `/assets/buildings/sosyal-${GAME_LANG}.png`);
+    this.load.image('projeler', `/assets/buildings/projeler-${GAME_LANG}.png`);
 
     const packs = [
       'Characters/Basic Charakter Actions.png',
@@ -221,23 +226,13 @@ export class GameScene extends Phaser.Scene {
       const isSolidPlant = ['plant3', 'plant4', 'plant5', 'plant6', 'plant13'].some(p => assetName.includes(p));
       const isWater = assetName.includes('water');
 
-      // plant6 ve plant2 binaların üstünde olmalı (yüksek depth)
-      const isHighPlant = assetName.includes('plant6') || assetName.includes('plant2');
-
       // Derinlik Ayarı:
-      // Zemin süsleri (-5) en altta.
-      // Su (-10) en altta.
-      // plant6 ve plant2 binaların üstünde (çok yüksek depth)
-      // Diğerleri (Plantler dahil) Y pozisyonuna göre sıralanır (Y-Sort).
+      // Zemin süsleri (-5) ve su (-10) en altta; diğer her şey (bitkiler, binalar, karakter)
+      // tabanının Y konumuna göre sıralanır: aşağıda olan önde görünür.
       let depth = isFloorDecoration ? -5 : (isWater ? -10 : obj.y + (obj.h * obj.scale));
 
-      // plant6 ve plant2 binaların üstünde olmalı (binalar p.y + p.h + 100 depth'inde)
-      if (isHighPlant) {
-        depth = obj.y + (obj.h * obj.scale) + 200; // Binaların üstünde
-      }
-
       // Belirtilen özel plantler için derinliği biraz daha artırıp karakterin önüne geçmesini garantileyelim
-      if (isSolidPlant && !isHighPlant) {
+      if (isSolidPlant) {
         depth += 10; // Hafif bir öncelik
       }
 
@@ -288,24 +283,21 @@ export class GameScene extends Phaser.Scene {
       if (p.name === 'PROJELER') textureKey = 'projeler';
 
       if (textureKey) {
-        // Binaların boyutunu biraz büyütüyoruz (0.3) ve kapı merkezine göre ayarlıyoruz
-        const bImg = this.add.image(p.x + p.w / 2, p.y + p.h / 2 - 20, textureKey).setDepth(p.y + p.h + 100).setScale(0.3); // Y ekseninde yukarı (-20) kaydırdık, depth'i yüksek tutuyoruz
-        bImg.setOrigin(0.5, 0.8); // Görselin alt kısmını kapıya hizalıyoruz
+        // Binalar Sprout Lands ile aynı piksel ölçeğinde (3x). Kapının alt kenarı giriş alanının
+        // üst kısmına oturur; karakter kapıya yürüyünce giriş alanına girer.
+        const doorBottom = BUILDING_DOOR_BOTTOM[textureKey];
+        const doorY = p.y + 16;
+        const bImg = this.add.image(p.x + p.w / 2, doorY, textureKey).setScale(3);
+        bImg.setOrigin(0.5, doorBottom / bImg.height);
+        // Derinlik = zemin çizgisi: önündeki karakter ve ağaçlar binanın önünde, arkasındakiler arkasında.
+        bImg.setDepth(doorY);
 
-        // Yan duvarlar (Görünmez ama çarpışmalı - alpha: 0)
-        // Duvar genişliğini azaltarak (%30) ortada daha fazla boşluk bırakıyoruz
-        // YÜKSEKLİK AYARI: Duvarları sadece üst yarıda tutuyoruz (p.h * 0.5)
-        const wallWidth = p.w * 0.3;
-        const wallHeight = p.h * 0.5;
-        const wallY = p.y + wallHeight / 2; // Üst tarafa hizalı
-
-        const leftWall = this.add.rectangle(p.x + wallWidth / 2, wallY, wallWidth, wallHeight, 0xff0000, 0); // alpha 0
-        this.physics.add.existing(leftWall, true);
-        this.obstacles.add(leftWall);
-
-        const rightWall = this.add.rectangle(p.x + p.w - wallWidth / 2, wallY, wallWidth, wallHeight, 0xff0000, 0); // alpha 0
-        this.physics.add.existing(rightWall, true);
-        this.obstacles.add(rightWall);
+        // Çarpışma yalnızca duvarlara: görselin alt kısmı. Çatı bölgesinde karakter binanın arkasından geçebilir.
+        const bw = bImg.displayWidth * 0.9;
+        const bh = bImg.displayHeight * 0.42;
+        const body = this.add.rectangle(p.x + p.w / 2, doorY - 4 - bh / 2, bw, bh, 0xff0000, 0);
+        this.physics.add.existing(body, true);
+        this.obstacles.add(body);
 
         // GİRİŞ KAPISI GÖRÜNÜRLÜĞÜ: Sadece grass'ın üstünde, plant'lerin ve binaların altında
         this.add.rectangle(p.x + p.w / 2, p.y + p.h / 2, p.w * 0.6, p.h * 0.8, 0x00ff00, 0.15)
