@@ -11,119 +11,109 @@ import { WelcomeCard } from './WelcomeCard';
 // Oturum süresince (refresh hariç) hoşgeldin mesajını takip etmek için modül dışı değişken
 let hasSeenSession = false;
 
-// Ultra-Modern Dynamic Joystick
+// Dokunmatik joystick: ekranın alt yarısında parmağın değdiği yerde belirir.
+// Hareket sırasında React yeniden çizmez; topuz doğrudan stil ile taşınır, değer sahneye ref ile gider.
+const JOY_RADIUS = 50;
 const VirtualJoystick: React.FC<{ onMove: (x: number, y: number) => void }> = ({ onMove }) => {
-  const [active, setActive] = useState(false);
-  const [basePosition, setBasePosition] = useState({ x: 0, y: 0 });
-  const [knobPosition, setKnobPosition] = useState({ x: 0, y: 0 });
-  
-  // Refs for immediate access in event handlers
-  const activeRef = useRef(false);
-  const basePosRef = useRef({ x: 0, y: 0 });
+  const baseRef = useRef<HTMLDivElement>(null);
+  const knobRef = useRef<HTMLDivElement>(null);
+  const touchId = useRef<number | null>(null);
+  const origin = useRef({ x: 0, y: 0 });
+  const onMoveRef = useRef(onMove);
+  onMoveRef.current = onMove;
 
-  const handleMove = (clientX: number, clientY: number) => {
-    const maxRadius = 50;
-    let dx = clientX - basePosRef.current.x;
-    let dy = clientY - basePosRef.current.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance > maxRadius) {
-      const angle = Math.atan2(dy, dx);
-      dx = Math.cos(angle) * maxRadius;
-      dy = Math.sin(angle) * maxRadius;
+  const setVisual = (active: boolean, x?: number, y?: number) => {
+    const base = baseRef.current;
+    const knob = knobRef.current;
+    if (!base || !knob) return;
+    if (active && x !== undefined && y !== undefined) {
+      base.style.left = `${x - 64}px`;
+      base.style.top = `${y - 64}px`;
+    } else {
+      base.style.left = 'calc(50% - 64px)';
+      base.style.top = 'calc(100% - 180px)';
     }
-
-    setKnobPosition({ x: dx, y: dy });
-    onMove(dx / maxRadius, dy / maxRadius);
+    base.style.opacity = active ? '1' : '0.5';
+    base.style.transform = active ? 'scale(1)' : 'scale(0.85)';
+    knob.style.opacity = active ? '1' : '0.3';
+    knob.style.transform = 'translate(0px, 0px)';
   };
 
-  const onTouchMove = (e: TouchEvent) => {
-    if (!activeRef.current) return;
-    if (e.cancelable) e.preventDefault();
-    handleMove(e.touches[0].clientX, e.touches[0].clientY);
-  };
-
-  const onMouseMove = (e: MouseEvent) => {
-    if (!activeRef.current) return;
-    handleMove(e.clientX, e.clientY);
-  };
-
-  const onEnd = () => {
-    activeRef.current = false;
-    setActive(false);
-    setKnobPosition({ x: 0, y: 0 });
-    onMove(0, 0);
-    
-    // Clean up listeners immediately
-    window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('touchend', onEnd);
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onEnd);
-  };
-
-  const handleStart = (e: React.TouchEvent | React.MouseEvent, clientX: number, clientY: number) => {
-    if (clientY < window.innerHeight / 2) return;
-    
-    // Tarayıcının bu dokunuşu bir "scroll" olarak algılamasını engelle
-    if (e.cancelable) e.preventDefault();
-
-    activeRef.current = true;
-    setActive(true);
-    setBasePosition({ x: clientX, y: clientY });
-    basePosRef.current = { x: clientX, y: clientY };
-    setKnobPosition({ x: 0, y: 0 });
-    onMove(0, 0);
-
-    // Dinleyicileri hemen ekle
+  useEffect(() => {
+    const find = (list: TouchList) => {
+      for (let i = 0; i < list.length; i++) if (list[i].identifier === touchId.current) return list[i];
+      return null;
+    };
+    const end = () => {
+      if (touchId.current === null) return;
+      touchId.current = null;
+      setVisual(false);
+      onMoveRef.current(0, 0);
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const t = touchId.current === null ? null : find(e.changedTouches);
+      if (!t) return;
+      if (e.cancelable) e.preventDefault();
+      let dx = t.clientX - origin.current.x;
+      let dy = t.clientY - origin.current.y;
+      const d = Math.hypot(dx, dy);
+      if (d > JOY_RADIUS) {
+        dx = (dx / d) * JOY_RADIUS;
+        dy = (dy / d) * JOY_RADIUS;
+      }
+      if (knobRef.current) knobRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
+      onMoveRef.current(dx / JOY_RADIUS, dy / JOY_RADIUS);
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (find(e.changedTouches)) end();
+    };
     window.addEventListener('touchmove', onTouchMove, { passive: false });
-    window.addEventListener('touchend', onEnd);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchend', onTouchEnd);
+    // Bildirim, arama vb. dokunuşu iptal ederse karakter yürümeye devam etmesin
+    window.addEventListener('touchcancel', onTouchEnd);
+    window.addEventListener('blur', end);
+    document.addEventListener('visibilitychange', end);
+    return () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchEnd);
+      window.removeEventListener('blur', end);
+      document.removeEventListener('visibilitychange', end);
+      onMoveRef.current(0, 0);
+    };
+  }, []);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (touchId.current !== null) return;
+    const t = e.changedTouches[0];
+    touchId.current = t.identifier;
+    origin.current = { x: t.clientX, y: t.clientY };
+    setVisual(true, t.clientX, t.clientY);
+    onMoveRef.current(0, 0);
   };
 
-  // Ekranın alt yarısını kaplayan görünmez tetikleyici alan
   return (
     <>
-      {/* Görünmez Tetikleyici Alan - Arka plan kaydırmasını tamamen durdurur */}
-      <div 
-        className="fixed bottom-0 left-0 right-0 h-1/2 z-40"
-        style={{ 
-          touchAction: 'none', 
-          pointerEvents: active ? 'none' : 'auto' 
-        }}
-        onTouchStart={(e) => {
-          if (e.cancelable) e.preventDefault();
-          handleStart(e, e.touches[0].clientX, e.touches[0].clientY);
-        }}
-        onMouseDown={(e) => handleStart(e, e.clientX, e.clientY)}
-      />
-
-      {/* Joystick Görseli */}
-      <div 
-        className="fixed w-32 h-32 rounded-full backdrop-blur-[1px] bg-white/10 border border-white/20 shadow-2xl z-50 pointer-events-none transition-all duration-300 ease-out"
-        style={{ 
-          left: active ? basePosition.x - 64 : window.innerWidth / 2 - 64, 
-          top: active ? basePosition.y - 64 : window.innerHeight - 180, // %20 yukarı çekildi
-          opacity: active ? 1 : 0.5, // Daha belirgin hale getirildi
-          transform: active ? 'scale(1)' : 'scale(0.85)',
-          touchAction: 'none'
-        }}
+      {/* Ekranın alt yarısı: dokunuşu yakalar, sayfanın kaymasını engeller */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 h-1/2" style={{ touchAction: 'none' }} onTouchStart={onTouchStart} />
+      <div
+        ref={baseRef}
+        aria-hidden="true"
+        className="pointer-events-none fixed z-50 h-32 w-32 rounded-full border border-white/25 bg-white/15 shadow-2xl transition-[opacity,transform] duration-200 ease-out"
+        style={{ left: 'calc(50% - 64px)', top: 'calc(100% - 180px)', opacity: 0.5, transform: 'scale(0.85)' }}
       >
-        {/* Knob (Topuz) */}
-        <div 
-          className="absolute top-1/2 left-1/2 w-12 h-12 -ml-6 -mt-6 rounded-full bg-white shadow-lg border-2 border-white/50 z-10 transition-transform duration-75 ease-out"
-          style={{ 
-            transform: `translate(${knobPosition.x}px, ${knobPosition.y}px)`,
-            opacity: active ? 1 : 0.3
-          }}
+        <div
+          ref={knobRef}
+          className="absolute left-1/2 top-1/2 z-10 -ml-6 -mt-6 h-12 w-12 rounded-full border-2 border-white/50 bg-white shadow-lg will-change-transform"
+          style={{ opacity: 0.3 }}
         />
-        
-        {/* İç halka süsü */}
         <div className="absolute inset-8 rounded-full border border-white/5" />
       </div>
     </>
   );
 };
+
+const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
 
 export const HubView: React.FC = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
@@ -233,12 +223,14 @@ export const HubView: React.FC = () => {
       <AnimatePresence>{showWelcome && <WelcomeCard onClose={handleCloseWelcome} />}</AnimatePresence>
 
       {/* Mobile Joystick - Dynamic */}
-      <div className={`md:hidden ${showWelcome ? 'pointer-events-none' : ''}`}>
-        <VirtualJoystick onMove={handleJoystickMove} />
-      </div>
+      {isTouchDevice && (
+        <div className={showWelcome ? 'pointer-events-none' : ''}>
+          <VirtualJoystick onMove={handleJoystickMove} />
+        </div>
+      )}
 
       {/* Desktop Hints */}
-      <div className={`pointer-events-none absolute bottom-12 left-12 z-10 hidden md:block transition-opacity duration-500 ${showWelcome ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`pointer-events-none absolute bottom-12 left-12 z-10 hidden ${isTouchDevice ? "" : "md:block"} transition-opacity duration-500 ${showWelcome ? 'opacity-0' : 'opacity-100'}`}>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
               <div className="flex gap-1">

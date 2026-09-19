@@ -448,7 +448,9 @@ export class GameScene extends Phaser.Scene {
     // Köprüye yaklaşırken ayakları yumuşakça köprünün ortasına yönlendir (dar şeride denk getirmek zorunda kalmasın).
     const br = WORLD.bridge;
     const feet = this.player.body.bottom;
-    if (vx !== 0 && this.player.x > br.x0 - 60 && this.player.x < br.x1 + 60) {
+    // Yalnız ağırlıklı olarak yatay yürürken: joystick'te yatay bileşen hiç tam sıfır olmadığından
+    // aksi hâlde köprünün yakınında aşağı/yukarı gitmek engelleniyordu.
+    if (Math.abs(vx) > Math.abs(vy) * 1.5 && this.player.x > br.x0 - 60 && this.player.x < br.x1 + 60) {
       const laneMid = (br.laneTop + br.laneBottom) / 2;
       const off = laneMid - (feet - 4);
       if (Math.abs(off) > 2 && Math.abs(off) < 70) vy += Phaser.Math.Clamp(off * 6, -speed, speed);

@@ -534,8 +534,7 @@ def blocked_cells():
                 b[y][x] = True
     hx0, hy0, hx1, hy1 = HILL
     fill(b, hx0, hy0, hx1, hy1, True)
-    for tx, ty, part in fences:
-        b[ty][tx] = True
+    # çitler burada değil: fence_colliders() ile direk ve tahtaların şekline göre ince kutular
     # köprü satırlarındaki dere hücreleri ayrı ele alınır (partial_bridge_blocks)
     for cx_, cy_ in bridge_cells:
         b[cy_][cx_] = False
@@ -584,6 +583,22 @@ def object_colliders(sizes):
         out.append([round(bx + dx * S - w * S / 2), round(by - dy * S - h * S), w * S, h * S])
     # sandık gövdesi
     out.append([CHEST[0] * TW + 6, CHEST[1] * TW + 18, TW - 12, TW - 22])
+    return out
+
+
+def fence_colliders():
+    """Çitin çarpışması: direk tabanı + komşuya uzanan tahta, karonun tamamı değil (sanat pikseli, 16'lık karo)."""
+    out = []
+    for tx, ty, part in fences:
+        e, w_ = (tx + 1, ty) in fence_cells, (tx - 1, ty) in fence_cells
+        n, s_ = (tx, ty - 1) in fence_cells, (tx, ty + 1) in fence_cells
+        boxes = [(5, 5, 11, 12)]            # direk
+        if e: boxes.append((11, 6, 16, 11))
+        if w_: boxes.append((0, 6, 5, 11))
+        if n: boxes.append((6, 0, 10, 5))
+        if s_: boxes.append((6, 12, 10, 16))
+        for x0, y0, x1, y1 in boxes:
+            out.append([tx * TW + x0 * S, ty * TW + y0 * S, (x1 - x0) * S, (y1 - y0) * S])
     return out
 
 
@@ -671,7 +686,7 @@ if __name__ == '__main__':
     sizes = build_atlas()
     grass, dirt_l, hills = layers()
     rects = merge_rects(blocked_cells()) + partial_bridge_blocks()
-    cols = object_colliders(sizes)
+    cols = object_colliders(sizes) + fence_colliders()
     write_ts(grass, dirt_l, hills, rects, cols)
     print('objects', len(objects), 'blocked rects', len(rects), 'colliders', len(cols))
     if '--preview' in sys.argv:
