@@ -376,14 +376,14 @@ export class GameScene extends Phaser.Scene {
       a.setDepth(a.body.bottom);
 
       // Karakter yaklaşınca küçük bir tepki
-      if (now > a.nextEmote && Phaser.Math.Distance.Between(a.x, a.y, this.player.x, this.player.y) < 80) {
+      if (now > a.nextEmote && Phaser.Math.Distance.Between(a.x, a.y, this.player.x, this.player.y) < 100) {
         a.nextEmote = now + 5000;
         this.emote(a.x, a.y - (a.kind === 'cow' ? 50 : 30), a.kind === 'cow' ? 'emoji_heart' : 'emoji_note');
         // Aynı anda iki hayvan birden bağırmasın
         if (now > this.nextAnimalSound) {
           this.nextAnimalSound = now + 2500;
           const pick = a.kind === 'cow' ? `moo-${1 + Math.floor(Math.random() * 3)}` : `cluck-${1 + Math.floor(Math.random() * 2)}`;
-          playSfx(pick, a.kind === 'cow' ? 0.45 : 0.4);
+          playSfx(pick, a.kind === 'cow' ? 0.5 : 0.7);
         }
       }
       return true;

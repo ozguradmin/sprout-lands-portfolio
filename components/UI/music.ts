@@ -43,29 +43,44 @@ const fadeTo = (target: number, onDone?: () => void) => {
   }, 40);
 };
 
+const shouldPlay = () => enabled && !isProOverlayOpen();
+
+let retryArmed = false;
 const play = () => {
   const a = getAudio();
   a.play().then(
-    () => fadeTo(VOLUME),
+    // play() geç çözülebilir; bu arada kapatıldıysa sesi açma, durdur.
+    () => (shouldPlay() ? fadeTo(VOLUME) : pause()),
     // Tarayıcı kullanıcı etkileşimi olmadan çalmaya izin vermedi; ilk tıklama/tuşta tekrar dene.
     () => {
+      if (retryArmed) return;
+      retryArmed = true;
       const retry = () => {
-        window.removeEventListener('pointerdown', retry);
+        window.removeEventListener('click', retry);
         window.removeEventListener('keydown', retry);
-        if (enabled && !isProOverlayOpen()) play();
+        retryArmed = false;
+        // click (pointerdown değil): müzik düğmesine basıldıysa önce onun kararı işlensin
+        window.setTimeout(() => shouldPlay() && play(), 0);
       };
-      window.addEventListener('pointerdown', retry, { once: true });
-      window.addEventListener('keydown', retry, { once: true });
+      window.addEventListener('click', retry);
+      window.addEventListener('keydown', retry);
     },
   );
 };
 
 const pause = () => {
-  if (!audio || audio.paused) return;
-  fadeTo(0, () => audio?.pause());
+  if (!audio) return;
+  if (audio.paused) {
+    window.clearInterval(fadeTimer);
+    audio.volume = 0;
+    return;
+  }
+  fadeTo(0, () => {
+    if (!shouldPlay()) audio?.pause();
+  });
 };
 
-const sync = () => (enabled && !isProOverlayOpen() ? play() : pause());
+const sync = () => (shouldPlay() ? play() : pause());
 
 export const setMusic = (on: boolean) => {
   enabled = on;
@@ -90,7 +105,7 @@ export const startMusicIfEnabled = () => {
 // Hayvan sesleri (BigSoundBank, CC0) — müzik düğmesine bağlı: ses kapalıysa çalmaz.
 const sfxCache = new Map<string, HTMLAudioElement>();
 export const playSfx = (name: string, volume = 0.5) => {
-  if (!enabled || isProOverlayOpen()) return;
+  if (!shouldPlay()) return;
   let base = sfxCache.get(name);
   if (!base) {
     base = new Audio(`/audio/sfx/${name}.mp3`);

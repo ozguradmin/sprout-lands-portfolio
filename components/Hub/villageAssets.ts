@@ -31,31 +31,35 @@ const allUrls = (): string[] => [
   ...VILLAGE_ASSETS.extra,
 ];
 
-/** Köy dosyalarını önceden indirir; her dosya bittikçe ilerlemeyi (0..1) bildirir. Hata olsa da devam eder. */
+// İndirilen görseller burada tutulur: tarayıcı bellekteki kopyayı yeniden kullanır, oyun ve karşılama
+// penceresi açılırken tekrar ağa gitmez.
+const kept: HTMLImageElement[] = [];
+
+const loadImage = (url: string) =>
+  new Promise<void>((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      kept.push(img);
+      // Çözümlemeyi de burada bitir ki ilk çizimde takılma olmasın
+      img.decode().catch(() => undefined).finally(resolve);
+    };
+    img.onerror = () => resolve();
+    img.src = url;
+  });
+
+// Karşılama penceresi ve yükleme ekranının yazı tipleri
+const FONTS = ['16px PressStart2P', '600 16px Outfit', '700 16px Outfit'];
+
+/** Köy dosyalarını ve yazı tiplerini önceden indirir; her iş bittikçe ilerlemeyi (0..1) bildirir. Hata olsa da devam eder. */
 export const preloadVillage = (onProgress: (p: number) => void): Promise<void> => {
   const urls = allUrls();
+  const total = urls.length + FONTS.length;
   let done = 0;
-  const tick = () => onProgress(++done / urls.length);
-  return Promise.all(
-    urls.map(
-      (url) =>
-        new Promise<void>((resolve) => {
-          if (url.endsWith('.json')) {
-            fetch(url)
-              .catch(() => undefined)
-              .finally(() => {
-                tick();
-                resolve();
-              });
-            return;
-          }
-          const img = new Image();
-          img.onload = img.onerror = () => {
-            tick();
-            resolve();
-          };
-          img.src = url;
-        }),
-    ),
-  ).then(() => undefined);
+  const tick = () => onProgress(++done / total);
+  const jobs = [
+    ...urls.map((url) => (url.endsWith('.json') ? fetch(url).then(() => undefined, () => undefined) : loadImage(url))),
+    ...FONTS.map((f) => (document.fonts ? document.fonts.load(f).then(() => undefined, () => undefined) : Promise.resolve())),
+  ];
+  return Promise.all(jobs.map((j) => j.finally(tick))).then(() => undefined);
 };

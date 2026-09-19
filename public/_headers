@@ -1,0 +1,6 @@
+# Görseller, sesler ve yazı tipleri: tarayıcı bir süre sormadan kullansın (varsayılan her istekte yeniden doğruluyordu).
+# Vite'ın ürettiği /assets/*.js ve *.css dosya adları içerik özetli; uzun önbellek güvenli.
+/assets/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/audio/*
+  Cache-Control: public, max-age=604800
