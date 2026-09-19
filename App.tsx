@@ -9,7 +9,7 @@ import { LoadingScreen } from './components/UI/LoadingScreen';
 import { AdminView } from './components/Admin/AdminView';
 import { ProfessionalButton } from './components/UI/ProfessionalButton';
 import { startMusicIfEnabled } from './components/UI/music';
-import { isProPath, setProOverlayOpen } from './professional/overlayBridge';
+import { PRO_OVERLAY_REQUEST, isProPath, setProOverlayOpen } from './professional/overlayBridge';
 import { GAME_LANG, professionalPath, villagePath } from './i18n/game';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -46,6 +46,11 @@ const Main: React.FC = () => {
   useEffect(() => {
     setProOverlayOpen(proOpen);
   }, [proOpen]);
+
+  useEffect(() => {
+    window.addEventListener(PRO_OVERLAY_REQUEST, openPro);
+    return () => window.removeEventListener(PRO_OVERLAY_REQUEST, openPro);
+  }, [openPro]);
 
   // Müzik açık bırakılmışsa köy açılınca devam etsin (yükleme ekranında başlamasın).
   useEffect(() => {

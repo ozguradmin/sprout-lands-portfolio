@@ -13,3 +13,7 @@ export const setProOverlayOpen = (value: boolean) => {
 };
 
 export const isProPath = (pathname: string) => pathname === '/professional' || pathname.startsWith('/professional/');
+
+// Köyün içinden (ör. karşılama penceresi) profesyonel katmanı açma isteği; App dinler.
+export const PRO_OVERLAY_REQUEST = 'pro-overlay-request';
+export const requestProOverlay = () => window.dispatchEvent(new Event(PRO_OVERLAY_REQUEST));

@@ -4,10 +4,10 @@ import { GameScene } from './GameScene';
 import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Hand } from 'lucide-react';
 import { PRO_OVERLAY_EVENT, isProOverlayOpen } from '../../professional/overlayBridge';
 
 import { G } from '../../i18n/game';
+import { WelcomeCard } from './WelcomeCard';
 // Oturum süresince (refresh hariç) hoşgeldin mesajını takip etmek için modül dışı değişken
 let hasSeenSession = false;
 
@@ -223,79 +223,13 @@ export const HubView: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: isGameReady ? 1 : 0 }}
         transition={{ duration: 0.5 }}
-        ref={gameContainerRef} 
-        className="w-full h-full" 
+        ref={gameContainerRef}
+        className={`w-full h-full transition-[filter,transform] duration-500 ${showWelcome ? 'scale-[1.03] blur-[3px]' : ''}`}
       />
       
-      {/* Welcome Modal Overlay - Sprout Lands Style */}
-      <AnimatePresence>
-        {showWelcome && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          >
-            <motion.div 
-              initial={{ scale: 0.8, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.8, y: 20 }}
-              transition={{ type: "spring", bounce: 0.4 }}
-              className="relative max-w-sm w-full"
-            >
-              {/* Wood Frame Structure */}
-              <div className="bg-[#e4a672] p-1.5 rounded-xl shadow-2xl border-[3px] border-[#b86f50]">
-                {/* Inner Bevel/Border */}
-                <div className="bg-[#e4a672] border-2 border-[#ffce9e] rounded-lg p-1">
-                  {/* Content Area (Paper/Light Wood) */}
-                  <div className="bg-[#ead4aa] rounded-md p-6 relative flex flex-col items-center font-pixel">
-                    
-                    {/* Close Button */}
-                    <button 
-                      onClick={handleCloseWelcome}
-                      className="absolute -top-5 -right-5 bg-[#e4a672] border-2 border-[#b86f50] text-[#5d4037] w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#ffce9e] transition-colors shadow-lg z-20 active:translate-y-1"
-                    >
-                      <X size={24} strokeWidth={3} />
-                    </button>
+      {/* Karşılama tabelası */}
+      <AnimatePresence>{showWelcome && <WelcomeCard onClose={handleCloseWelcome} />}</AnimatePresence>
 
-                    {/* Header Image/Icon */}
-                    <div className="w-32 h-32 mb-4 overflow-hidden rounded-xl shadow-lg">
-                       <img src="/assets/ben-256.png" alt="Özgür Güler" className="w-full h-full object-cover" />
-                    </div>
-
-                    {/* Title */}
-                    <div className="flex items-center gap-2 mb-2">
-                       <h2 className="text-[#5d4037] font-bold text-xl tracking-wider uppercase drop-shadow-sm">{G.welcomeTitle}</h2>
-                    </div>
-                    
-                    <div className="h-0.5 w-16 bg-[#b86f50]/40 rounded-full mb-4"></div>
-
-                    {/* Text */}
-                    <div className="text-[#5d4037] text-center font-medium leading-relaxed mb-6 text-sm">
-                      {G.welcomeLine1} <span className="font-bold">Özgür</span>{G.welcomeLine1b}<br/>
-                      {G.welcomeLine2}<br/><br/>
-                      <span className="text-[#5d4037]/80 text-[10px] leading-tight block">{G.welcomeHint}</span>
-                    </div>
-                    
-                    {/* Action Button */}
-                    <button 
-                      onClick={handleCloseWelcome}
-                      className="w-full group relative"
-                    >
-                      <div className="absolute inset-0 bg-[#b86f50] rounded-xl translate-y-1.5 transition-transform group-active:translate-y-0"></div>
-                      <div className="relative bg-[#e4a672] border-2 border-[#b86f50] text-[#5d4037] font-extrabold py-3 rounded-xl hover:brightness-110 transition-all uppercase tracking-wider flex items-center justify-center gap-2 group-active:translate-y-1.5">
-                        {G.welcomeButton} <Hand size={18} className="rotate-12" />
-                      </div>
-                    </button>
-
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
       {/* Mobile Joystick - Dynamic */}
       <div className={`md:hidden ${showWelcome ? 'pointer-events-none' : ''}`}>
         <VirtualJoystick onMove={handleJoystickMove} />
