@@ -179,32 +179,33 @@ for b in BUILDINGS:
 
 # ---------------------------------------------------------------------------
 # 6) Çitler (tarla ve mera)
-FENCE_TILES = {'tl': (1, 0), 't': (2, 0), 'tr': (3, 0), 'l': (1, 1), 'r': (3, 1), 'bl': (1, 2), 'b': (2, 2), 'br': (3, 2)}
-fences = []  # (tx, ty, part)
+# Fences.png 4x4 otomatik karo: sütun yatay bağlantıyı (yok, D, D+B, B), satır dikeyi (G, K+G, K, yok) seçer.
+fence_cells = set()
+gates = []  # (tx, ty) — çitteki kapı hücreleri
 
 
-def fence_rect(x0, y0, x1, y1, gaps=()):
+def fence_rect(x0, y0, x1, y1, gate):
     for x in range(x0, x1 + 1):
-        for y in (y0, y1):
-            if (x, y) in gaps:
-                continue
-            if x == x0:
-                part = 'tl' if y == y0 else 'bl'
-            elif x == x1:
-                part = 'tr' if y == y0 else 'br'
-            else:
-                part = 't' if y == y0 else 'b'
-            fences.append((x, y, part))
+        fence_cells.update({(x, y0), (x, y1)})
     for y in range(y0 + 1, y1):
-        for x in (x0, x1):
-            if (x, y) not in gaps:
-                fences.append((x, y, 'l' if x == x0 else 'r'))
+        fence_cells.update({(x0, y), (x1, y)})
+    fence_cells.discard(gate)
+    gates.append(gate)
+
+
+def fence_part(x, y):
+    e, w = (x + 1, y) in fence_cells, (x - 1, y) in fence_cells
+    n, s_ = (x, y - 1) in fence_cells, (x, y + 1) in fence_cells
+    col = {(False, False): 0, (True, False): 1, (True, True): 2, (False, True): 3}[(e, w)]
+    row = {(False, True): 0, (True, True): 1, (True, False): 2, (False, False): 3}[(n, s_)]
+    return f'{col}{row}'
 
 
 FARM = (23, 17, 29, 22)
-fence_rect(*FARM, gaps={(24, 17)})           # tarla, kapı üstte
+fence_rect(*FARM, gate=(24, 17))           # tarla, kapı üstte
 PASTURE = (12, 3, 17, 7)
-fence_rect(*PASTURE, gaps={(14, 7)})          # mera, kapı altta
+fence_rect(*PASTURE, gate=(14, 7))          # mera, kapı altta
+fences = [(x, y, fence_part(x, y)) for x, y in sorted(fence_cells)]
 for x0, y0, x1, y1 in (FARM, PASTURE):
     fill(reserved, x0, y0, x1, y1, True)
 
@@ -272,8 +273,9 @@ FRAMES = {
     'emoji_star': (UI / 'emojis-free' / 'Emoji_Spritesheet_Free.png', 128, 256, 32, 32),
     'emoji_excl': (UI / 'emojis-free' / 'Emoji_Spritesheet_Free.png', 64, 224, 32, 32),
 }
-for name, (tx, ty) in FENCE_TILES.items():
-    FRAMES[f'fence_{name}'] = (SL / 'Tilesets' / 'Fences.png', tx * 16, ty * 16, 16, 16)
+for col in range(4):
+    for row in range(4):
+        FRAMES[f'fence_{col}{row}'] = (SL / 'Tilesets' / 'Fences.png', col * 16, row * 16, 16, 16)
 for i in range(5):
     # sandık karenin üst 32 pikselinde; alttaki boşluğu at ki taban çarpışma kutusuyla hizalı olsun
     FRAMES[f'chest_{i}'] = (SL / 'Objects' / 'Chest.png', i * 48, 0, 48, 32)
@@ -413,6 +415,33 @@ for x, y in cells:
 for tx, ty, part in fences:
     objects.append((f'fence_{part}', (tx + 0.5) * TW, (ty + 1) * TW))
 
+
+# Pakette çit kapısı yok: Fences.png'nin tahtası ve renkleriyle çizilmiş kapı kanadı.
+# Komşu çit direkleri kapı tarafında uç direk olur; kanat iki direk arasını doldurur.
+GATE_POST_GAP = 5   # direğin kenarından karo kenarına kadar sanat pikseli
+GATE_W = 16 + 2 * GATE_POST_GAP
+
+
+def make_gate():
+    dark, mid, light, cap = (170, 121, 89, 255), (183, 138, 98, 255), (196, 154, 108, 255), (232, 207, 166, 255)
+    im = Image.new('RGBA', (GATE_W, 16), (0, 0, 0, 0))
+    put = lambda xx, yy, c: im.putpixel((xx, yy), c)
+    # çapraz destek: sol alttan sağ üste, altında gölge pikseli
+    xa, ya, xb, yb = 3, 8, GATE_W - 4, 5
+    for xx in range(xa, xb + 1):
+        yy = round(ya + (yb - ya) * (xx - xa) / (xb - xa))
+        put(xx, yy, light)
+        put(xx, yy + 1, dark)
+    for xx in range(GATE_W):  # iki yatay tahta
+        for yy, c in ((3, light), (4, dark), (9, light), (10, dark)):
+            put(xx, yy, c)
+    for x0 in (0, GATE_W - 3):  # dikey kayıtlar
+        for yy in range(2, 12):
+            put(x0, yy, dark); put(x0 + 1, yy, mid); put(x0 + 2, yy, dark)
+        put(x0 + 1, 2, cap)
+    return im
+
+
 # ---------------------------------------------------------------------------
 # 8) Atlas
 def build_atlas():
@@ -433,6 +462,7 @@ def build_atlas():
                     elif ch == 'W':
                         im.putpixel((xx, yy), wing_hi + (255,))
             images.append((f'bfly_{color_name}_{fi}', im, (5, 3, 0, 0)))
+    images.append(('gate', make_gate(), (GATE_W, 16, 0, 0)))
     for name, (src, x, y, w, h) in FRAMES.items():
         im = Image.open(src).convert('RGBA').crop((x, y, x + w, y + h))
         bbox = im.getbbox()
@@ -440,6 +470,8 @@ def build_atlas():
             raise SystemExit(f'boş kare: {name}')
         # yatayda kırp, altta taban çizgisi sabit kalsın diye dikeyde yalnız üstten kırp
         bx0, by0, bx1, by1 = bbox
+        if name.startswith('fence_'):
+            bx0, bx1 = 0, w  # çit parçaları karo genişliğinde kalmalı, yoksa komşusuyla birleşmez
         crop = im.crop((bx0, by0, bx1, h))
         images.append((name, crop, (w, h, bx0, by0)))
     # basit raf paketleme
@@ -566,6 +598,7 @@ def write_ts(grass, dirt_l, hills, rects, colliders):
         'spawn': {'x': 16 * TW, 'y': 15 * TW},
         'chickens': {'x': (FARM[0] + 1) * TW, 'y': (FARM[1] + 1) * TW, 'w': (FARM[2] - FARM[0] - 1) * TW, 'h': (FARM[3] - FARM[1] - 1) * TW},
         'cows': {'x': (PASTURE[0] + 1) * TW, 'y': (PASTURE[1] + 1) * TW, 'w': (PASTURE[2] - PASTURE[0] - 1) * TW, 'h': (PASTURE[3] - PASTURE[1] - 1) * TW},
+        'gates': [{'x': tx * TW - GATE_POST_GAP * S, 'y': (ty + 1) * TW} for tx, ty in gates],
         'chest': {'x': CHEST[0] * TW + TW // 2, 'y': CHEST[1] * TW + TW - 6},
         'flowers': [[round(x), round(y)] for f, x, y in objects if f.startswith(('flower', 'sunflower'))][:24],
         'water': [[x, y] for y in range(H) for x in range(W) if not land[y][x] and (x, y) not in bridge_cells

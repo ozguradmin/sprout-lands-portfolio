@@ -76,3 +76,4 @@ Ozgur Guler - [GitHub](https://github.com/ozguradmin) | [LinkedIn](https://www.l
 
 Developed using Sprout Lands asset packs.
 Background music: "Good Morning" by Cakeflaps (CC0), https://opengameart.org/content/good-morning
+Animal sounds: "Cow moos #2-#4" and "Annoyed Hen" from BigSoundBank (CC0), https://bigsoundbank.com

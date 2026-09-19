@@ -87,6 +87,20 @@ export const startMusicIfEnabled = () => {
   if (enabled) sync();
 };
 
+// Hayvan sesleri (BigSoundBank, CC0) — müzik düğmesine bağlı: ses kapalıysa çalmaz.
+const sfxCache = new Map<string, HTMLAudioElement>();
+export const playSfx = (name: string, volume = 0.5) => {
+  if (!enabled || isProOverlayOpen()) return;
+  let base = sfxCache.get(name);
+  if (!base) {
+    base = new Audio(`/audio/sfx/${name}.mp3`);
+    sfxCache.set(name, base);
+  }
+  const a = base.cloneNode() as HTMLAudioElement;
+  a.volume = Math.max(0, Math.min(1, volume));
+  void a.play().catch(() => undefined);
+};
+
 export const useMusicEnabled = () =>
   useSyncExternalStore(
     (l) => {

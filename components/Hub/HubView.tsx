@@ -160,6 +160,8 @@ export const HubView: React.FC = () => {
     };
 
     gameRef.current = new Phaser.Game(config);
+    // ?debug: test ve inceleme için oyunu konsoldan erişilebilir yap
+    if (new URLSearchParams(window.location.search).has('debug')) (window as any).__village = gameRef.current;
     
     if (showWelcome) {
         gameRef.current.input.enabled = false;

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { VILLAGE_ASSETS } from './villageAssets';
 import { WORLD } from './world/worldData';
+import { playSfx } from '../UI/music';
 
 // Dünya scripts/village/build_village.py ile üretilir (karo katmanları, nesneler, çarpışma, kapılar).
 // Bu sahne o veriyi çizer ve karakteri, hayvanları, kapıları yönetir.
@@ -42,6 +43,8 @@ export class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
   private animals!: Phaser.Physics.Arcade.Group;
+  private nextAnimalSound = 0;
+  private gates: { sprite: Phaser.GameObjects.Image; cx: number; cy: number; open: boolean }[] = [];
   private doors: Door[] = [];
   private chest!: Phaser.GameObjects.Sprite;
   private chestOpen = false;
@@ -83,6 +86,7 @@ export class GameScene extends Phaser.Scene {
     this.buildBuildings();
     this.buildColliders();
     this.buildChest();
+    this.buildGates();
 
     // Başlangıç: bir binadan dönüldüyse o binanın kapısının önü, yoksa meydan.
     const lastView = sessionStorage.getItem('lastView');
@@ -204,6 +208,24 @@ export class GameScene extends Phaser.Scene {
   private buildChest() {
     const { x, y } = WORLD.chest;
     this.chest = this.add.sprite(x, y, 'village', 'chest_0').setOrigin(0.5, 1).setScale(S).setDepth(y);
+  }
+
+  // Ağıl kapıları: karakter yaklaşınca menteşesinden açılır, uzaklaşınca kapanır.
+  private buildGates() {
+    for (const g of WORLD.gates) {
+      const sprite = this.add.image(g.x, g.y, 'village', 'gate').setOrigin(0, 1).setScale(S).setDepth(g.y);
+      this.gates.push({ sprite, cx: g.x + sprite.displayWidth / 2, cy: g.y - WORLD.tile * 0.4, open: false });
+    }
+  }
+
+  private updateGates() {
+    for (const g of this.gates) {
+      const near = Phaser.Math.Distance.Between(this.player.x, this.player.body.bottom, g.cx, g.cy) < 95;
+      if (near === g.open) continue;
+      g.open = near;
+      this.tweens.killTweensOf(g.sprite);
+      this.tweens.add({ targets: g.sprite, scaleX: near ? S * 0.2 : S, duration: near ? 220 : 320, ease: near ? 'Sine.out' : 'Back.out' });
+    }
   }
 
   private spawnAnimals() {
@@ -357,6 +379,12 @@ export class GameScene extends Phaser.Scene {
       if (now > a.nextEmote && Phaser.Math.Distance.Between(a.x, a.y, this.player.x, this.player.y) < 80) {
         a.nextEmote = now + 5000;
         this.emote(a.x, a.y - (a.kind === 'cow' ? 50 : 30), a.kind === 'cow' ? 'emoji_heart' : 'emoji_note');
+        // Aynı anda iki hayvan birden bağırmasın
+        if (now > this.nextAnimalSound) {
+          this.nextAnimalSound = now + 2500;
+          const pick = a.kind === 'cow' ? `moo-${1 + Math.floor(Math.random() * 3)}` : `cluck-${1 + Math.floor(Math.random() * 2)}`;
+          playSfx(pick, a.kind === 'cow' ? 0.45 : 0.4);
+        }
       }
       return true;
     });
@@ -442,6 +470,7 @@ export class GameScene extends Phaser.Scene {
     this.player.setDepth(this.player.body.bottom);
 
     this.updateChest();
+    this.updateGates();
     this.updateDoors(vy < -40 && absY >= absX * 0.5);
   }
 }
