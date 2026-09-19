@@ -50,7 +50,7 @@ const STRINGS = {
     welcomeHint: 'Buradan karakteri hareket ettirerek benimle ilgili bilgilere ulaşabilirsin.',
     welcomeButton: 'KÖYÜ KEŞFET',
     welcomeName: `Özgür Güler · ${currentAge()}`,
-    welcomeIntro: "Ben Özgür. Mardin'de yazılım ve dijital ürünler geliştiriyorum. Dijital köyüme hoş geldin!",
+    welcomeIntro: "Ben Özgür, Mardin'de yaşıyorum. Oyun, uygulama ve web siteleri yapıyorum; bir de sosyal medya hesaplarıyla uğraşıyorum. Burası da benim sanal köyüm.",
     welcomePlacesTitle: 'Köyde neler var?',
     welcomePlaces: [
       { key: 'projeler', name: 'Projeler', desc: 'Yaptığım işler ve sonuçları' },
@@ -142,7 +142,7 @@ const STRINGS = {
     welcomeHint: 'Walk the character around to find out more about me.',
     welcomeButton: 'EXPLORE',
     welcomeName: `Özgür Güler · ${currentAge()}`,
-    welcomeIntro: "I'm Özgür. I build software and digital products in Mardin, Türkiye. Welcome to my digital village!",
+    welcomeIntro: "I'm Özgür and I live in Mardin, Türkiye. I make games, apps and websites, and I run a few social media accounts. This is my little virtual village.",
     welcomePlacesTitle: "What's in the village?",
     welcomePlaces: [
       { key: 'projeler', name: 'Projects', desc: 'What I built and how it went' },
