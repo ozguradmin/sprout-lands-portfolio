@@ -1,21 +1,68 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowUpRight, FileText, Github, Instagram, Linkedin, Mail, MessageSquare, Send, X, Youtube } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
-import { ArrowLeft, Instagram, Github, Linkedin, Mail, Youtube, Camera, Globe, MessageSquare, Send, X } from 'lucide-react';
+import { G, GAME_LANG } from '../../i18n/game';
+import { PROFILE } from '../../professional/data';
+import { Interior } from '../UI/Interior';
 
-import { G } from '../../i18n/game';
+type L = { tr: string; en: string };
+
+// İş için iletişim adresleri (profesyonel görünümle aynı).
+const WORK_LINKS = [
+  { name: 'LinkedIn', handle: 'Özgür Güler', href: PROFILE.links.linkedin, icon: <Linkedin size={20} /> },
+  { name: 'GitHub', handle: '@ozguradmin', href: PROFILE.links.github, icon: <Github size={20} /> },
+  { name: 'E-posta', nameEn: 'Email', handle: PROFILE.email, href: `mailto:${PROFILE.email}`, icon: <Mail size={20} /> },
+  { name: 'X', handle: '@ozguramdin', href: PROFILE.links.x, icon: <span className="text-[17px] font-bold leading-none">X</span> },
+];
+
+// İçerik hesapları. Sayılar CV'den; "geçmişte" ibaresi CV'deki ifadeyle aynı.
+const CONTENT_ACCOUNTS: { name: string; note?: L; links: { kind: 'instagram' | 'youtube'; href: string; label: string }[] }[] = [
+  {
+    name: 'Tarihsel Wojak',
+    note: { tr: 'Instagram’da geçmişte 1M+ takipçi, YouTube’da 100K+ abone', en: 'Previously 1M+ on Instagram, 100K+ on YouTube' },
+    links: [
+      { kind: 'instagram', href: 'https://instagram.com/tarihselwojak', label: '@tarihselwojak' },
+      { kind: 'youtube', href: 'https://www.youtube.com/@Tarihselwojak', label: 'YouTube' },
+    ],
+  },
+  {
+    name: 'WTF Çeviri',
+    note: { tr: '200K+ takipçi', en: '200K+ followers' },
+    links: [{ kind: 'instagram', href: 'https://instagram.com/wtfceviri', label: '@wtfceviri' }],
+  },
+  {
+    name: 'Galaktik Uzay',
+    note: { tr: '200K+ takipçi', en: '200K+ followers' },
+    links: [{ kind: 'instagram', href: 'https://instagram.com/galaktikuzay', label: '@galaktikuzay' }],
+  },
+  {
+    name: 'Kırmızı ya da Mavi',
+    note: { tr: '250K+ abone', en: '250K+ subscribers' },
+    links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
+  },
+  { name: 'Manipulatix', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
+  { name: 'WTF Minecraft', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+];
+
+const inputClass =
+  'w-full rounded-xl border border-[#e3d6bf] bg-white px-4 py-3 text-[15px] text-[#262b44] placeholder:text-[#9a9eb0] outline-none transition focus:border-[#b86f50] focus:ring-2 focus:ring-[#e4a672]/40';
+const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#5b6075]';
+
 export const ArcadeView: React.FC = () => {
   const { setCurrentView } = useApp();
   const [isMessageOpen, setIsMessageOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    instagram: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState({ name: '', phone: '', instagram: '', message: '' });
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    if (!isMessageOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setIsMessageOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isMessageOpen]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +74,7 @@ export const ArcadeView: React.FC = () => {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -40,292 +87,208 @@ export const ArcadeView: React.FC = () => {
       } else {
         setStatus('error');
       }
-    } catch (err) {
+    } catch {
       setStatus('error');
     } finally {
       setIsSending(false);
     }
   };
 
-  const mainLinks = [
-    {
-      name: 'GitHub',
-      icon: <Github size={24} />,
-      username: '@ozguradmin',
-      link: 'https://github.com/ozguradmin',
-      color: 'hover:bg-gray-500/10 hover:border-gray-500/50 hover:text-gray-200'
-    },
-    {
-      name: 'LinkedIn',
-      icon: <Linkedin size={24} />,
-      username: 'Özgür Güler',
-      link: 'https://www.linkedin.com/in/%C3%B6zg%C3%BCr-g-133a33219/',
-      color: 'hover:bg-blue-500/10 hover:border-blue-500/50 hover:text-blue-500'
-    },
-    {
-      name: 'Twitter',
-      icon: <X size={24} />,
-      username: '@ozguramdin',
-      link: 'https://x.com/ozguramdin',
-      color: 'hover:bg-gray-500/10 hover:border-gray-400/50 hover:text-gray-200'
-    }
-  ];
-
-  const instagramAccounts = [
-    '@tarihselwojak',
-    '@wtfceviri',
-    '@galaktikuzay',
-    '@manipulatix',
-    '@wtfmcraft'
-  ];
+  const back = () => {
+    sessionStorage.setItem('lastView', 'ARCADE');
+    setCurrentView(ViewState.HUB);
+  };
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-[#0a0a0a] pt-24 px-6 pb-24 relative font-sans">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-      <div className="max-w-2xl mx-auto relative z-10">
-        <header className="mb-12">
-          <button
-            onClick={() => {
-              sessionStorage.setItem('lastView', 'ARCADE');
-              setCurrentView(ViewState.HUB);
-            }}
-            className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-6 text-sm font-medium"
+    <Interior title={G.socialTitle} subtitle={G.socialSub} onBack={back}>
+      {/* İletişim */}
+      <h2 className="mt-10 font-heading text-xl font-bold">{G.workTitle}</h2>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {WORK_LINKS.map((l) => (
+          <a
+            key={l.name}
+            href={l.href}
+            target={l.href.startsWith('mailto') ? undefined : '_blank'}
+            rel="noopener noreferrer"
+            className="group flex items-center gap-4 rounded-2xl border border-[#e3d6bf] bg-[#fffdf9] p-4 transition hover:-translate-y-0.5 hover:border-[#b86f50]/60 hover:shadow-[0_8px_24px_rgba(35,40,64,0.08)]"
           >
-            <ArrowLeft size={18} /> {G.back}
+            <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#262b44] text-[#faf6ee]">{l.icon}</span>
+            <span className="min-w-0">
+              <span className="block font-semibold">{GAME_LANG === 'en' && l.nameEn ? l.nameEn : l.name}</span>
+              <span className="block truncate text-sm text-[#5b6075]">{l.handle}</span>
+            </span>
+            <ArrowUpRight size={18} className="ml-auto flex-none text-[#9a5438] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </a>
+        ))}
+      </div>
+
+      {/* Mesaj kartı */}
+      <div className="mt-4 flex flex-col gap-4 rounded-2xl border-2 border-[#b86f50] bg-[#fbe6d3] p-5 sm:flex-row sm:items-center">
+        <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#e4a672] text-[#4a2f22]">
+          <MessageSquare size={20} />
+        </span>
+        <div>
+          <p className="font-heading text-lg font-bold">{G.messageCardTitle}</p>
+          <p className="text-sm text-[#5b6075]">{G.messageCardText}</p>
+        </div>
+        <div className="flex flex-wrap gap-2 sm:ml-auto">
+          <button
+            type="button"
+            onClick={() => setIsMessageOpen(true)}
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#262b44] px-4 text-sm font-semibold text-[#faf6ee] transition hover:brightness-125"
+          >
+            <Send size={16} /> {G.writeMessage}
           </button>
-
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">{G.socialTitle}</h1>
-        </header>
-
-        {/* Ana Linkler */}
-        <div className="grid gap-4 mb-8">
-          {mainLinks.map((social, i) => (
-            <motion.a
-              key={i}
-              href={social.link}
-              target="_blank"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className={`group flex items-center justify-between p-5 bg-[#111] border border-white/5 rounded-2xl transition-all duration-300 ${social.color}`}
-            >
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-white/5 rounded-xl group-hover:bg-white/10 transition-colors">
-                  {social.icon}
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-lg">{social.name}</h3>
-                  <p className="text-sm text-gray-500 font-mono">{social.username}</p>
-                </div>
-              </div>
-            </motion.a>
-          ))}
-        </div>
-
-        <div className="h-px w-full bg-white/10 my-8"></div>
-
-        {/* E-posta */}
-        <motion.a
-          href="mailto:ozgurglr256@gmail.com"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-4 p-5 bg-[#111] border border-emerald-800/30 rounded-2xl hover:bg-emerald-900/10 hover:border-emerald-700/50 hover:text-emerald-500 transition-all group mb-8"
-        >
-          <div className="p-3 bg-emerald-900/20 rounded-xl text-emerald-700 group-hover:text-emerald-600 transition-colors">
-            <Mail size={24} />
-          </div>
-          <div>
-            <h3 className="font-bold text-emerald-700 group-hover:text-emerald-600 text-lg transition-colors">{G.sendEmail}</h3>
-            <p className="text-sm text-emerald-800/70 font-mono group-hover:text-emerald-700/80 transition-colors">ozgurglr256@gmail.com</p>
-          </div>
-        </motion.a>
-
-        <div className="h-px w-full bg-white/10 my-8"></div>
-
-        {/* Sosyal Medya Sayfaları */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Globe size={20} className="text-indigo-400" />
-            {G.socialPages}
-          </h2>
-
-          <div className="grid gap-3">
-            {instagramAccounts.map((acc, i) => (
-              <a
-                key={i}
-                href={`https://instagram.com/${acc.replace('@', '')}`}
-                target="_blank"
-                className="flex items-center gap-3 p-4 bg-[#111] rounded-xl border border-white/5 hover:border-pink-600/50 hover:text-pink-500 hover:bg-pink-600/10 transition-all group"
-              >
-                <Instagram size={18} className="text-gray-500 group-hover:text-pink-500 transition-colors" />
-                <span className="text-gray-300 font-medium group-hover:text-pink-500 transition-colors">{acc}</span>
-              </a>
-            ))}
-
-            <a
-              href="https://www.youtube.com/@Tarihselwojak"
-              target="_blank"
-              className="flex items-center gap-3 p-4 bg-[#111] rounded-xl border border-white/5 hover:border-red-600/50 hover:text-red-500 hover:bg-red-600/10 transition-all group"
-            >
-              <Youtube size={18} className="text-gray-500 group-hover:text-red-500 transition-colors" />
-              <span className="text-gray-300 font-medium group-hover:text-red-500 transition-colors">YouTube: Tarihselwojak</span>
-            </a>
-          </div>
+          <a
+            href={PROFILE.cv[GAME_LANG]}
+            target="_blank"
+            rel="noopener"
+            className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#b86f50]/40 bg-[#fffdf9] px-4 text-sm font-semibold transition hover:border-[#b86f50]"
+          >
+            <FileText size={16} /> {G.cvLabel}
+          </a>
         </div>
       </div>
 
-      {/* Mesaj Butonu ve Baloncuk - Whitish Minimal Glass Redesign */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2">
-        <AnimatePresence>
-          {!isMessageOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 10 }}
-              className="relative px-3 py-1.5 bg-white/20 backdrop-blur-xl border border-white/30 rounded-full shadow-lg mb-1 pointer-events-none"
-            >
-              <p className="text-white text-[9px] font-bold tracking-tight flex items-center gap-1.5 whitespace-nowrap uppercase">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
-                </span>
-                {G.messageMe}
-              </p>
-              {/* Arrow - More realistic pointing arrow */}
-              <div className="absolute -bottom-1.5 right-4 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white/30"></div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* İçerik hesapları */}
+      <h2 className="mt-12 font-heading text-xl font-bold">{G.contentTitle}</h2>
+      <ul className="mt-4 divide-y divide-[#e3d6bf] overflow-hidden rounded-2xl border border-[#e3d6bf] bg-[#fffdf9]">
+        {CONTENT_ACCOUNTS.map((a) => (
+          <li key={a.name} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-4">
+            <div className="min-w-0 sm:flex-1">
+              <p className="font-semibold">{a.name}</p>
+              {a.note && <p className="text-sm text-[#5b6075]">{a.note[GAME_LANG]}</p>}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {a.links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition ${
+                    l.kind === 'youtube'
+                      ? 'border-[#e3d6bf] text-[#b3261e] hover:border-[#b3261e]/50 hover:bg-[#b3261e]/5'
+                      : 'border-[#e3d6bf] text-[#a0306e] hover:border-[#a0306e]/50 hover:bg-[#a0306e]/5'
+                  }`}
+                >
+                  {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
+                  {l.label}
+                </a>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
 
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsMessageOpen(true)}
-          className="w-10 h-10 bg-white/10 backdrop-blur-2xl border border-white/40 rounded-xl flex items-center justify-center shadow-xl transition-all duration-300 group"
-        >
-          <MessageSquare size={18} className="text-white group-hover:scale-110 transition-transform" />
-        </motion.button>
-      </div>
-
-      {/* Mesaj Gönderme Modal - Glassmorphism Redesign */}
+      {/* Mesaj formu */}
       <AnimatePresence>
         {isMessageOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 md:p-6 font-pixel"
+            className="fixed inset-0 z-[200] flex items-end justify-center bg-[#1b1f31]/70 backdrop-blur-sm sm:items-center sm:p-6"
             onClick={() => setIsMessageOpen(false)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 50, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 50, opacity: 0 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-white/5 backdrop-blur-2xl border border-white/10 w-full max-w-lg rounded-[2rem] overflow-hidden shadow-[0_32px_64px_rgba(0,0,0,0.5)] flex flex-col"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="message-title"
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-[#fffdf9] p-6 text-[#262b44] shadow-2xl sm:rounded-3xl sm:p-7"
             >
-              {/* Header */}
-              <div className="p-6 pb-2 flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-3">
-                    <div className="p-2 bg-white/10 rounded-xl">
-                      <Send size={20} className="text-white" />
-                    </div>
-                    {G.contactTitle}
-                  </h3>
-                </div>
+              <div className="flex items-center justify-between">
+                <h2 id="message-title" className="font-heading text-2xl font-extrabold tracking-tight">
+                  {G.messageCardTitle}
+                </h2>
                 <button
+                  type="button"
                   onClick={() => setIsMessageOpen(false)}
-                  className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 hover:text-white transition-all"
+                  aria-label={G.close}
+                  className="grid h-10 w-10 place-items-center rounded-full text-[#5b6075] hover:bg-[#f2ebde]"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleSendMessage} className="p-6 pt-4 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* İsim */}
-                  <div className="space-y-1.5">
-                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.nameLabel}</label>
+              <form onSubmit={handleSendMessage} className="mt-5 space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className={labelClass}>{G.nameLabel}</span>
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder={G.namePlaceholder}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all"
+                      className={inputClass}
                     />
-                  </div>
-                  {/* Instagram */}
-                  <div className="space-y-1.5">
-                    <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.instagramLabel}</label>
+                  </label>
+                  <label className="block">
+                    <span className={labelClass}>{G.instagramLabel}</span>
                     <input
                       type="text"
                       value={formData.instagram}
-                      onChange={e => setFormData({ ...formData, instagram: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
                       placeholder={G.instagramPlaceholder}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all"
+                      className={inputClass}
                     />
-                  </div>
+                  </label>
                 </div>
-
-                {/* Telefon */}
-                <div className="space-y-1.5">
-                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.phoneLabel}</label>
+                <label className="block">
+                  <span className={labelClass}>{G.phoneLabel}</span>
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="05xx xxx xx xx"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all"
+                    className={inputClass}
                   />
-                </div>
-
-                {/* Mesaj */}
-                <div className="space-y-1.5">
-                  <label className="text-[8px] font-bold text-gray-500 uppercase tracking-widest ml-1">{G.messageLabel}</label>
+                </label>
+                <label className="block">
+                  <span className={labelClass}>{G.messageLabel}</span>
                   <textarea
                     required
                     value={formData.message}
-                    onChange={e => setFormData({ ...formData, message: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder={G.messagePlaceholder}
-                    className="w-full h-24 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-xs placeholder:text-gray-600 focus:bg-white/10 focus:border-white/30 outline-none transition-all resize-none"
-                  ></textarea>
-                </div>
+                    className={`${inputClass} h-32 resize-none`}
+                  />
+                </label>
 
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSending || status === 'success'}
-                    className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-3 ${status === 'success'
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20 active:scale-[0.98]'
-                      }`}
-                  >
-                    {isSending ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    ) : status === 'success' ? (
-                      G.sent
-                    ) : (
-                      <>{G.send} <Send size={16} /></>
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={isSending || status === 'success'}
+                  className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold transition ${
+                    status === 'success' ? 'bg-[#3f7d2c] text-white' : 'bg-[#262b44] text-[#faf6ee] hover:brightness-125 disabled:opacity-70'
+                  }`}
+                >
+                  {isSending ? (
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  ) : status === 'success' ? (
+                    G.sent
+                  ) : (
+                    <>
+                      {G.send} <Send size={16} />
+                    </>
+                  )}
+                </button>
 
                 {status === 'error' && (
-                  <p className="text-red-400 text-[8px] text-center font-medium bg-red-400/10 py-2 rounded-lg border border-red-400/20">
+                  <p role="alert" className="rounded-lg border border-[#b3261e]/20 bg-[#b3261e]/5 py-2 text-center text-sm font-medium text-[#b3261e]">
                     {G.error}
                   </p>
                 )}
-
-                <p className="text-[8px] text-gray-500 text-center px-4 leading-normal">
-                  {G.contactNote}
-                </p>
+                <p className="text-center text-xs leading-relaxed text-[#5b6075]">{G.contactNote}</p>
               </form>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Interior>
   );
 };

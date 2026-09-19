@@ -1,250 +1,218 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Briefcase, Github, Globe, Smartphone, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { ViewState, Project } from '../../types';
-import { PROJECTS } from '../../constants';
-import { ArrowLeft, ExternalLink, Github, Layers, Zap, Smartphone, Gamepad, X } from 'lucide-react';
+import { ViewState } from '../../types';
 import { G, GAME_LANG } from '../../i18n/game';
+import { labelOf, projectPath, type LinkKind } from '../../professional/data';
+import { Interior, openProfessional } from '../UI/Interior';
+import { VILLAGE_PROJECTS, type VillageCategory, type VillageProject } from './villageProjects';
 
-// Filtre anahtarları Türkçe kalır; yalnızca görünen etiket çevrilir.
-const filterLabel = (cat: string) =>
-  cat === 'Tümü' ? G.filterAll : cat === 'Web' ? G.filterWeb : cat === 'Uygulama/Oyun' ? G.filterApps : cat;
-const categoryLabel = (cat: Project['category']) => (cat === 'Uygulama/Oyun' ? G.filterApps : cat);
-const localized = (p: Project) =>
-  GAME_LANG === 'en' && p.en ? { description: p.en.description, details: p.en.details } : { description: p.description, details: p.details };
+type Filter = 'all' | VillageCategory;
+
+const FILTERS: { id: Filter; label: string }[] = [
+  { id: 'all', label: G.filterAll },
+  { id: 'mobile', label: G.filterMobile },
+  { id: 'web', label: G.filterWeb },
+  { id: 'ai', label: G.filterAi },
+];
+
+const linkIcon = (kind: LinkKind) =>
+  kind === 'github' ? <Github size={15} aria-hidden="true" /> : kind === 'store' ? <Smartphone size={15} aria-hidden="true" /> : <Globe size={15} aria-hidden="true" />;
+
+const ProjectCard: React.FC<{ project: VillageProject; onOpen: () => void }> = ({ project: p, onOpen }) => (
+  <button
+    type="button"
+    onClick={onOpen}
+    className="group flex w-full flex-col overflow-hidden rounded-2xl border border-[#e3d6bf] bg-[#fffdf9] text-left shadow-[0_1px_2px_rgba(35,40,64,0.05),0_6px_20px_rgba(35,40,64,0.05)] transition hover:-translate-y-0.5 hover:border-[#b86f50]/60 hover:shadow-[0_10px_30px_rgba(35,40,64,0.10)] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2f6fd6]"
+  >
+    <div className="aspect-[16/10] w-full overflow-hidden" style={{ background: p.image.bg }}>
+      <img
+        src={`${p.image.src}-720.webp`}
+        width={720}
+        height={450}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+      />
+    </div>
+    <div className="flex flex-1 flex-col p-5">
+      <div className="flex items-center gap-3">
+        {p.icon && <img src={p.icon} width={36} height={36} alt="" className="h-9 w-9 rounded-[23%] ring-1 ring-black/5" />}
+        <div className="min-w-0">
+          <h3 className="font-heading text-xl font-bold leading-tight tracking-tight">{p.name}</h3>
+          <p className="text-[13px] text-[#5b6075]">{p.status[GAME_LANG]}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-[15px] leading-relaxed text-[#3c4159]">{p.summary[GAME_LANG]}</p>
+      <span className="mt-auto flex items-center gap-1 pt-4 text-sm font-semibold text-[#9a5438]">
+        {G.detailsCta}
+        <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+      </span>
+    </div>
+  </button>
+);
+
+const ProjectSheet: React.FC<{ project: VillageProject; onClose: () => void }> = ({ project: p, onClose }) => {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const lang = GAME_LANG;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-[#1b1f31]/70 backdrop-blur-sm md:items-center md:p-8"
+      onClick={onClose}
+    >
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sheet-title"
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 40, opacity: 0 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 260 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative flex max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl bg-[#fffdf9] text-[#262b44] shadow-2xl md:rounded-3xl"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={G.close}
+          className="absolute right-3 top-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-[#fffdf9]/90 text-[#262b44] shadow ring-1 ring-black/5 hover:bg-white"
+        >
+          <X size={20} />
+        </button>
+        <div className="overflow-y-auto">
+          <div style={{ background: p.image.bg }}>
+            <img src={`${p.image.src}.webp`} width={1200} height={750} alt="" className="w-full" />
+          </div>
+          <div className="p-6 md:p-8">
+            <div className="flex items-center gap-3">
+              {p.icon && <img src={p.icon} width={44} height={44} alt="" className="h-11 w-11 rounded-[23%] ring-1 ring-black/5" />}
+              <div>
+                <h2 id="sheet-title" className="font-heading text-3xl font-extrabold leading-tight tracking-tight">
+                  {p.name}
+                </h2>
+                <p className="text-sm text-[#5b6075]">{p.status[lang]}</p>
+              </div>
+            </div>
+            <p className="mt-4 text-[17px] font-medium leading-relaxed">{p.summary[lang]}</p>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {p.links.map((l, i) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3.5 text-sm font-semibold transition ${
+                    i === 0 ? 'border-[#262b44] bg-[#262b44] text-[#faf6ee] hover:brightness-125' : 'border-[#e3d6bf] hover:border-[#262b44]/40'
+                  }`}
+                >
+                  {linkIcon(l.kind)}
+                  {labelOf(l.label, lang)}
+                </a>
+              ))}
+            </div>
+
+            {p.details && (
+              <dl className="mt-7 grid gap-5 border-t border-[#e3d6bf] pt-6">
+                <div>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-[#9a5438]">{G.goal}</dt>
+                  <dd className="mt-1 leading-relaxed text-[#5b6075]">{p.details.goal[lang]}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-[#9a5438]">{G.built}</dt>
+                  <dd className="mt-1">
+                    <ul className="space-y-1.5">
+                      {p.details.built[lang].map((b) => (
+                        <li key={b} className="relative pl-4 leading-relaxed text-[#5b6075] before:absolute before:left-0 before:top-[0.62em] before:h-1.5 before:w-1.5 before:bg-[#b86f50]">
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-bold uppercase tracking-wider text-[#9a5438]">{G.result}</dt>
+                  <dd className="mt-1 leading-relaxed text-[#5b6075]">{p.details.result[lang]}</dd>
+                </div>
+                {p.stack && (
+                  <div>
+                    <dt className="text-xs font-bold uppercase tracking-wider text-[#9a5438]">{G.technologies}</dt>
+                    <dd className="mt-1 font-medium text-[#3c4159]">{p.stack.join(' · ')}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
+
+            {p.proSlug && (
+              <a
+                href={projectPath(lang, p.proSlug)}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                  e.preventDefault();
+                  onClose();
+                  openProfessional(projectPath(lang, p.proSlug!));
+                }}
+                className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-[#9a5438] underline decoration-[#9a5438]/40 underline-offset-4 hover:decoration-[#9a5438]"
+              >
+                <Briefcase size={15} aria-hidden="true" />
+                {G.openInPro}
+              </a>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
 
 export const PortfolioView: React.FC = () => {
   const { setCurrentView } = useApp();
-  const [filter, setFilter] = useState<'Tümü' | 'Web' | 'Uygulama/Oyun'>('Tümü');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [filter, setFilter] = useState<Filter>('all');
+  const [selected, setSelected] = useState<VillageProject | null>(null);
 
-  const getCategoryFilter = (cat: string) => {
-    switch (cat) {
-      case 'Tümü': return 'All';
-      case 'Web': return 'Web';
-      case 'Mobil': return 'Mobile';
-      case 'Uygulama/Oyun': return 'Uygulama/Oyun';
-      case 'Tasarım': return 'Design';
-      default: return 'All';
-    }
-  };
+  const projects = VILLAGE_PROJECTS.filter((p) => filter === 'all' || p.categories.includes(filter));
 
-  const currentFilterEnglish = getCategoryFilter(filter);
-  const filteredProjects = PROJECTS.filter(p => currentFilterEnglish === 'All' || p.category === currentFilterEnglish);
-
-  const getCategoryIcon = (cat: string) => {
-    switch (cat) {
-      case 'Web': return <Layers size={14} />;
-      case 'Mobile': return <Smartphone size={14} />;
-      case 'Uygulama/Oyun': return <Gamepad size={14} />;
-      default: return <Zap size={14} />;
-    }
+  const back = () => {
+    sessionStorage.setItem('lastView', 'PORTFOLIO');
+    setCurrentView(ViewState.HUB);
   };
 
   return (
-    // SCROLL FIX: h-full ve overflow-y-auto eklendi
-    <div className="h-full w-full overflow-y-auto bg-primary pt-12 px-4 md:px-12 pb-12">
-      <div className="max-w-7xl mx-auto min-h-min">
-        {/* Header Section */}
-        <header className="mb-12">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            onClick={() => {
-              sessionStorage.setItem('lastView', 'PORTFOLIO');
-              setCurrentView(ViewState.HUB);
-            }}
-            className="flex items-center gap-2 text-gray-400 hover:text-accent transition-all mb-6 group text-sm font-medium"
+    <Interior title={G.projectsTitle} subtitle={G.projectsSub} onBack={back}>
+      <div className="mt-7 flex flex-wrap items-center gap-2" role="group" aria-label={G.projectsTitle}>
+        {FILTERS.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setFilter(f.id)}
+            aria-pressed={filter === f.id}
+            className={`h-10 rounded-full border px-4 text-sm font-semibold transition ${
+              filter === f.id ? 'border-[#b86f50] bg-[#e4a672] text-[#4a2f22] shadow-[0_2px_0_#b86f50]' : 'border-[#e3d6bf] bg-[#fffdf9] text-[#3c4159] hover:border-[#b86f50]/50'
+            }`}
           >
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-mono text-xs uppercase tracking-widest">{G.back}</span>
-          </motion.button>
-
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <h1 className="text-4xl md:text-6xl font-heading font-bold text-white mb-4">
-                {G.projectsTitle}
-              </h1>
-            </motion.div>
-
-            {/* Filter Tabs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex overflow-x-auto pb-2 md:pb-0 gap-2 no-scrollbar"
-            >
-              <div className="flex gap-2 bg-secondary/50 p-1 rounded-xl backdrop-blur-sm border border-white/5">
-                {['Tümü', 'Web', 'Uygulama/Oyun'].map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setFilter(cat as any)}
-                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-all relative whitespace-nowrap ${filter === cat ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                      }`}
-                  >
-                    {filter === cat && (
-                      <motion.div
-                        layoutId="activeFilter"
-                        className="absolute inset-0 bg-accent rounded-lg shadow-lg shadow-accent/20"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                    <span className="relative z-10">{filterLabel(cat)}</span>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </header>
-
-        {/* Projects Grid */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 pb-20"
-        >
-          <AnimatePresence mode='popLayout'>
-            {filteredProjects.map((project, i) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                onClick={() => setSelectedProject(project)}
-                className="group relative bg-secondary rounded-2xl overflow-hidden border border-white/5 shadow-lg cursor-pointer aspect-[4/5] md:aspect-[3/4]"
-              >
-                <img
-                  src={project.thumbnail}
-                  alt={project.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  loading="lazy"
-                />
-
-                {/* Siyah Katman (Overlay) */}
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300" />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
-
-                <div className="absolute top-4 left-4 z-20">
-                  <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
-                    {getCategoryIcon(project.category)}
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-white">{categoryLabel(project.category)}</span>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-4 left-4 right-4 z-20">
-                  <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-lg group-hover:border-accent/30 transition-colors">
-                    <h3 className="text-lg font-heading font-bold text-white mb-1 group-hover:text-accent transition-colors">{project.title}</h3>
-                    <p className="text-gray-300 text-xs line-clamp-2 mb-3">{localized(project).description}</p>
-
-                    <div className="flex flex-wrap gap-2">
-                      {project.techStack.slice(0, 3).map(s => (
-                        <span key={s} className="px-2 py-1 bg-black/30 rounded text-[10px] font-mono text-gray-300">
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+            {f.label}
+          </button>
+        ))}
+        <span className="ml-auto text-sm text-[#5b6075]">{G.projectCount(projects.length)}</span>
       </div>
 
-      {/* Project Detail Modal */}
-      <AnimatePresence>
-        {selectedProject && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-8 bg-black/90 backdrop-blur-sm overflow-hidden"
-            onClick={() => setSelectedProject(null)}
-          >
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              onClick={e => e.stopPropagation()}
-              className="bg-[#151b26] w-full max-w-5xl h-[90vh] md:h-auto md:max-h-[90vh] rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col md:flex-row"
-            >
-              <div className="md:w-1/2 h-64 md:h-auto relative bg-black shrink-0">
-                <img
-                  src={selectedProject.thumbnail}
-                  alt={selectedProject.title}
-                  className="w-full h-full object-cover opacity-80"
-                />
-                <button
-                  onClick={() => setSelectedProject(null)}
-                  className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur-md rounded-full text-white md:hidden"
-                >
-                  <X size={20} />
-                </button>
-              </div>
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {projects.map((p) => (
+          <ProjectCard key={p.id} project={p} onOpen={() => setSelected(p)} />
+        ))}
+      </div>
 
-              <div className="md:w-1/2 p-6 md:p-10 overflow-y-auto">
-                <button
-                  onClick={() => setSelectedProject(null)}
-                  className="absolute top-6 right-6 p-2 bg-white/5 rounded-full text-gray-400 hover:text-white hidden md:block"
-                >
-                  <X size={20} />
-                </button>
-
-                <div className="mb-6">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider mb-4 border border-accent/20">
-                    {getCategoryIcon(selectedProject.category)}
-                    {categoryLabel(selectedProject.category)}
-                  </span>
-                  <h2 className="text-3xl font-heading font-bold text-white mb-4">{selectedProject.title}</h2>
-                  <p className="text-gray-300 leading-relaxed text-sm">
-                    {localized(selectedProject).details}
-                  </p>
-                </div>
-
-                <div className="space-y-6 pb-8 md:pb-0">
-                  {selectedProject.techStack.length > 0 && (
-                    <div>
-                      <h4 className="font-mono text-xs text-gray-500 uppercase tracking-widest mb-3">{G.technologies}</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProject.techStack.map(s => (
-                          <span key={s} className="px-3 py-1.5 bg-white/5 text-gray-300 border border-white/5 rounded-lg text-xs font-medium">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-4 pt-4 border-t border-white/5">
-                    {selectedProject.link && selectedProject.link !== '#' ? (
-                      <a
-                        href={selectedProject.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 bg-accent text-white py-3 rounded-xl font-bold text-sm tracking-wide hover:brightness-110 transition-all"
-                      >
-                        <ExternalLink size={18} /> {G.livePreview}
-                      </a>
-                    ) : (
-                      <button disabled className="flex-1 flex items-center justify-center gap-2 bg-gray-700 text-gray-400 py-3 rounded-xl font-bold text-sm tracking-wide cursor-not-allowed">
-                        {G.comingSoon}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      <AnimatePresence>{selected && <ProjectSheet project={selected} onClose={() => setSelected(null)} />}</AnimatePresence>
+    </Interior>
   );
 };

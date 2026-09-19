@@ -169,6 +169,7 @@ html[data-theme='dark'] .pro {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
   font-family: var(--font-head);
   font-weight: 700;
   font-size: 17px;
@@ -195,6 +196,7 @@ html[data-theme='dark'] .pro {
   background: var(--surface-2);
 }
 .pro-header-actions {
+  flex: none;
   margin-left: auto;
   display: flex;
   align-items: center;
@@ -809,10 +811,15 @@ html[data-theme='dark'] .pro {
 }
 
 /* ---------- Dar telefonlar ---------- */
-@media (max-width: 419px) {
+/* Dar ekranda isim köy düğmesine çarpmasın (İngilizcede "Digital Village" daha uzun). */
+@media (max-width: 579px) {
   .pro-brand-name {
     display: none;
   }
+}
+.pro-brand-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ---------- Geniş ekranlar ---------- */

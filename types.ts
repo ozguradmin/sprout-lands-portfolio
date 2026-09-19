@@ -8,19 +8,6 @@ export enum ViewState {
   ADMIN = 'ADMIN',
 }
 
-export interface Project {
-  id: string;
-  title: string;
-  category: 'Web' | 'Mobile' | 'Uygulama/Oyun' | 'Design';
-  description: string;
-  techStack: string[];
-  thumbnail: string;
-  details: string;
-  link?: string;
-  /** İngilizce sürüm (/en) için açıklamalar. */
-  en?: { description: string; details: string };
-}
-
 export interface Photo {
   id: string;
   url: string;
