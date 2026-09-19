@@ -260,7 +260,7 @@ export const HubView: React.FC = () => {
 
                     {/* Header Image/Icon */}
                     <div className="w-32 h-32 mb-4 overflow-hidden rounded-xl shadow-lg">
-                       <img src="/assets/ben.png" alt="Özgür Güler" className="w-full h-full object-cover" />
+                       <img src="/assets/ben-256.png" alt="Özgür Güler" className="w-full h-full object-cover" />
                     </div>
 
                     {/* Title */}

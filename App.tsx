@@ -8,6 +8,7 @@ import { GalleryView } from './components/Gallery/GalleryView';
 import { LoadingScreen } from './components/UI/LoadingScreen';
 import { AdminView } from './components/Admin/AdminView';
 import { ProfessionalButton } from './components/UI/ProfessionalButton';
+import { startMusicIfEnabled } from './components/UI/music';
 import { isProPath, setProOverlayOpen } from './professional/overlayBridge';
 import { GAME_LANG, professionalPath, villagePath } from './i18n/game';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,6 +46,11 @@ const Main: React.FC = () => {
   useEffect(() => {
     setProOverlayOpen(proOpen);
   }, [proOpen]);
+
+  // Müzik açık bırakılmışsa köy açılınca devam etsin (yükleme ekranında başlamasın).
+  useEffect(() => {
+    if (currentView === ViewState.HUB) startMusicIfEnabled();
+  }, [currentView]);
 
   const showProButton = !proOpen && (currentView === ViewState.LOADING || currentView === ViewState.HUB);
 

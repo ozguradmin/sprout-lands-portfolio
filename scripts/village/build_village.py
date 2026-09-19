@@ -626,7 +626,15 @@ def preview(path, grass, dirt_l, hills, rects, colliders, show_blocks=False):
     img.save(path)
 
 
+def water_frames():
+    """Yükleme ekranının CSS arka planı için su karosunun 4 karesi ayrı dosyalar."""
+    im = Image.open(SL / 'Tilesets' / 'Water.png').convert('RGBA')
+    for i in range(4):
+        im.crop((i * 16, 0, i * 16 + 16, 16)).save(OUT_ASSETS / f'water-{i}.png', optimize=True)
+
+
 if __name__ == '__main__':
+    water_frames()
     sizes = build_atlas()
     grass, dirt_l, hills = layers()
     rects = merge_rects(blocked_cells()) + partial_bridge_blocks()

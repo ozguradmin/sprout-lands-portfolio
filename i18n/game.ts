@@ -14,6 +14,9 @@ export const currentAge = (now = new Date()) => {
   return now.getFullYear() - BIRTH.year - (hadBirthday ? 0 : 1);
 };
 
+/** ?yukleme=eski: eski (zamanlayıcılı) yükleme ekranı; karşılaştırma ve geri dönüş için saklanıyor. */
+export const CLASSIC_LOADER = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('yukleme') === 'eski';
+
 export const villagePath = (lang: Lang) => (lang === 'en' ? '/en' : '/');
 export const professionalPath = (lang: Lang) => (lang === 'en' ? '/professional/en' : '/professional');
 
@@ -31,6 +34,15 @@ const STRINGS = {
     loadingBadge: 'PORTFOLYOSU',
     loadingBar: 'KÖY YÜKLENİYOR...',
     credit: 'Köy görselleri: Sprout Lands · Cup Nooble',
+    loadingStages: ['Çimenler ekiliyor...', 'Evler kuruluyor...', 'Hayvanlar uyandırılıyor...', 'Köy hazır!'],
+    loadingTips: [
+      'İpucu: Bir binaya girmek için kapısına doğru yukarı yürü.',
+      'İpucu: Ağaçların arkasından geçebilirsin, köklerine çarparsın.',
+      'İpucu: Özgeçmiş ve projeler için sağ üstteki Profesyonel Görünüm.',
+      'İpucu: Meydandaki sandığa yaklaşmayı dene.',
+    ],
+    musicOn: 'Müziği kapat',
+    musicOff: 'Müziği aç',
     welcomeTitle: 'MERHABA!',
     welcomeLine1: 'Ben',
     welcomeLine1b: `, ${currentAge()} yaşındayım.`,
@@ -100,6 +112,15 @@ const STRINGS = {
     loadingBadge: 'PORTFOLIO',
     loadingBar: 'LOADING VILLAGE...',
     credit: 'Village art: Sprout Lands by Cup Nooble',
+    loadingStages: ['Planting the grass...', 'Building the houses...', 'Waking up the animals...', 'The village is ready!'],
+    loadingTips: [
+      'Tip: walk up into a door to enter a building.',
+      'Tip: you can walk behind trees; only their trunks block you.',
+      'Tip: CV and projects are under Professional View, top right.',
+      'Tip: try walking up to the chest in the square.',
+    ],
+    musicOn: 'Turn music off',
+    musicOff: 'Turn music on',
     welcomeTitle: 'HELLO!',
     welcomeLine1: "I'm",
     welcomeLine1b: `, ${currentAge()} years old.`,

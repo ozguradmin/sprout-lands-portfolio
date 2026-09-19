@@ -46,8 +46,24 @@ const gameEn = gameIndex
     /<meta name="description" content="[^"]*"\s*\/>/,
     `<meta name="description" content="Explore Özgür Güler's interactive 2D pixel village: projects, social accounts and more." />`,
   );
+const enMeta = [
+  ['<link rel="canonical" href="https://ozgurguler.tech/" />', '<link rel="canonical" href="https://ozgurguler.tech/en" />'],
+  ['content="tr_TR"', 'content="en_US"'],
+  ['<meta property="og:url" content="https://ozgurguler.tech/" />', '<meta property="og:url" content="https://ozgurguler.tech/en" />'],
+  [/content="Özgür'ün Dijital Köyü"/g, `content="Özgür's Digital Village"`],
+  [/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="Walk around Özgür Güler's pixel village; projects, social accounts and a gallery live in the houses. There is a plain Professional View too."`],
+  [/<meta name="twitter:description" content="[^"]*"/, `<meta name="twitter:description" content="Walk around Özgür Güler's pixel village; projects, social accounts and a gallery live in the houses."`],
+  [/og-village\.png/g, 'og-village-en.png'],
+  [/<meta property="og:image:alt" content="[^"]*"/, `<meta property="og:image:alt" content="Özgür's pixel village: houses, a pond and dirt paths"`],
+];
+let gameEnMeta = gameEn;
+for (const [from, to] of enMeta) {
+  const next = gameEnMeta.replace(from, to);
+  if (next === gameEnMeta) throw new Error(`en meta not replaced: ${from}`);
+  gameEnMeta = next;
+}
 await mkdir(join(dist, 'en'), { recursive: true });
-await writeFile(join(dist, 'en', 'index.html'), gameEn);
+await writeFile(join(dist, 'en', 'index.html'), gameEnMeta);
 console.log('game /en');
 
 const site = 'https://ozgurguler.tech';

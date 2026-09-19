@@ -1,5 +1,6 @@
 import React from 'react';
-import { Briefcase } from 'lucide-react';
+import { Briefcase, Volume2, VolumeX } from 'lucide-react';
+import { setMusic, useMusicEnabled } from './music';
 import { G, GAME_LANG, professionalPath, villagePath } from '../../i18n/game';
 
 const prefetch = () => {
@@ -11,8 +12,22 @@ const woodFace =
   'relative flex items-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] text-[#4a2f22] font-heading font-bold leading-none shadow-lg transition-transform group-hover:brightness-105 group-active:translate-y-1';
 
 // Köyün ahşap tabelalarıyla aynı paletten, okunaklı yazıyla sabit köşe düğmeleri.
+const MusicButton: React.FC = () => {
+  const on = useMusicEnabled();
+  const label = on ? G.musicOn : G.musicOff;
+  return (
+    <button type="button" onClick={() => setMusic(!on)} className="relative group" aria-label={label} aria-pressed={on} title={label}>
+      <span className={woodBack} />
+      <span className={`${woodFace} p-2 md:p-2.5`}>
+        {on ? <Volume2 size={17} strokeWidth={2.5} aria-hidden="true" /> : <VolumeX size={17} strokeWidth={2.5} aria-hidden="true" className="opacity-70" />}
+      </span>
+    </button>
+  );
+};
+
 export const ProfessionalButton: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
   <div className="fixed top-3 right-3 md:top-5 md:right-5 z-[10000] flex items-center gap-2 select-none">
+    <MusicButton />
     {/* İki dil yan yana; seçili olan koyu. Düğmeye basınca diğer dile geçilir. */}
     <a href={villagePath(GAME_LANG === 'en' ? 'tr' : 'en')} lang={GAME_LANG === 'en' ? 'tr' : 'en'} className="relative group" aria-label={G.langSwitchAria}>
       <span className={woodBack} />

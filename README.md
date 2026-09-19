@@ -75,3 +75,4 @@ Live Demo: https://ozgurguler.netlify.app/
 Ozgur Guler - [GitHub](https://github.com/ozguradmin) | [LinkedIn](https://www.linkedin.com/in/%C3%B6zg%C3%BCr-g-133a33219/)
 
 Developed using Sprout Lands asset packs.
+Background music: "Good Morning" by Cakeflaps (CC0), https://opengameart.org/content/good-morning

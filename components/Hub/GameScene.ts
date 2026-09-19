@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_LANG } from '../../i18n/game';
+import { VILLAGE_ASSETS } from './villageAssets';
 import { WORLD } from './world/worldData';
 
 // Dünya scripts/village/build_village.py ile üretilir (karo katmanları, nesneler, çarpışma, kapılar).
@@ -64,18 +64,12 @@ export class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.setBaseURL('');
-    this.load.spritesheet('player', '/assets/characters/player.png', { frameWidth: 48, frameHeight: 48 });
-    this.load.spritesheet('chicken', '/assets/sprout-lands/Characters/Free Chicken Sprites.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.spritesheet('cow', '/assets/sprout-lands/Characters/Free Cow Sprites.png', { frameWidth: 32, frameHeight: 32 });
-    this.load.spritesheet('water', '/assets/sprout-lands/Tilesets/Water.png', { frameWidth: 16, frameHeight: 16 });
-    this.load.image('tiles-grass', '/assets/sprout-lands/Tilesets/Grass.png');
-    this.load.image('tiles-dirt', '/assets/sprout-lands/Tilesets/Tilled_Dirt_Wide_v2.png');
-    this.load.image('tiles-hills', '/assets/sprout-lands/Tilesets/Hills.png');
-    this.load.atlas('village', '/assets/village/atlas.png', '/assets/village/atlas.json');
-    // Tabela yazısı görsele işli; dile göre TR ya da EN sürüm yüklenir.
-    for (const key of ['projeler', 'sosyal', 'galeri']) {
-      this.load.image(key, `/assets/buildings/${key}-${GAME_LANG}.png`);
+    const A = VILLAGE_ASSETS;
+    for (const [key, sheet] of Object.entries(A.spritesheets)) {
+      this.load.spritesheet(key, sheet.url, { frameWidth: sheet.frameWidth, frameHeight: sheet.frameHeight });
     }
+    for (const [key, url] of Object.entries(A.images)) this.load.image(key, url);
+    this.load.atlas(A.atlas.key, A.atlas.image, A.atlas.data);
   }
 
   create() {
