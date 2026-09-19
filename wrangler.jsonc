@@ -12,7 +12,7 @@
     "binding": "ASSETS",
     // /professional -> professional/index.html, /professional/ -> /professional
     "html_handling": "drop-trailing-slash",
-    // Bilinmeyen yollar oyuna (index.html) düşer; /admin gibi istemci yolları çalışmaya devam eder.
+    // Bilinmeyen yollar oyuna (index.html) düşer.
     "not_found_handling": "single-page-application",
     // Worker yalnızca API için çalışır; statik dosyalar doğrudan sunulur.
     "run_worker_first": ["/api/*"]

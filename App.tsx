@@ -6,7 +6,6 @@ import { PortfolioView } from './components/Portfolio/PortfolioView';
 import { ArcadeView } from './components/Arcade/ArcadeView';
 import { GalleryView } from './components/Gallery/GalleryView';
 import { LoadingScreen } from './components/UI/LoadingScreen';
-import { AdminView } from './components/Admin/AdminView';
 import { ProfessionalButton } from './components/UI/ProfessionalButton';
 import { startMusicIfEnabled } from './components/UI/music';
 import { PRO_OVERLAY_REQUEST, isProPath, setProOverlayOpen } from './professional/overlayBridge';
@@ -71,8 +70,6 @@ const Main: React.FC = () => {
         return <ArcadeView />;
       case ViewState.GALLERY:
         return <GalleryView />;
-      case ViewState.ADMIN:
-        return <AdminView />;
       default:
         return <HubView />;
     }
@@ -80,7 +77,6 @@ const Main: React.FC = () => {
 
   return (
     <div className="relative w-full h-[100dvh] overflow-hidden bg-gray-900 text-white font-sans">
-      <div className="fixed inset-0 pointer-events-none z-[50] opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
       <AnimatePresence mode="wait">
         <motion.main
           key={currentView}

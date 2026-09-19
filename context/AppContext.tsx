@@ -11,13 +11,7 @@ interface ExtendedAppContextType extends AppContextType {
 const AppContext = createContext<ExtendedAppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentView, setCurrentView] = useState<ViewState>(() => {
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname;
-      if (path === '/admin') return ViewState.ADMIN;
-    }
-    return ViewState.LOADING;
-  });
+  const [currentView, setCurrentView] = useState<ViewState>(ViewState.LOADING);
   
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);

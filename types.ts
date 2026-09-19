@@ -5,7 +5,6 @@ export enum ViewState {
   PORTFOLIO = 'PORTFOLIO',
   ARCADE = 'ARCADE',
   GALLERY = 'GALLERY',
-  ADMIN = 'ADMIN',
 }
 
 export interface Photo {
