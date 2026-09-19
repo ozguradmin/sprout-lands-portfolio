@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { VILLAGE_ASSETS } from './villageAssets';
 import { WORLD } from './world/worldData';
-import { playSfx } from '../UI/music';
+import { playAnimalSound } from '../UI/music';
 
 // Dünya scripts/village/build_village.py ile üretilir (karo katmanları, nesneler, çarpışma, kapılar).
 // Bu sahne o veriyi çizer ve karakteri, hayvanları, kapıları yönetir.
@@ -382,8 +382,7 @@ export class GameScene extends Phaser.Scene {
         // Aynı anda iki hayvan birden bağırmasın
         if (now > this.nextAnimalSound) {
           this.nextAnimalSound = now + 2500;
-          const pick = a.kind === 'cow' ? `moo-${1 + Math.floor(Math.random() * 3)}` : `cluck-${1 + Math.floor(Math.random() * 2)}`;
-          playSfx(pick, a.kind === 'cow' ? 0.5 : 0.7);
+          playAnimalSound(a.kind, a.kind === 'cow' ? 0.5 : 0.7);
         }
       }
       return true;

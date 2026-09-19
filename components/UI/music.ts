@@ -10,10 +10,13 @@ import { PRO_OVERLAY_EVENT, isProOverlayOpen } from '../../professional/overlayB
 // her yeni <audio> ancak dokunuşla çalabiliyor (oyun döngüsünden tetiklenen hayvan sesleri engelleniyordu).
 // AudioContext bir kez dokunuşla açılınca ikisi de çalışır.
 const SRC = '/audio/good-morning.mp3';
+// Her hayvan için birkaç klip; çalınırken perde ve ses hafifçe rastgele değişir, aynı klip art arda gelmez.
+const SFX_CLIPS = { cow: ['moo-1', 'moo-2', 'moo-3', 'moo-4', 'moo-5'], chicken: ['cluck-1', 'cluck-2', 'cluck-3', 'cluck-4'] } as const;
+const SFX_RATE = { cow: [0.92, 1.08], chicken: [0.9, 1.15] } as const;
 const KEY = 'village-music';
 const MUSIC_VOLUME = 0.35;
 const FADE_S = 0.6;
-const SFX = ['moo-1', 'moo-2', 'moo-3', 'cluck-1', 'cluck-2'];
+const SFX = [...SFX_CLIPS.cow, ...SFX_CLIPS.chicken];
 
 let enabled = false;
 const listeners = new Set<() => void>();
@@ -155,20 +158,34 @@ export const startMusicIfEnabled = () => {
   if (enabled) sync();
 };
 
-/** Hayvan sesleri; ses kapalıysa ya da bağlam henüz açılmadıysa sessizce geçer. */
-export const playSfx = (name: string, volume = 0.5) => {
+const lastClip: Partial<Record<keyof typeof SFX_CLIPS, string>> = {};
+const rand = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
+
+/** Hayvan sesi; ses kapalıysa ya da bağlam henüz açılmadıysa sessizce geçer. */
+export const playAnimalSound = (kind: keyof typeof SFX_CLIPS, volume = 0.5) => {
   if (!shouldPlay() || !ctx || ctx.state !== 'running') return;
-  const buf = buffers.get(name);
-  if (!buf) {
+  const options = SFX_CLIPS[kind].filter((n) => n !== lastClip[kind] && buffers.get(n));
+  if (!options.length) {
     loadSfx();
     return;
   }
+  const name = options[Math.floor(Math.random() * options.length)];
+  lastClip[kind] = name;
+  const buf = buffers.get(name)!;
   const src = ctx.createBufferSource();
   const gain = ctx.createGain();
-  gain.gain.value = volume;
   src.buffer = buf;
+  src.playbackRate.value = rand(SFX_RATE[kind][0], SFX_RATE[kind][1]);
+  // Dosyalar zaten sessizlikle bitiyor; yine de sonda kısa bir kısma ile tık sesi riskini sıfırla
+  const now = ctx.currentTime;
+  const end = now + buf.duration / src.playbackRate.value;
+  const v = volume * rand(0.85, 1.05);
+  gain.gain.setValueAtTime(v, now);
+  gain.gain.setValueAtTime(v, Math.max(now, end - 0.05));
+  gain.gain.linearRampToValueAtTime(0, end);
   src.connect(gain).connect(ctx.destination);
-  src.start();
+  src.start(now);
+  src.stop(end + 0.02);
 };
 
 export const useMusicEnabled = () =>
