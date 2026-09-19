@@ -147,7 +147,10 @@ export const HubView: React.FC = () => {
         default: 'arcade',
         arcade: { 
             gravity: { x: 0, y: 0 },
-            debug: false // HATA AYIKLAMA MODU KAPATILDI
+            debug: false, // ?debug ya da F2 ile sahnede açılır (GameScene.setDebug)
+            debugBodyColor: 0xff0000,
+            debugStaticBodyColor: 0xff0000,
+            debugShowVelocity: false
         }
       },
       scene: new GameScene((target) => {

@@ -46,6 +46,8 @@ export class GameScene extends Phaser.Scene {
   private chest!: Phaser.GameObjects.Sprite;
   private chestOpen = false;
   private entering = false;
+  private debugOn = false;
+  private doorDebug?: Phaser.GameObjects.Graphics;
 
   private wasd!: { W: Phaser.Input.Keyboard.Key; A: Phaser.Input.Keyboard.Key; S: Phaser.Input.Keyboard.Key; D: Phaser.Input.Keyboard.Key };
   private onPortalEnter: (target: string) => void;
@@ -100,7 +102,7 @@ export class GameScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     // Çarpışma yalnız ayaklarda: karakter ağaç taçlarının ve çatıların arkasına geçebilir.
     this.player.setBodySize(12, 8);
-    this.player.setOffset(18, 28);
+    this.player.setOffset(18, 26);
     this.physics.add.collider(this.player, this.obstacles);
     if (door) this.player.play('idle-up');
 
@@ -115,6 +117,24 @@ export class GameScene extends Phaser.Scene {
     cam.startFollow(this.player, true, 0.12, 0.12);
     this.applyZoom();
     this.scale.on('resize', this.applyZoom, this);
+
+    // Hata ayıklama: adres ?debug içerirse ya da F2'ye basılınca çarpışma kutuları kırmızı, kapı alanları yeşil çizilir.
+    if (new URLSearchParams(window.location.search).has('debug')) this.setDebug(true);
+    this.input.keyboard!.on('keydown-F2', () => this.setDebug(!this.debugOn));
+  }
+
+  private setDebug(on: boolean) {
+    this.debugOn = on;
+    const world = this.physics.world;
+    if (on && !world.debugGraphic) world.createDebugGraphic();
+    world.drawDebug = on;
+    world.debugGraphic?.setVisible(on).setDepth(200000).clear();
+    if (!this.doorDebug) {
+      this.doorDebug = this.add.graphics().setDepth(200001);
+      this.doorDebug.lineStyle(2, 0x00ff00, 1);
+      for (const d of this.doors) this.doorDebug.strokeRectShape(d.zone);
+    }
+    this.doorDebug.setVisible(on);
   }
 
   /** Dar ekranlarda biraz uzaklaş ki telefonda köy sıkışık görünmesin. */
