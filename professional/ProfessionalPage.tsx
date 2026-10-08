@@ -244,18 +244,24 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
   const roleHead = roleWords.slice(0, -1).join(' ') + (roleWords.length > 1 ? ' ' : '');
 
   // Okuma ilerlemesi + menüde bulunduğun bölüm. Katman modunda sayfa .pro-overlay içinde kayar.
-  const [progress, setProgress] = useState(0);
   const [section, setSection] = useState<string | null>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const [clock, setClock] = useState('');
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const scroller = (rootRef.current?.closest('.pro-overlay') as HTMLElement | null) ?? null;
     const target: HTMLElement | Window = scroller ?? window;
+    // Değer doğrudan çubuğun stiline yazılır; React yeniden render edilmez.
+    let frame = 0;
     const read = () => {
-      const el = scroller ?? document.documentElement;
-      const max = el.scrollHeight - el.clientHeight;
-      setProgress(max > 0 ? Math.min(1, el.scrollTop / max) : 0);
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const el = scroller ?? document.documentElement;
+        const max = el.scrollHeight - el.clientHeight;
+        barRef.current?.style.setProperty('--p', String(max > 0 ? Math.min(1, el.scrollTop / max) : 0));
+      });
     };
     read();
     target.addEventListener('scroll', read, { passive: true });
@@ -278,6 +284,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
     const clockId = window.setInterval(tick, 30_000);
 
     return () => {
+      cancelAnimationFrame(frame);
       target.removeEventListener('scroll', read);
       io.disconnect();
       window.clearInterval(clockId);
@@ -293,7 +300,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
       </a>
       <div className="pro-pixel-strip" aria-hidden="true" />
       <header className="pro-header">
-        <div className="pro-progress" style={{ ['--p' as string]: progress } as React.CSSProperties} aria-hidden="true" />
+        <div className="pro-progress" ref={barRef} aria-hidden="true" />
         <div className="pro-container pro-header-inner">
           <a className="pro-brand" href="#main" aria-label={`${PROFILE.name}, ${t.toTop}`}>
             <img src={PROFILE.avatar} width={30} height={30} alt="" />
@@ -349,8 +356,10 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
               <div className="pro-hero-head pro-rise" style={rd(0.07)}>
                 <h1 id="pro-name">{PROFILE.name}</h1>
                 <p className="pro-role">
-                  {roleHead}
-                  <Marked delay="0.2s">{roleTail}</Marked>
+                  <span>
+                    {roleHead}
+                    <Marked delay="0.2s">{roleTail}</Marked>
+                  </span>
                   <span className="pro-location">
                     <MapPin size={15} aria-hidden="true" />
                     {PROFILE.location[lang]}
@@ -375,8 +384,8 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
                   </a>
                 </div>
                 <p className="pro-note-row pro-rise" style={rd(0.33)}>
-                  <NoteArrow />
                   <span className="pro-note">{t.heroNote}</span>
+                  <NoteArrow />
                 </p>
                 <ul className="pro-links pro-rise" style={rd(0.38)}>
                   <li>

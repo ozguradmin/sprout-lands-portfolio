@@ -230,11 +230,11 @@ export const PortfolioView: React.FC = () => {
       note={
         <>
           <Reveal slot={3} immediate className="pointer-events-none absolute right-0 top-0 hidden w-44 lg:block">
-            <p className="font-hand text-[22px] leading-tight text-[#b86f50] [rotate:-4deg]">{G.projectsNote}</p>
+            <p className="font-hand text-[22px] leading-tight text-[#9a5438] [rotate:-4deg]">{G.projectsNote}</p>
             <Mark kind="arrow" delay={0.9} className="ml-10 mt-1 h-14 w-20 text-[#b86f50] [rotate:12deg]" />
           </Reveal>
           <Reveal slot={3} immediate className="lg:hidden">
-            <p className="mt-3 font-hand text-[21px] leading-tight text-[#b86f50] [rotate:-2deg]">{G.projectsNote}</p>
+            <p className="mt-3 font-hand text-[21px] leading-tight text-[#9a5438] [rotate:-2deg]">{G.projectsNote}</p>
           </Reveal>
         </>
       }
@@ -279,11 +279,11 @@ export const PortfolioView: React.FC = () => {
         </Reveal>
       </LayoutGroup>
 
-      <motion.div layout className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((p, i) => (
           <ProjectCard key={p.id} project={p} index={i} onOpen={() => setSelected(p)} />
         ))}
-      </motion.div>
+      </div>
 
       <AnimatePresence>{selected && <ProjectSheet project={selected} onClose={() => setSelected(null)} />}</AnimatePresence>
     </Interior>

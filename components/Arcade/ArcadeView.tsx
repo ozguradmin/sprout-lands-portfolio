@@ -132,11 +132,11 @@ export const ArcadeView: React.FC = () => {
       note={
         <>
           <Reveal slot={3} immediate className="pointer-events-none absolute right-0 top-0 hidden w-44 lg:block">
-            <p className="font-hand text-[22px] leading-tight text-[#b86f50] [rotate:-4deg]">{G.socialNote}</p>
+            <p className="font-hand text-[22px] leading-tight text-[#9a5438] [rotate:-4deg]">{G.socialNote}</p>
             <Mark kind="arrow" delay={0.9} className="ml-10 mt-1 h-14 w-20 text-[#b86f50] [rotate:12deg]" />
           </Reveal>
           <Reveal slot={3} immediate className="lg:hidden">
-            <p className="mt-3 font-hand text-[21px] leading-tight text-[#b86f50] [rotate:-2deg]">{G.socialNote}</p>
+            <p className="mt-3 font-hand text-[21px] leading-tight text-[#9a5438] [rotate:-2deg]">{G.socialNote}</p>
           </Reveal>
         </>
       }
@@ -243,7 +243,7 @@ export const ArcadeView: React.FC = () => {
         <span className="font-pixel text-[9px] uppercase tracking-wider text-[#8d5d42]">
           {G.localTime} {clock}
         </span>
-        <span className="font-hand text-[20px] text-[#b86f50] [rotate:-2deg]">{G.aroundNote}</span>
+        <span className="font-hand text-[20px] text-[#9a5438] [rotate:-2deg]">{G.aroundNote}</span>
       </Reveal>
 
       {/* Mesaj formu */}

@@ -1103,7 +1103,7 @@ html[data-theme='dark'] .pro {
 }
 .pro-eyebrow b {
   font-weight: 400;
-  color: var(--wood-dark);
+  color: var(--accent);
 }
 .pro-eyebrow i {
   font-style: normal;
@@ -1153,6 +1153,7 @@ html[data-theme='dark'] .pro {
   flex: none;
   /* Ucu yukarı sağa, yani CV düğmesine baksın */
   transform: scaleY(-1) rotate(-4deg);
+  margin-left: 2px;
 }
 .pro-note-arrow path {
   fill: none;
@@ -1173,11 +1174,33 @@ html[data-theme='dark'] .pro {
   transform-origin: 0 50%;
   opacity: 0.85;
 }
+.pro-nav a {
+  position: relative;
+}
+.pro-nav a::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 100% 50%;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
 .pro-nav a[aria-current='true'] {
   color: var(--ink);
 }
 .pro-nav a[aria-current='true']::after {
   transform: scaleX(1);
+  transform-origin: 0 50%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pro-nav a::after {
+    transition: none;
+  }
 }
 
 /* --- somut sonuç rozeti ---------------------------------------------------- */
@@ -1271,6 +1294,9 @@ html[data-theme='dark'] .pro {
   display: flex;
   flex-direction: column;
 }
+.pro-project-body > .pro-details-toggle {
+  align-self: flex-start;
+}
 .pro-project {
   transition:
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1290,4 +1316,25 @@ html[data-theme='dark'] .pro {
 }
 .pro-skills dd {
   margin-top: 8px;
+}
+
+
+/* Yazdırma / PDF: kaydırmaya bağlı animasyonlar burada çalışmaz, her şey görünür olmalı. */
+@media print {
+  .pro-rise,
+  .pro-in,
+  .pro-rule,
+  .pro-project {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .pro-mark path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+  .pro-progress {
+    display: none !important;
+  }
 }

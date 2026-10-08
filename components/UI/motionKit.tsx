@@ -21,13 +21,11 @@ export const Reveal: React.FC<RevealProps> = ({ slot = 0, delay = 0, immediate, 
   const still = useReducedMotion();
   const Tag = motion[as] as typeof motion.div;
   if (still) {
+    // Hareket kapalıyken sade bir etiket basılır; role/aria/id gibi her şey korunur.
     const Plain = as as 'div';
-    const { style, className } = rest as { style?: React.CSSProperties; className?: string };
-    return (
-      <Plain style={style} className={className}>
-        {children}
-      </Plain>
-    );
+    const { initial, animate, whileInView, viewport, transition, exit, whileHover, whileTap, layout, ...dom } = rest as Record<string, unknown>;
+    void initial, animate, whileInView, viewport, transition, exit, whileHover, whileTap, layout;
+    return <Plain {...(dom as React.HTMLAttributes<HTMLElement>)}>{children}</Plain>;
   }
   return (
     <Tag
@@ -73,10 +71,14 @@ export const CountUp: React.FC<{ to: number; suffix?: string; className?: string
     return () => controls.stop();
   }, [inView, still, to, duration]);
 
+  const label = `${compact(to)}${suffix}`;
   return (
     <span ref={ref} className={className}>
-      <span className="tabular-nums">{compact(Math.round(value))}</span>
-      {suffix}
+      <span aria-hidden="true" className="tabular-nums">
+        {compact(Math.round(value))}
+        {suffix}
+      </span>
+      <span className="sr-only">{label}</span>
     </span>
   );
 };
@@ -100,13 +102,13 @@ export const useLocalClock = () => {
 
 /** Kartların ortak dokunma hissi: hafif kalkar, basınca geri oturur. */
 export const CARD_BASE =
-  'group relative rounded-2xl border border-[#e3d6bf] bg-[#fffdf9] shadow-[0_1px_2px_rgba(35,40,64,0.05),0_8px_22px_rgba(35,40,64,0.05)] transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-[#b86f50]/60 hover:shadow-[0_14px_32px_rgba(35,40,64,0.12)] active:translate-y-0 active:scale-[0.995] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2f6fd6]';
+  'group relative rounded-2xl border border-[#e3d6bf] bg-[#fffdf9] shadow-[0_1px_2px_rgba(35,40,64,0.05),0_8px_22px_rgba(35,40,64,0.05)] transition-[transform,translate,scale,box-shadow,border-color] duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-[#b86f50]/60 hover:shadow-[0_14px_32px_rgba(35,40,64,0.12)] active:translate-y-0 active:scale-[0.995] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2f6fd6]';
 
 /** Bölüm başlığı: piksel fontta numara, yanında çizilen dalga. */
 export const Eyebrow: React.FC<{ n: string; children: React.ReactNode; className?: string }> = ({ n, children, className = '' }) => (
   <p className={`flex items-center gap-2 font-pixel text-[9px] uppercase tracking-[0.18em] text-[#8d5d42] ${className}`}>
-    <span className="text-[#b86f50]/70">{n}</span>
-    <span className="text-[#9a5438]">/</span>
+    <span className="text-[#9a5438]">{n}</span>
+    <span className="text-[#b86f50]">/</span>
     <span>{children}</span>
   </p>
 );

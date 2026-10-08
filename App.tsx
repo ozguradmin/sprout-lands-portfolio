@@ -10,7 +10,7 @@ import { ProfessionalButton } from './components/UI/ProfessionalButton';
 import { startMusicIfEnabled } from './components/UI/music';
 import { PRO_OVERLAY_REQUEST, isProPath, setProOverlayOpen } from './professional/overlayBridge';
 import { GAME_LANG, professionalPath, villagePath } from './i18n/game';
-import { motion, AnimatePresence } from 'framer-motion';
+import { MotionConfig, motion, AnimatePresence } from 'framer-motion';
 
 const ProfessionalOverlay = lazy(() => import('./professional/ProfessionalOverlay'));
 
@@ -101,9 +101,13 @@ const Main: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AppProvider>
-      <Main />
-    </AppProvider>
+    // reducedMotion="user": sistemde hareket azaltma açıksa framer-motion'un yerleşim (layout)
+    // animasyonları da dahil her şey durur.
+    <MotionConfig reducedMotion="user">
+      <AppProvider>
+        <Main />
+      </AppProvider>
+    </MotionConfig>
   );
 };
 
