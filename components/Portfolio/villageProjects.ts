@@ -17,6 +17,8 @@ export interface VillageProject {
   stack?: string[];
   details?: { goal: L; built: Record<Lang, string[]>; result: L };
   links: { label: L | string; href: string; kind: LinkKind }[];
+  /** Kartın üstünde görünen tek satırlık somut sonuç (varsa). */
+  metric?: L;
   /** Profesyonel görünümde karşılığı olan projeler için slug. */
   proSlug?: string;
 }
@@ -61,6 +63,7 @@ const extras: VillageProject[] = [
     status: { tr: 'Google Play · Web', en: 'Google Play · Web' },
     image: { src: '/pro/img/v-wtf', bg: navy },
     icon: '/pro/img/wtf-icon.webp',
+    metric: { tr: '50.000+ indirme', en: '50,000+ downloads' },
     links: more('WTF Yapay Zekâ').links.map((l) => ({ ...l, kind: l.href.includes('play.google') ? 'store' : 'live' })),
   },
   {

@@ -33,6 +33,32 @@ type Strings = (typeof UI)['tr'];
 
 const THEME_KEY = 'pro-theme';
 
+/** Kelimenin altına elle çizilmiş gibi iki geçişli çizgi. CSS ile çizilir (bu sayfada animasyon kütüphanesi yok). */
+const Marked: React.FC<{ children: React.ReactNode; onScroll?: boolean; delay?: string }> = ({ children, onScroll, delay }) => (
+  <span className="pro-marked">
+    <span>{children}</span>
+    <svg className={`pro-mark${onScroll ? ' pro-mark-scroll' : ''}`} viewBox="0 0 200 18" preserveAspectRatio="none" aria-hidden="true" style={delay ? ({ ['--rd' as string]: delay } as React.CSSProperties) : undefined}>
+      <path pathLength={1} d="M5 11 C 54 4, 118 3, 196 8" />
+      <path pathLength={1} d="M16 16 C 68 11, 134 10, 188 13" />
+    </svg>
+  </span>
+);
+
+const Eyebrow: React.FC<{ n: string; children: React.ReactNode }> = ({ n, children }) => (
+  <p className="pro-eyebrow">
+    <b>{n}</b>
+    <i>/</i>
+    {children}
+  </p>
+);
+
+const NoteArrow: React.FC = () => (
+  <svg className="pro-note-arrow" viewBox="0 0 110 76" aria-hidden="true">
+    <path d="M7 11 C 44 5, 84 21, 97 60" />
+    <path d="M82 50 L99 66 L101 44" />
+  </svg>
+);
+
 const linkIcon = (kind: LinkKind) => {
   if (kind === 'github') return <Github size={15} aria-hidden="true" />;
   if (kind === 'store') return <Smartphone size={15} aria-hidden="true" />;
@@ -93,6 +119,7 @@ const ProjectCard: React.FC<{
         />
       </div>
       <div className="pro-project-body">
+        <p className="pro-metric">{p.metric[lang]}</p>
         <div className="pro-project-title">
           {p.icon && <img className="pro-app-icon" src={p.icon} width={40} height={40} alt="" loading="lazy" decoding="async" />}
           <div>
@@ -209,25 +236,75 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
     }
   };
 
+  // Kahraman bloğu sırayla gelsin diye her parçaya gecikme verilir (CSS animasyonu, JS gerekmez).
+  const rd = (sec: number) => ({ ['--rd' as string]: `${sec}s` }) as React.CSSProperties;
+  // Unvanın son kelimesinin altı elle çizilir.
+  const roleWords = PROFILE.role[lang].split(' ');
+  const roleTail = roleWords[roleWords.length - 1];
+  const roleHead = roleWords.slice(0, -1).join(' ') + (roleWords.length > 1 ? ' ' : '');
+
+  // Okuma ilerlemesi + menüde bulunduğun bölüm. Katman modunda sayfa .pro-overlay içinde kayar.
+  const [progress, setProgress] = useState(0);
+  const [section, setSection] = useState<string | null>(null);
+  const [clock, setClock] = useState('');
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scroller = (rootRef.current?.closest('.pro-overlay') as HTMLElement | null) ?? null;
+    const target: HTMLElement | Window = scroller ?? window;
+    const read = () => {
+      const el = scroller ?? document.documentElement;
+      const max = el.scrollHeight - el.clientHeight;
+      setProgress(max > 0 ? Math.min(1, el.scrollTop / max) : 0);
+    };
+    read();
+    target.addEventListener('scroll', read, { passive: true });
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setSection(visible.target.id);
+      },
+      { root: scroller, rootMargin: '-38% 0px -55% 0px' },
+    );
+    for (const id of ['projects', 'skills', 'about', 'contact']) {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    }
+
+    const fmt = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' });
+    const tick = () => setClock(fmt.format(new Date()));
+    tick();
+    const clockId = window.setInterval(tick, 30_000);
+
+    return () => {
+      target.removeEventListener('scroll', read);
+      io.disconnect();
+      window.clearInterval(clockId);
+    };
+  }, [lang]);
+
   const otherLang: Lang = lang === 'en' ? 'tr' : 'en';
 
   return (
-    <div className="pro" lang={lang}>
+    <div className="pro" lang={lang} ref={rootRef}>
       <a className="pro-skip" href="#main">
         {t.skip}
       </a>
       <div className="pro-pixel-strip" aria-hidden="true" />
       <header className="pro-header">
+        <div className="pro-progress" style={{ ['--p' as string]: progress } as React.CSSProperties} aria-hidden="true" />
         <div className="pro-container pro-header-inner">
           <a className="pro-brand" href="#main" aria-label={`${PROFILE.name}, ${t.toTop}`}>
             <img src={PROFILE.avatar} width={30} height={30} alt="" />
             <span className="pro-brand-name">{PROFILE.name}</span>
           </a>
           <nav className="pro-nav" aria-label={t.navLabel}>
-            <a href="#projects">{t.nav.projects}</a>
-            <a href="#skills">{t.nav.skills}</a>
-            <a href="#about">{t.nav.about}</a>
-            <a href="#contact">{t.nav.contact}</a>
+            {(['projects', 'skills', 'about', 'contact'] as const).map((id) => (
+              <a key={id} href={`#${id}`} aria-current={section === id ? 'true' : undefined}>
+                {t.nav[id]}
+              </a>
+            ))}
           </nav>
           <div className="pro-header-actions">
             {/* İki dil yan yana: seçili olan vurgulu, diğeri o sayfanın karşılığına gider. */}
@@ -268,11 +345,12 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
         <section className="pro-hero" aria-labelledby="pro-name">
           <div className="pro-container">
             <div className="pro-hero-grid">
-              <img className="pro-avatar" src={PROFILE.avatar} width={132} height={132} alt="" fetchPriority="high" />
-              <div className="pro-hero-head">
+              <img className="pro-avatar pro-rise" src={PROFILE.avatar} width={132} height={132} alt="" fetchPriority="high" />
+              <div className="pro-hero-head pro-rise" style={rd(0.07)}>
                 <h1 id="pro-name">{PROFILE.name}</h1>
                 <p className="pro-role">
-                  {PROFILE.role[lang]}
+                  {roleHead}
+                  <Marked delay="0.2s">{roleTail}</Marked>
                   <span className="pro-location">
                     <MapPin size={15} aria-hidden="true" />
                     {PROFILE.location[lang]}
@@ -280,12 +358,12 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
                 </p>
               </div>
               <div className="pro-hero-body">
-                {PROFILE.intro[lang].map((p) => (
-                  <p className="pro-intro" key={p}>
+                {PROFILE.intro[lang].map((p, i) => (
+                  <p className="pro-intro pro-rise" style={rd(0.14 + i * 0.05)} key={p}>
                     {p}
                   </p>
                 ))}
-                <div className="pro-cta">
+                <div className="pro-cta pro-rise" style={rd(0.26)}>
                   <a className="pro-btn pro-btn-primary" href="#projects">
                     {t.seeProjects} <ArrowRight size={17} aria-hidden="true" />
                   </a>
@@ -296,7 +374,11 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
                     <Download size={17} aria-hidden="true" />
                   </a>
                 </div>
-                <ul className="pro-links">
+                <p className="pro-note-row pro-rise" style={rd(0.33)}>
+                  <NoteArrow />
+                  <span className="pro-note">{t.heroNote}</span>
+                </p>
+                <ul className="pro-links pro-rise" style={rd(0.38)}>
                   <li>
                     <External href={PROFILE.links.github} t={t}>
                       <Github size={16} aria-hidden="true" /> GitHub
@@ -321,7 +403,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
               </div>
             </div>
 
-            <div className="pro-stores">
+            <div className="pro-stores pro-rise" style={rd(0.45)}>
               <h2 className="pro-label">{t.storesTitle}</h2>
               <ul>
                 {STORE_APPS.map((a) => {
@@ -351,8 +433,10 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
           </div>
         </section>
 
-        <section id="projects" className="pro-section" aria-labelledby="projects-title">
+        <hr className="pro-rule" />
+        <section id="projects" className="pro-section pro-in" aria-labelledby="projects-title">
           <div className="pro-container">
+            <Eyebrow n="01">{t.eyebrows.projects}</Eyebrow>
             <h2 id="projects-title">{t.projectsTitle}</h2>
             <p className="pro-section-sub">{t.projectsSub}</p>
             <div className="pro-projects">
@@ -383,23 +467,38 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
           </div>
         </section>
 
-        <section id="skills" className="pro-section" aria-labelledby="skills-title">
+        <hr className="pro-rule" />
+        <section id="skills" className="pro-section pro-in" aria-labelledby="skills-title">
           <div className="pro-container">
+            <Eyebrow n="02">{t.eyebrows.skills}</Eyebrow>
             <h2 id="skills-title">{t.skillsTitle}</h2>
             <p className="pro-section-sub">{t.skillsSub}</p>
             <dl className="pro-skills">
               {SKILLS.map((g) => (
-                <div key={g.title}>
+                <div key={g.title} className="pro-in">
                   <dt>{g.title}</dt>
-                  <dd>{g.items[lang]}</dd>
+                  <dd>
+                    <ul className="pro-chips">
+                      {g.primary.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                    {g.also && (
+                      <p className="pro-skill-also">
+                        {t.alsoLabel}: {g.also[lang]}
+                      </p>
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>
           </div>
         </section>
 
-        <section id="about" className="pro-section" aria-labelledby="about-title">
+        <hr className="pro-rule" />
+        <section id="about" className="pro-section pro-in" aria-labelledby="about-title">
           <div className="pro-container pro-prose">
+            <Eyebrow n="03">{t.eyebrows.about}</Eyebrow>
             <h2 id="about-title">{t.aboutTitle}</h2>
             {ABOUT[lang].map((p) => (
               <p key={p}>{p}</p>
@@ -423,9 +522,11 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
           </div>
         </section>
 
-        <section id="contact" className="pro-section" aria-labelledby="contact-title">
+        <hr className="pro-rule" />
+        <section id="contact" className="pro-section pro-in" aria-labelledby="contact-title">
           <div className="pro-container pro-contact">
             <div>
+              <Eyebrow n="04">{t.eyebrows.contact}</Eyebrow>
               <h2 id="contact-title">{t.contactTitle}</h2>
               <p className="pro-section-sub">{t.contactText}</p>
               <a className="pro-mail" href={`mailto:${PROFILE.email}`}>
@@ -473,6 +574,11 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
 
       <footer className="pro-footer">
         <div className="pro-container pro-footer-inner">
+          <span className="pro-sign">{t.signOff} — Özgür</span>
+          <span className="pro-clock">
+            <span aria-hidden="true" />
+            {t.clockLabel} {clock}
+          </span>
           <span>
             © {new Date().getFullYear()} Özgür Güler ·{' '}
             <a href="https://cupnooble.itch.io/sprout-lands-asset-pack" target="_blank" rel="noopener noreferrer" className="pro-credit">

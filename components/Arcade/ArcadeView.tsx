@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, FileText, Github, Instagram, Linkedin, Mail, MessageSquare, Send, X, Youtube } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { G, GAME_LANG } from '../../i18n/game';
 import { PROFILE } from '../../professional/data';
 import { Interior } from '../UI/Interior';
+import { Mark } from '../UI/marks';
+import { CARD_BASE, CountUp, Eyebrow, Reveal, useLocalClock } from '../UI/motionKit';
 
 type L = { tr: string; en: string };
 
@@ -18,36 +20,55 @@ const WORK_LINKS = [
 ];
 
 // İçerik hesapları. Sayılar CV'den; "geçmişte" ibaresi CV'deki ifadeyle aynı.
-const CONTENT_ACCOUNTS: { name: string; note?: L; links: { kind: 'instagram' | 'youtube'; href: string; label: string }[] }[] = [
+type Account = {
+  name: string;
+  count?: number;
+  countNote?: L;
+  tint: string;
+  links: { kind: 'instagram' | 'youtube'; href: string; label: string }[];
+};
+
+const IG = '#a0306e';
+const YT = '#b3261e';
+
+const CONTENT_ACCOUNTS: Account[] = [
   {
     name: 'Tarihsel Wojak',
-    note: { tr: 'Instagram’da geçmişte 1M+ takipçi, YouTube’da 100K+ abone', en: 'Previously 1M+ on Instagram, 100K+ on YouTube' },
+    count: 1_000_000,
+    countNote: { tr: 'Instagram · geçmişte', en: 'Instagram · in the past' },
+    tint: IG,
     links: [
       { kind: 'instagram', href: 'https://instagram.com/tarihselwojak', label: '@tarihselwojak' },
       { kind: 'youtube', href: 'https://www.youtube.com/@Tarihselwojak', label: 'YouTube' },
     ],
   },
   {
+    name: 'Kırmızı ya da Mavi',
+    count: 250_000,
+    countNote: { tr: 'YouTube abonesi', en: 'YouTube subscribers' },
+    tint: YT,
+    links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
+  },
+  {
     name: 'WTF Çeviri',
-    note: { tr: '200K+ takipçi', en: '200K+ followers' },
+    count: 200_000,
+    countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
+    tint: IG,
     links: [{ kind: 'instagram', href: 'https://instagram.com/wtfceviri', label: '@wtfceviri' }],
   },
   {
     name: 'Galaktik Uzay',
-    note: { tr: '200K+ takipçi', en: '200K+ followers' },
+    count: 200_000,
+    countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
+    tint: IG,
     links: [{ kind: 'instagram', href: 'https://instagram.com/galaktikuzay', label: '@galaktikuzay' }],
   },
-  {
-    name: 'Kırmızı ya da Mavi',
-    note: { tr: '250K+ abone', en: '250K+ subscribers' },
-    links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
-  },
-  { name: 'Manipulatix', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
-  { name: 'WTF Minecraft', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+  { name: 'Manipulatix', tint: IG, links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
+  { name: 'WTF Minecraft', tint: IG, links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
 ];
 
 const inputClass =
-  'w-full rounded-xl border border-[#e3d6bf] bg-white px-4 py-3 text-[15px] text-[#262b44] placeholder:text-[#9a9eb0] outline-none transition focus:border-[#b86f50] focus:ring-2 focus:ring-[#e4a672]/40';
+  'w-full rounded-xl border border-[#e3d6bf] bg-white px-4 py-3 text-[15px] text-[#262b44] placeholder:text-[#9a9eb0] outline-none transition focus:border-[#b86f50] focus:ring-4 focus:ring-[#e4a672]/35';
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#5b6075]';
 
 export const ArcadeView: React.FC = () => {
@@ -56,6 +77,8 @@ export const ArcadeView: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', instagram: '', message: '' });
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const clock = useLocalClock();
+  const still = useReducedMotion();
 
   useEffect(() => {
     if (!isMessageOpen) return;
@@ -83,7 +106,7 @@ export const ArcadeView: React.FC = () => {
         setTimeout(() => {
           setIsMessageOpen(false);
           setStatus('idle');
-        }, 2000);
+        }, 2200);
       } else {
         setStatus('error');
       }
@@ -100,86 +123,128 @@ export const ArcadeView: React.FC = () => {
   };
 
   return (
-    <Interior title={G.socialTitle} subtitle={G.socialSub} onBack={back}>
-      {/* İletişim */}
-      <h2 className="mt-10 font-heading text-xl font-bold">{G.workTitle}</h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {WORK_LINKS.map((l) => (
-          <a
-            key={l.name}
-            href={l.href}
-            target={l.href.startsWith('mailto') ? undefined : '_blank'}
-            rel="noopener noreferrer"
-            className="group flex items-center gap-4 rounded-2xl border border-[#e3d6bf] bg-[#fffdf9] p-4 transition hover:-translate-y-0.5 hover:border-[#b86f50]/60 hover:shadow-[0_8px_24px_rgba(35,40,64,0.08)]"
-          >
-            <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#262b44] text-[#faf6ee]">{l.icon}</span>
-            <span className="min-w-0">
-              <span className="block font-semibold">{GAME_LANG === 'en' && l.nameEn ? l.nameEn : l.name}</span>
-              <span className="block truncate text-sm text-[#5b6075]">{l.handle}</span>
-            </span>
-            <ArrowUpRight size={18} className="ml-auto flex-none text-[#9a5438] transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </a>
+    <Interior
+      title={G.socialTitle}
+      markWord={G.socialMarkWord}
+      subtitle={G.socialSub}
+      eyebrow={<Eyebrow n="01">{G.eyebrowContact}</Eyebrow>}
+      onBack={back}
+      note={
+        <>
+          <Reveal slot={3} immediate className="pointer-events-none absolute right-0 top-0 hidden w-44 lg:block">
+            <p className="font-hand text-[22px] leading-tight text-[#b86f50] [rotate:-4deg]">{G.socialNote}</p>
+            <Mark kind="arrow" delay={0.9} className="ml-10 mt-1 h-14 w-20 text-[#b86f50] [rotate:12deg]" />
+          </Reveal>
+          <Reveal slot={3} immediate className="lg:hidden">
+            <p className="mt-3 font-hand text-[21px] leading-tight text-[#b86f50] [rotate:-2deg]">{G.socialNote}</p>
+          </Reveal>
+        </>
+      }
+    >
+      {/* İletişim kartları */}
+      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        {WORK_LINKS.map((l, i) => (
+          <Reveal key={l.name} slot={4} delay={i * 0.05} immediate>
+            <a
+              href={l.href}
+              target={l.href.startsWith('mailto') ? undefined : '_blank'}
+              rel="noopener noreferrer"
+              className={`${CARD_BASE} flex items-center gap-4 p-4`}
+            >
+              <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#262b44] text-[#faf6ee] transition-colors group-hover:bg-[#b86f50]">
+                {l.icon}
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold">{GAME_LANG === 'en' && l.nameEn ? l.nameEn : l.name}</span>
+                <span className="block truncate text-sm text-[#5b6075]">{l.handle}</span>
+              </span>
+              <ArrowUpRight size={18} className="ml-auto flex-none text-[#9a5438] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+          </Reveal>
         ))}
       </div>
 
-      {/* Mesaj kartı */}
-      <div className="mt-4 flex flex-col gap-4 rounded-2xl border-2 border-[#b86f50] bg-[#fbe6d3] p-5 sm:flex-row sm:items-center">
-        <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#e4a672] text-[#4a2f22]">
-          <MessageSquare size={20} />
+      {/* Mesaj kartı: masaya bırakılmış bir mektup */}
+      <Reveal slot={6} immediate className="relative mt-8">
+        <span className="tape" aria-hidden="true" />
+        <div className="flex flex-col gap-4 rounded-2xl border-2 border-[#b86f50] bg-[#fbe6d3] p-5 pt-6 shadow-[0_10px_26px_rgba(35,40,64,0.10)] sm:flex-row sm:items-center">
+          <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#e4a672] text-[#4a2f22]">
+            <MessageSquare size={20} />
+          </span>
+          <div>
+            <p className="font-heading text-lg font-bold">{G.messageCardTitle}</p>
+            <p className="text-sm text-[#5b6075]">{G.messageCardText}</p>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:ml-auto">
+            <button type="button" onClick={() => setIsMessageOpen(true)} className="group relative">
+              <span className="absolute inset-0 translate-y-[3px] rounded-xl bg-[#b86f50]" />
+              <span className="relative inline-flex h-11 items-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] px-4 text-sm font-bold text-[#4a2f22] transition-transform group-hover:brightness-105 group-active:translate-y-[3px]">
+                <Send size={16} /> {G.writeMessage}
+              </span>
+            </button>
+            <a
+              href={PROFILE.cv[GAME_LANG]}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#b86f50]/40 bg-[#fffdf9] px-4 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98]"
+            >
+              <FileText size={16} /> {G.cvLabel}
+            </a>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* Hesaplar: sayılar bu bölümün en görünür parçası */}
+      <Reveal slot={7} immediate className="mt-12">
+        <Eyebrow n="02">{G.eyebrowAccounts}</Eyebrow>
+        <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight">{G.contentTitle}</h2>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[#5b6075]">{G.contentLead}</p>
+      </Reveal>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {CONTENT_ACCOUNTS.map((a, i) => (
+          <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate className="h-full">
+            <div className={`${CARD_BASE} flex h-full flex-col overflow-hidden p-5 hover:-translate-y-0.5`} style={{ borderTop: `3px solid ${a.tint}` }}>
+              <p className="font-heading text-lg font-bold leading-tight">{a.name}</p>
+              {a.count ? (
+                <>
+                  <CountUp to={a.count} className="mt-2 font-heading text-3xl font-extrabold leading-none tracking-tight text-[#262b44]" />
+                  <p className="mt-1 text-[13px] text-[#5b6075]">{a.countNote?.[GAME_LANG]}</p>
+                </>
+              ) : (
+                <p className="mt-2 text-[13px] text-[#5b6075]">{a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}</p>
+              )}
+              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+                {a.links.map((l) => (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: l.kind === 'youtube' ? YT : IG }}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3d6bf] px-3 text-sm font-semibold transition hover:bg-[#f6efe2] active:scale-[0.98]"
+                  >
+                    {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      {/* Köyde biri var: Mardin saati */}
+      <Reveal slot={10} immediate className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[#e3d6bf] pt-5">
+        <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+          {!still && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3f7d2c]/60" />}
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#3f7d2c]" />
         </span>
-        <div>
-          <p className="font-heading text-lg font-bold">{G.messageCardTitle}</p>
-          <p className="text-sm text-[#5b6075]">{G.messageCardText}</p>
-        </div>
-        <div className="flex flex-wrap gap-2 sm:ml-auto">
-          <button
-            type="button"
-            onClick={() => setIsMessageOpen(true)}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#262b44] px-4 text-sm font-semibold text-[#faf6ee] transition hover:brightness-125"
-          >
-            <Send size={16} /> {G.writeMessage}
-          </button>
-          <a
-            href={PROFILE.cv[GAME_LANG]}
-            target="_blank"
-            rel="noopener"
-            className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#b86f50]/40 bg-[#fffdf9] px-4 text-sm font-semibold transition hover:border-[#b86f50]"
-          >
-            <FileText size={16} /> {G.cvLabel}
-          </a>
-        </div>
-      </div>
-
-      {/* İçerik hesapları */}
-      <h2 className="mt-12 font-heading text-xl font-bold">{G.contentTitle}</h2>
-      <ul className="mt-4 divide-y divide-[#e3d6bf] overflow-hidden rounded-2xl border border-[#e3d6bf] bg-[#fffdf9]">
-        {CONTENT_ACCOUNTS.map((a) => (
-          <li key={a.name} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-4">
-            <div className="min-w-0 sm:flex-1">
-              <p className="font-semibold">{a.name}</p>
-              {a.note && <p className="text-sm text-[#5b6075]">{a.note[GAME_LANG]}</p>}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {a.links.map((l) => (
-                <a
-                  key={l.href}
-                  href={l.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-semibold transition ${
-                    l.kind === 'youtube'
-                      ? 'border-[#e3d6bf] text-[#b3261e] hover:border-[#b3261e]/50 hover:bg-[#b3261e]/5'
-                      : 'border-[#e3d6bf] text-[#a0306e] hover:border-[#a0306e]/50 hover:bg-[#a0306e]/5'
-                  }`}
-                >
-                  {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
-                  {l.label}
-                </a>
-              ))}
-            </div>
-          </li>
-        ))}
-      </ul>
+        <span className="font-pixel text-[9px] uppercase tracking-wider text-[#8d5d42]">
+          {G.localTime} {clock}
+        </span>
+        <span className="font-hand text-[20px] text-[#b86f50] [rotate:-2deg]">{G.aroundNote}</span>
+      </Reveal>
 
       {/* Mesaj formu */}
       <AnimatePresence>
@@ -195,9 +260,9 @@ export const ArcadeView: React.FC = () => {
               role="dialog"
               aria-modal="true"
               aria-labelledby="message-title"
-              initial={{ y: 40, opacity: 0 }}
+              initial={still ? false : { y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
+              exit={still ? undefined : { y: 40, opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 260 }}
               onClick={(e) => e.stopPropagation()}
               className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-[#fffdf9] p-6 text-[#262b44] shadow-2xl sm:rounded-3xl sm:p-7"
@@ -210,13 +275,13 @@ export const ArcadeView: React.FC = () => {
                   type="button"
                   onClick={() => setIsMessageOpen(false)}
                   aria-label={G.close}
-                  className="grid h-10 w-10 place-items-center rounded-full text-[#5b6075] hover:bg-[#f2ebde]"
+                  className="grid h-10 w-10 place-items-center rounded-full text-[#5b6075] transition hover:bg-[#f2ebde] active:scale-95"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleSendMessage} className="mt-5 space-y-4">
+              <form onSubmit={handleSendMessage} className={`mt-5 space-y-4 transition-opacity ${status === 'success' ? 'opacity-25' : ''}`}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block">
                     <span className={labelClass}>{G.nameLabel}</span>
@@ -263,14 +328,10 @@ export const ArcadeView: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSending || status === 'success'}
-                  className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold transition ${
-                    status === 'success' ? 'bg-[#3f7d2c] text-white' : 'bg-[#262b44] text-[#faf6ee] hover:brightness-125 disabled:opacity-70'
-                  }`}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#262b44] font-semibold text-[#faf6ee] transition hover:brightness-125 disabled:opacity-70 active:scale-[0.99]"
                 >
                   {isSending ? (
                     <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  ) : status === 'success' ? (
-                    G.sent
                   ) : (
                     <>
                       {G.send} <Send size={16} />
@@ -279,12 +340,23 @@ export const ArcadeView: React.FC = () => {
                 </button>
 
                 {status === 'error' && (
-                  <p role="alert" className="rounded-lg border border-[#b3261e]/20 bg-[#b3261e]/5 py-2 text-center text-sm font-medium text-[#b3261e]">
-                    {G.error}
+                  <p role="alert" className="rounded-lg border border-[#b3261e]/20 bg-[#b3261e]/5 px-3 py-2 text-center text-sm font-medium text-[#b3261e]">
+                    {G.error}{' '}
+                    <a href={`mailto:${PROFILE.email}`} className="underline underline-offset-2">
+                      {PROFILE.email}
+                    </a>
                   </p>
                 )}
                 <p className="text-center text-xs leading-relaxed text-[#5b6075]">{G.contactNote}</p>
               </form>
+
+              {/* Gönderildi: formun üstüne damga çizilir */}
+              {status === 'success' && (
+                <div className="pointer-events-none absolute inset-0 grid place-content-center justify-items-center" role="status">
+                  <Mark kind="stamp" immediate className="h-20 w-20 text-[#3f7d2c]" />
+                  <p className="mt-1 font-hand text-[28px] text-[#3f7d2c] [rotate:-6deg]">{G.sentStamp}</p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

@@ -84,6 +84,8 @@ export interface FeaturedProject {
   kind: L;
   status: L;
   summary: L;
+  /** Kartın üstünde duran tek satırlık somut sonuç. */
+  metric: L;
   goal: L;
   built: Record<Lang, string[]>;
   result: L;
@@ -96,6 +98,7 @@ const both = (s: string): L => ({ tr: s, en: s });
 export const PROJECTS: FeaturedProject[] = [
   {
     slug: 'cografist',
+    metric: { tr: 'Nisan 2026’dan beri yayında', en: 'Live since April 2026' },
     name: 'Coğrafist',
     icon: '/pro/img/cografist-icon.webp',
     image: {
@@ -140,6 +143,7 @@ export const PROJECTS: FeaturedProject[] = [
   },
   {
     slug: 'galaktik-uzay',
+    metric: { tr: 'Altı dilde yayın', en: 'Publishing in six languages' },
     name: 'Galaktik Uzay',
     image: { src: '/pro/img/galaktikuzay', bg: '#262b44', alt: { tr: 'galaktikuzay.com ana sayfası', en: 'galaktikuzay.com home page' } },
     kind: { tr: 'Yayın otomasyonu · Cloudflare, Azure OpenAI', en: 'Publishing automation · Cloudflare, Azure OpenAI' },
@@ -178,6 +182,7 @@ export const PROJECTS: FeaturedProject[] = [
   },
   {
     slug: 'donerci',
+    metric: { tr: 'Eylül 2026’da yayınlandı', en: 'Released September 2026' },
     name: 'Dönerci',
     icon: '/pro/img/donerci-icon.webp',
     image: {
@@ -222,6 +227,7 @@ export const PROJECTS: FeaturedProject[] = [
   },
   {
     slug: 'print-fast',
+    metric: { tr: 'Mart 2026’dan beri yayında', en: 'Live since March 2026' },
     name: 'Print Fast',
     icon: '/pro/img/printfast-icon.webp',
     image: {
@@ -263,6 +269,7 @@ export const PROJECTS: FeaturedProject[] = [
   },
   {
     slug: 'ofile-opaste',
+    metric: { tr: 'İki servis, MIT lisanslı', en: 'Two services, MIT-licensed' },
     name: 'OFile & OPaste',
     image: { src: '/pro/img/edge-tools', bg: '#262b44', alt: { tr: 'OFile ve OPaste arayüzleri', en: 'OFile and OPaste interfaces' } },
     kind: { tr: 'Geliştirici araçları · Cloudflare Workers', en: 'Developer tools · Cloudflare Workers' },
@@ -301,6 +308,7 @@ export const PROJECTS: FeaturedProject[] = [
   },
   {
     slug: 'whisper-web-scribe',
+    metric: { tr: 'Tarayıcıda çalışır, sunucusuz', en: 'Runs in the browser, no server' },
     name: 'Whisper Web Scribe',
     image: { src: '/pro/img/whisper', bg: '#262b44', alt: { tr: 'Whisper Web Scribe dosya yükleme ekranı', en: 'Whisper Web Scribe upload screen' } },
     kind: { tr: 'Tarayıcıda konuşmadan yazıya', en: 'In-browser speech-to-text' },
@@ -397,28 +405,43 @@ export const MORE_PROJECTS: SmallProject[] = [
 ];
 
 // ---------- Teknolojiler ----------
-export const SKILLS: { title: string; items: L }[] = [
-  { title: 'Frontend / Product', items: both('TypeScript, JavaScript, React, Next.js, Vite, Tailwind CSS, Phaser') },
-  { title: 'Backend / APIs', items: both('Node.js, Hono, REST, WordPress REST API, Meta Graph API, YouTube API, X API, Telegram Bot API') },
+export const SKILLS: { title: string; primary: string[]; also?: L }[] = [
+  {
+    title: 'Frontend / Product',
+    primary: ['TypeScript', 'React', 'Next.js', 'Vite', 'Tailwind CSS'],
+    also: both('JavaScript, Phaser'),
+  },
+  {
+    title: 'Backend / APIs',
+    primary: ['Node.js', 'Hono', 'REST'],
+    also: both('WordPress REST API, Meta Graph API, YouTube API, X API, Telegram Bot API'),
+  },
   {
     title: 'AI & Automation',
-    items: {
-      tr: 'Azure OpenAI, OpenAI uyumlu API’ler, LLM değerlendirme, Transformers.js, zamanlanmış içerik akışları',
-      en: 'Azure OpenAI, OpenAI-compatible APIs, LLM evaluation, Transformers.js, scheduled content pipelines',
+    primary: ['Azure OpenAI', 'Transformers.js'],
+    also: {
+      tr: 'OpenAI uyumlu API’ler, LLM değerlendirme, zamanlanmış içerik akışları',
+      en: 'OpenAI-compatible APIs, LLM evaluation, scheduled content pipelines',
     },
   },
-  { title: 'Cloud & Infrastructure', items: both('Cloudflare Workers, R2, KV, Queues, Durable Objects, Firebase, Vercel, Google Cloud, Oracle Cloud') },
+  {
+    title: 'Cloud & Infrastructure',
+    primary: ['Cloudflare Workers', 'R2', 'KV', 'Queues', 'D1'],
+    also: both('Durable Objects, Firebase, Vercel, Google Cloud, Oracle Cloud'),
+  },
   {
     title: 'Mobile',
-    items: {
-      tr: 'Capacitor, Godot 4, RevenueCat, AdMob, StoreKit 2, Google Play Billing, App Store ve Google Play yayını',
-      en: 'Capacitor, Godot 4, RevenueCat, AdMob, StoreKit 2, Google Play Billing, App Store and Google Play releases',
+    primary: ['Capacitor', 'Godot 4', 'RevenueCat', 'AdMob'],
+    also: {
+      tr: 'StoreKit 2, Google Play Billing, App Store ve Google Play yayını',
+      en: 'StoreKit 2, Google Play Billing, App Store and Google Play releases',
     },
   },
-  { title: 'Data / Database', items: both('SQL, Cloudflare D1, Firestore, Workers KV') },
+  { title: 'Data / Database', primary: ['SQL', 'Cloudflare D1', 'Firestore'], also: both('Workers KV') },
   {
     title: 'Tools',
-    items: { tr: 'Git, GitHub Actions, Playwright, Wrangler, Codemagic, AI kodlama araçları', en: 'Git, GitHub Actions, Playwright, Wrangler, Codemagic, AI coding tools' },
+    primary: ['Git', 'GitHub Actions', 'Playwright', 'Wrangler'],
+    also: { tr: 'Codemagic, AI kodlama araçları', en: 'Codemagic, AI coding tools' },
   },
 ];
 
@@ -509,6 +532,11 @@ export const UI = {
     cvEn: 'CV (İngilizce, PDF)',
     villageNote: 'Bu portfolyonun bir de oynanabilir hali var: karakterle köyü gezip binalara girerek projelere ulaşabilirsiniz.',
     villageCta: 'Dijital köye git',
+    eyebrows: { projects: 'YAPTIĞIM İŞLER', skills: 'NE İLE ÇALIŞIYORUM', about: 'KISACA BEN', contact: 'BANA ULAŞ' },
+    heroNote: 'CV burada',
+    alsoLabel: 'Ayrıca',
+    signOff: 'görüşmek üzere',
+    clockLabel: 'MARDİN',
     credit: 'Köy görselleri: Sprout Lands · Cup Nooble',
   },
   en: {
@@ -552,6 +580,11 @@ export const UI = {
     cvEn: 'CV (English, PDF)',
     villageNote: 'There’s also a playable version of this portfolio: walk around the village and step into the buildings to see my projects.',
     villageCta: 'Go to the village',
+    eyebrows: { projects: 'WHAT I BUILT', skills: 'WHAT I WORK WITH', about: 'ABOUT ME', contact: 'GET IN TOUCH' },
+    heroNote: 'CV is right here',
+    alsoLabel: 'Also',
+    signOff: 'see you around',
+    clockLabel: 'MARDIN',
     credit: 'Village art: Sprout Lands by Cup Nooble',
   },
 };
