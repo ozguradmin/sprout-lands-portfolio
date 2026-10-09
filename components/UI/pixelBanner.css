@@ -62,7 +62,7 @@
 
 .pixel-banner-walker,
 .pixel-banner-walker-back {
-  --step: -192px; /* yürüyüşün ikinci karesi */
+  --step: -192px; /* iki kare ileri: steps(2) aradaki kareyi gösterir */
   width: calc(48px * var(--s));
   height: calc(48px * var(--s));
   top: calc(-8px * var(--s));
@@ -86,7 +86,7 @@
 }
 
 .pixel-banner-cow {
-  --step: -64px; /* yürüyüşün ikinci karesi */
+  --step: -64px; /* iki kare ileri: steps(2) aradaki kareyi gösterir */
   /* İnek sayfasında sola bakan kare yok; yatayda aynalanıyor. */
   --flip: -1;
   --x0: calc(100vw + 260px);
@@ -99,7 +99,7 @@
   background-position: 0 calc(-32px * var(--s));
 }
 .pixel-banner-chicken {
-  --step: -16px; /* yürüyüşün ikinci karesi */
+  --step: -32px; /* iki kare ileri: steps(2) aradaki kareyi gösterir */
   /* Tavuk sayfası da sola bakıyor; sağa giderken aynalanıyor. */
   --flip: -1;
   --x0: -140px;

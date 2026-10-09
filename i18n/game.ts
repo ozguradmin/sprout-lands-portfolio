@@ -201,7 +201,7 @@ const STRINGS = {
     contentTitle: 'Content accounts',
     messageCardTitle: 'Leave a message here',
     messageCardText: 'It goes straight to my Telegram.',
-    cvLabel: 'CV (PDF)',
+    cvLabel: 'Résumé (PDF)',
     filterAll: 'All',
     filterWeb: 'Web',
     filterApps: 'Apps/Games',

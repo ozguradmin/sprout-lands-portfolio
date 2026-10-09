@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowUpRight, FileText, Github, Instagram, Linkedin, Mail, Send, Youtube } from 'lucide-react';
+import { ArrowUpRight, Download, FileText, Github, Instagram, Linkedin, Mail, Send, Youtube } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { G, GAME_LANG } from '../../i18n/game';
@@ -200,6 +200,7 @@ export const ArcadeView: React.FC = () => {
                   className="mt-3 inline-flex h-10 items-center gap-2 rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-3.5 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98] md:mt-4"
                 >
                   <FileText size={16} /> {G.cvLabel}
+                  <Download size={14} className="text-[#8d5d42]" aria-hidden="true" />
                 </a>
               </div>
             </div>
