@@ -46,19 +46,11 @@ const CONTENT_ACCOUNTS: Account[] = [
     ],
   },
   {
-    name: 'Kırmızı ya da Mavi',
-    count: 250_000,
-    countNote: { tr: 'YouTube abonesi', en: 'YouTube subscribers' },
-    tint: YT,
-    art: 'pills',
-    links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
-  },
-  {
     name: 'WTF Çeviri',
     count: 200_000,
     countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
     tint: IG,
-    art: 'bubble',
+    art: 'subtitle',
     links: [{ kind: 'instagram', href: 'https://instagram.com/wtfceviri', label: '@wtfceviri' }],
   },
   {
@@ -66,11 +58,19 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 200_000,
     countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
     tint: IG,
-    art: 'planet',
+    art: 'space',
     links: [{ kind: 'instagram', href: 'https://instagram.com/galaktikuzay', label: '@galaktikuzay' }],
   },
-  { name: 'Manipulatix', tint: IG, art: 'frame', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
-  { name: 'WTF Minecraft', tint: IG, art: 'pickaxe', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+  { name: 'Manipulatix', tint: IG, art: 'strings', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
+  { name: 'WTF Minecraft', tint: IG, art: 'voxel', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+  {
+    name: 'Kırmızı ya da Mavi',
+    count: 250_000,
+    countNote: { tr: 'YouTube abonesi', en: 'YouTube subscribers' },
+    tint: YT,
+    art: 'pills',
+    links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
+  },
 ];
 
 const inputClass =
@@ -158,7 +158,7 @@ export const ArcadeView: React.FC = () => {
       </Reveal>
 
       <Reveal slot={6} delay={0.05} immediate className="relative mt-3">
-        <div className="relative overflow-hidden rounded-3xl border-2 border-[#d9c7a8] bg-[#fbf3e4] shadow-[0_12px_30px_rgba(35,40,64,0.08)]">
+        <div className="relative overflow-hidden rounded-b-3xl border-2 border-[#d9c7a8] bg-[#fbf3e4] shadow-[0_12px_30px_rgba(35,40,64,0.08)]">
           {/* Üstte ahşap bir bant: köyün tabelalarıyla aynı desen */}
           <div className="h-2 bg-[linear-gradient(90deg,#e4a672_50%,#b86f50_50%)] bg-[length:12px_8px]" aria-hidden="true" />
 
@@ -166,11 +166,11 @@ export const ArcadeView: React.FC = () => {
             {/* Sol: posta kutusu ve açıklama */}
             <div className="flex gap-4 md:block">
               <img
-                src="/assets/accounts/mailbox.png"
+                src="/assets/accounts/cat-sign.png"
                 alt=""
-                width={48}
+                width={84}
                 height={48}
-                className="h-16 w-16 flex-none [image-rendering:pixelated] md:h-24 md:w-24"
+                className="h-14 w-auto flex-none [image-rendering:pixelated] md:h-20"
               />
               <div className="md:mt-4">
                 <h2 className="font-heading text-xl font-extrabold tracking-tight md:text-2xl">{G.messageCardTitle}</h2>
@@ -230,7 +230,7 @@ export const ArcadeView: React.FC = () => {
                     {G.send}
                   </span>
                 </button>
-                <Mark kind="arrow" immediate delay={0.4} className="h-8 w-11 flex-none text-[#b86f50] [transform:scaleX(-1)_rotate(-8deg)]" />
+                <Mark kind="arrowLeft" immediate delay={0.4} className="h-7 w-14 flex-none text-[#b86f50]" />
                 <span className="font-hand text-[20px] leading-none text-[#9a5438] [rotate:-3deg]">{G.socialNote}</span>
                 <a
                   href={PROFILE.cv[GAME_LANG]}
@@ -282,16 +282,18 @@ export const ArcadeView: React.FC = () => {
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {CONTENT_ACCOUNTS.map((a, i) => (
           <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate className="h-full">
-            <div className={`${CARD_BASE} flex h-full flex-col overflow-hidden p-5 hover:-translate-y-0.5`} style={{ borderTop: `3px solid ${a.tint}` }}>
-              {/* Hesabın konusunu anlatan piksel motif; okunurluğu bozmasın diye soluk */}
+            <div className={`${CARD_BASE} flex h-full flex-col overflow-hidden hover:-translate-y-0.5`}>
+              {/* Hesabın konusunu anlatan piksel sahne (kendi çizimimiz) */}
               <img
                 src={`/assets/accounts/${a.art}.png`}
                 alt=""
-                width={48}
+                width={128}
                 height={48}
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-3 -top-2 h-28 w-28 opacity-[0.22] [image-rendering:pixelated] transition-[opacity,transform] duration-300 group-hover:-translate-y-0.5 group-hover:opacity-40"
+                className="h-20 w-full [image-rendering:pixelated] object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               />
+              <span aria-hidden="true" className="block h-[3px] w-full" style={{ background: a.tint }} />
+              <div className="flex flex-1 flex-col p-5">
               <p className="relative font-heading text-lg font-bold leading-tight">{a.name}</p>
               {a.count ? (
                 <>
@@ -315,6 +317,7 @@ export const ArcadeView: React.FC = () => {
                     {l.label}
                   </a>
                 ))}
+              </div>
               </div>
             </div>
           </Reveal>

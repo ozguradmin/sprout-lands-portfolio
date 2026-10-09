@@ -402,7 +402,8 @@ small = 0
 for x, y in cells:
     if small >= 46:
         break
-    if not free(x, y, need_grass=False) or not land[y][x]:
+    # need_grass=True: sekiz komşusu da kara olsun, süs suya taşmasın
+    if not free(x, y) or not land[y][x]:
         continue
     f = rng.choices(['flower_y_small', 'flower_pink_small', 'sprouts', 'sprout', 'flower_blue', 'flower_y', 'flower_pink',
                      'rock_small', 'rock', 'stump_small', 'bush', 'bush_long'], [7, 7, 6, 5, 3, 3, 3, 3, 1, 1, 2, 1])[0]
@@ -463,8 +464,30 @@ def build_atlas():
                         im.putpixel((xx, yy), wing_hi + (255,))
             images.append((f'bfly_{color_name}_{fi}', im, (5, 3, 0, 0)))
     images.append(('gate', make_gate(), (GATE_W, 16, 0, 0)))
+    # Bu iki sprite "eşya" olarak beyaz dış hatla çizilmiş; karada dururken suya aitmiş gibi
+    # görünüyor. Dışa bakan beyaz halkayı siliyoruz (içerideki açık renkler kalıyor).
+    def strip_white_edge(im):
+        px = im.load()
+        edge = []
+        for yy in range(im.height):
+            for xx in range(im.width):
+                if px[xx, yy][3] < 128 or min(px[xx, yy][:3]) <= 225:
+                    continue
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = xx + dx, yy + dy
+                    if not (0 <= nx < im.width and 0 <= ny < im.height) or px[nx, ny][3] < 128:
+                        edge.append((xx, yy))
+                        break
+        for xx, yy in edge:
+            px[xx, yy] = (0, 0, 0, 0)
+        return im
+
+    WHITE_EDGED = {'milk', 'hay'}
+
     for name, (src, x, y, w, h) in FRAMES.items():
         im = Image.open(src).convert('RGBA').crop((x, y, x + w, y + h))
+        if name in WHITE_EDGED:
+            im = strip_white_edge(im)
         bbox = im.getbbox()
         if bbox is None:
             raise SystemExit(f'boş kare: {name}')

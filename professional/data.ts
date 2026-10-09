@@ -349,6 +349,19 @@ export interface SmallProject {
   links: { label: L | string; href: string }[];
 }
 
+/** Sıralama dile göre: Dönerci başta; Coğrafist tamamen Türkçe olduğu için İngilizcede sonda. */
+const PROJECT_ORDER: Record<Lang, string[]> = {
+  tr: ['donerci', 'cografist', 'galaktik-uzay', 'print-fast', 'ofile-opaste', 'whisper-web-scribe'],
+  en: ['donerci', 'galaktik-uzay', 'print-fast', 'ofile-opaste', 'whisper-web-scribe', 'cografist'],
+};
+
+export const projectsFor = (lang: Lang): FeaturedProject[] =>
+  PROJECT_ORDER[lang].map((slug) => {
+    const p = PROJECTS.find((x) => x.slug === slug);
+    if (!p) throw new Error(`PROJECT_ORDER içindeki slug yok: ${slug}`);
+    return p;
+  });
+
 export const MORE_PROJECTS: SmallProject[] = [
   {
     name: 'LLM Evaluation Toolkit',

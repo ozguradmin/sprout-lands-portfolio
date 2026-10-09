@@ -1,6 +1,7 @@
 // Köydeki "Projeler" binasının listesi. Öne çıkan projeler profesyonel görünümle aynı veriden gelir
 // (professional/data.ts); burada yalnızca kategori ve köye özel küçük projeler eklenir.
-import { MORE_PROJECTS, PROJECTS, type Lang, type LinkKind } from '../../professional/data';
+import { GAME_LANG } from '../../i18n/game';
+import { MORE_PROJECTS, projectsFor, type Lang, type LinkKind } from '../../professional/data';
 
 type L = Record<Lang, string>;
 
@@ -32,7 +33,7 @@ const FEATURED_CATEGORIES: Record<string, VillageCategory[]> = {
   'whisper-web-scribe': ['web', 'ai'],
 };
 
-const featured: VillageProject[] = PROJECTS.map((p) => ({
+const featured: VillageProject[] = projectsFor(GAME_LANG).map((p) => ({
   id: p.slug,
   name: p.name,
   categories: FEATURED_CATEGORIES[p.slug] ?? ['web'],

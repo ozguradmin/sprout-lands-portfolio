@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 
 const DRAW_EASE = [0.65, 0, 0.35, 1] as const;
 
-export type MarkKind = 'underline' | 'circle' | 'squiggle' | 'arrow' | 'tick' | 'sparkle' | 'stamp';
+export type MarkKind = 'underline' | 'circle' | 'squiggle' | 'arrow' | 'arrowLeft' | 'tick' | 'sparkle' | 'stamp';
 
 type Shape = { viewBox: string; paths: { d: string; w?: number; at?: number }[]; dur: number };
 
@@ -34,6 +34,15 @@ const SHAPES: Record<MarkKind, Shape> = {
     paths: [
       { d: 'M7 11 C 44 5, 84 21, 97 60' },
       { d: 'M82 50 L99 66 L101 44', at: 0.45 },
+    ],
+  },
+  // Ucu solda, neredeyse yatay: yanındaki düğmeyi gösterir
+  arrowLeft: {
+    viewBox: '0 0 110 40',
+    dur: 0.5,
+    paths: [
+      { d: 'M105 11 C 74 3, 40 9, 15 24' },
+      { d: 'M31 13 L12 25 L33 31', at: 0.4 },
     ],
   },
   tick: {

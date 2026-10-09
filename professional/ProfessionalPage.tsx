@@ -5,7 +5,7 @@ import {
   MEDIA,
   MORE_PROJECTS,
   PROFILE,
-  PROJECTS,
+  projectsFor,
   SKILLS,
   STORE_APPS,
   UI,
@@ -454,7 +454,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
             <h2 id="projects-title">{t.projectsTitle}</h2>
             <p className="pro-section-sub">{t.projectsSub}</p>
             <div className="pro-projects">
-              {PROJECTS.map((p) => (
+              {projectsFor(lang).map((p) => (
                 <ProjectCard key={p.slug} project={p} lang={lang} t={t} active={p.slug === activeSlug} onCopy={copyProjectLink} />
               ))}
             </div>
