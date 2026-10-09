@@ -3,9 +3,10 @@ import React from 'react';
 // sayfada ayrı bir CSS dosyası bağlanmıyor).
 
 /**
- * Sayfanın üstündeki ince piksel manzara: köyün tepeleri, bulutları ve çimeni;
- * üzerinden karakter sağdan sola geçer, inek peşinden gelir. Tamamen süs olduğu için ekran
- * okuyuculara kapalı; hareket azaltma tercihinde her şey durur.
+ * Sayfanın üstündeki ince piksel manzara: köyün tepeleri, bulutları ve çimeni.
+ * Üzerinden sırayla iki ikili geçer: karakter sağdan sola gider, inek peşinden gelir;
+ * sonra karakter soldan sağa döner, bu sefer yanında tavuk olur. Tamamen süs olduğu için
+ * ekran okuyuculara kapalı; hareket azaltma tercihinde her şey durur.
  */
 export const PixelBanner: React.FC<{ className?: string }> = ({ className }) => (
   <div className={`pixel-banner${className ? ` ${className}` : ''}`} aria-hidden="true">
@@ -14,5 +15,7 @@ export const PixelBanner: React.FC<{ className?: string }> = ({ className }) => 
     <i className="pixel-banner-ground" />
     <div className="pixel-banner-walker" />
     <div className="pixel-banner-cow" />
+    <div className="pixel-banner-walker-back" />
+    <div className="pixel-banner-chicken" />
   </div>
 );
