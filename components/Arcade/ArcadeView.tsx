@@ -39,7 +39,7 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 1_000_000,
     countNote: { tr: 'Instagram · geçmişte', en: 'Instagram · in the past' },
     tint: IG,
-    art: 'wojak',
+    art: 'card-wojak',
     links: [
       { kind: 'instagram', href: 'https://instagram.com/tarihselwojak', label: '@tarihselwojak' },
       { kind: 'youtube', href: 'https://www.youtube.com/@Tarihselwojak', label: 'YouTube' },
@@ -50,7 +50,7 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 200_000,
     countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
     tint: IG,
-    art: 'subtitle',
+    art: 'card-subtitle',
     links: [{ kind: 'instagram', href: 'https://instagram.com/wtfceviri', label: '@wtfceviri' }],
   },
   {
@@ -58,19 +58,29 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 200_000,
     countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
     tint: IG,
-    art: 'space',
+    art: 'card-space',
     links: [{ kind: 'instagram', href: 'https://instagram.com/galaktikuzay', label: '@galaktikuzay' }],
   },
-  { name: 'Manipulatix', tint: IG, art: 'strings', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
-  { name: 'WTF Minecraft', tint: IG, art: 'voxel', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+  { name: 'Manipulatix', tint: IG, art: 'card-puppet', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
+  { name: 'WTF Minecraft', tint: IG, art: 'card-voxel', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
   {
     name: 'Kırmızı ya da Mavi',
     count: 250_000,
     countNote: { tr: 'YouTube abonesi', en: 'YouTube subscribers' },
     tint: YT,
-    art: 'pills',
+    art: 'card-pills',
     links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
   },
+];
+
+// Kart görselleri Wikimedia Commons'tan; CC BY / CC BY-SA olanlarda yazar belirtmek zorunlu.
+const CARD_CREDITS = [
+  { label: 'Wojak (CC0)', href: 'https://commons.wikimedia.org/wiki/File:Wojak_(meme)_simplified_%26_vectorized.svg' },
+  { label: 'Elephants Dream · Blender Foundation (CC BY 2.5)', href: 'https://commons.wikimedia.org/wiki/File:Elephants_Dream_Subtitles_German.jpg' },
+  { label: 'Yengeç Bulutsusu · NASA/ESA (kamu malı)', href: 'https://commons.wikimedia.org/wiki/File:Crab_Nebula.jpg' },
+  { label: 'Marionetten · Jürgen Howaldt (CC BY-SA 2.0 DE)', href: 'https://commons.wikimedia.org/wiki/File:PloenMarionetten_1.jpg' },
+  { label: 'Minetest · Kotolegokot (CC BY-SA 3.0)', href: 'https://commons.wikimedia.org/wiki/File:Minetest_screenshot_2.png' },
+  { label: 'Red and blue pill · W. Carter (CC BY-SA 4.0)', href: 'https://commons.wikimedia.org/wiki/File:Red_and_blue_pill.jpg' },
 ];
 
 const inputClass =
@@ -282,19 +292,24 @@ export const ArcadeView: React.FC = () => {
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {CONTENT_ACCOUNTS.map((a, i) => (
           <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate className="h-full">
-            <div className={`${CARD_BASE} relative flex h-full flex-col overflow-hidden hover:-translate-y-0.5`}>
-              {/* Hesabın konusunu anlatan piksel sahne kartın arka planı; üstüne okunurluk perdesi gelir */}
+            <div className={`${CARD_BASE} relative flex h-full min-h-[250px] flex-col justify-end overflow-hidden hover:-translate-y-0.5`}>
+              {/* Hesabın konusunu anlatan gerçek görsel; yazılar altta perdenin üstünde durur */}
               <img
-                src={`/assets/accounts/${a.art}.png?v=5`}
+                src={`/assets/accounts/${a.art}.webp?v=5`}
                 alt=""
-                width={192}
-                height={128}
+                width={480}
+                height={320}
+                loading="lazy"
+                decoding="async"
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-0 h-full w-full object-cover [image-rendering:pixelated] transition-transform duration-500 group-hover:scale-105"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(140deg,rgba(255,253,249,0.93),rgba(255,253,249,0.9)_55%,rgba(255,253,249,0.74))]" />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 bg-[linear-gradient(to_top,rgba(255,253,249,0.98)_38%,rgba(255,253,249,0.9)_54%,rgba(255,253,249,0.28)_76%,rgba(255,253,249,0.04))]"
+              />
               <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px]" style={{ background: a.tint }} />
-              <div className="relative flex flex-1 flex-col p-5">
+              <div className="relative flex flex-col p-5 pt-20">
               <p className="relative font-heading text-lg font-bold leading-tight">{a.name}</p>
               {a.count ? (
                 <>
@@ -324,6 +339,21 @@ export const ArcadeView: React.FC = () => {
           </Reveal>
         ))}
       </div>
+
+      {/* Serbest lisanslı görseller: lisans gereği kaynak ve yazar belirtiliyor */}
+      <Reveal slot={10} immediate>
+        <p className="mt-4 text-[11.5px] leading-relaxed text-[#8d5d42]/90">
+          {G.cardCredits}{' '}
+          {CARD_CREDITS.map((c, i) => (
+            <React.Fragment key={c.href}>
+              {i > 0 && ' · '}
+              <a href={c.href} target="_blank" rel="noopener noreferrer" className="underline decoration-[#b86f50]/40 underline-offset-2 hover:text-[#9a5438]">
+                {c.label}
+              </a>
+            </React.Fragment>
+          ))}
+        </p>
+      </Reveal>
     </Interior>
   );
 };
