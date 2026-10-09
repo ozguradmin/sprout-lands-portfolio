@@ -1,26 +1,27 @@
 import { GAME_LANG } from '../../i18n/game';
+import { v } from '../UI/assetVersion';
 
 // Köyün yüklediği dosyalar. Hem oyun sahnesi (GameScene.preload) hem de yükleme ekranı bu listeyi kullanır;
 // böylece yükleme ekranı bittiğinde dosyalar tarayıcı önbelleğinde olur ve köy beklemeden açılır.
 export const VILLAGE_ASSETS = {
   spritesheets: {
-    player: { url: '/assets/characters/player.png', frameWidth: 48, frameHeight: 48 },
-    chicken: { url: '/assets/sprout-lands/Characters/Free Chicken Sprites.png', frameWidth: 16, frameHeight: 16 },
-    cow: { url: '/assets/sprout-lands/Characters/Free Cow Sprites.png', frameWidth: 32, frameHeight: 32 },
-    water: { url: '/assets/sprout-lands/Tilesets/Water.png', frameWidth: 16, frameHeight: 16 },
+    player: { url: v('/assets/characters/player.png'), frameWidth: 48, frameHeight: 48 },
+    chicken: { url: v('/assets/sprout-lands/Characters/Free Chicken Sprites.png'), frameWidth: 16, frameHeight: 16 },
+    cow: { url: v('/assets/sprout-lands/Characters/Free Cow Sprites.png'), frameWidth: 32, frameHeight: 32 },
+    water: { url: v('/assets/sprout-lands/Tilesets/Water.png'), frameWidth: 16, frameHeight: 16 },
   },
   images: {
-    'tiles-grass': '/assets/sprout-lands/Tilesets/Grass.png',
-    'tiles-dirt': '/assets/sprout-lands/Tilesets/Tilled_Dirt_Wide_v2.png',
-    'tiles-hills': '/assets/sprout-lands/Tilesets/Hills.png',
+    'tiles-grass': v('/assets/sprout-lands/Tilesets/Grass.png'),
+    'tiles-dirt': v('/assets/sprout-lands/Tilesets/Tilled_Dirt_Wide_v2.png'),
+    'tiles-hills': v('/assets/sprout-lands/Tilesets/Hills.png'),
     // Tabela yazısı görsele işli; dile göre TR ya da EN sürüm.
-    projeler: `/assets/buildings/projeler-${GAME_LANG}.png`,
-    sosyal: `/assets/buildings/sosyal-${GAME_LANG}.png`,
-    galeri: `/assets/buildings/galeri-${GAME_LANG}.png`,
+    projeler: v(`/assets/buildings/projeler-${GAME_LANG}.png`),
+    sosyal: v(`/assets/buildings/sosyal-${GAME_LANG}.png`),
+    galeri: v(`/assets/buildings/galeri-${GAME_LANG}.png`),
   },
-  atlas: { key: 'village', image: '/assets/village/atlas.png', data: '/assets/village/atlas.json' },
+  atlas: { key: 'village', image: v('/assets/village/atlas.png'), data: v('/assets/village/atlas.json') },
   // Karşılama penceresindeki portre
-  extra: ['/assets/ben-256.png'],
+  extra: [v('/assets/ben-256.png')],
 } as const;
 
 const allUrls = (): string[] => [

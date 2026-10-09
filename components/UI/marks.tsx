@@ -38,11 +38,11 @@ const SHAPES: Record<MarkKind, Shape> = {
   },
   // Ucu solda, neredeyse yatay: yanındaki düğmeyi gösterir
   arrowLeft: {
-    viewBox: '0 0 110 40',
+    viewBox: '0 0 120 44',
     dur: 0.5,
     paths: [
-      { d: 'M105 11 C 74 3, 40 9, 15 24' },
-      { d: 'M31 13 L12 25 L33 31', at: 0.4 },
+      { d: 'M112 12 C 80 6, 44 12, 18 26' },
+      { d: 'M24 9 L16 27 L36 30', at: 0.4 },
     ],
   },
   tick: {

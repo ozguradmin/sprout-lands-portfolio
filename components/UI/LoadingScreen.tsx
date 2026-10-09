@@ -18,15 +18,15 @@ export const LoadingScreen: React.FC = () => {
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-[#9bd4c3] font-pixel">
       <style>{`
         @keyframes loader-water {
-          0% { background-image: url('/assets/village/water-0.png'); }
-          25% { background-image: url('/assets/village/water-1.png'); }
-          50% { background-image: url('/assets/village/water-2.png'); }
-          75% { background-image: url('/assets/village/water-3.png'); }
+          0% { background-image: url('/assets/village/water-0.png?v=5'); }
+          25% { background-image: url('/assets/village/water-1.png?v=5'); }
+          50% { background-image: url('/assets/village/water-2.png?v=5'); }
+          75% { background-image: url('/assets/village/water-3.png?v=5'); }
         }
         @keyframes loader-cow-walk { from { background-position: 0 -48px; } to { background-position: -96px -48px; } }
         @keyframes loader-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
         .loader-water {
-          background-image: url('/assets/village/water-0.png');
+          background-image: url('/assets/village/water-0.png?v=5');
           background-size: 48px 48px;
           image-rendering: pixelated;
           animation: loader-water 1.1s steps(1) infinite;
@@ -53,7 +53,7 @@ export const LoadingScreen: React.FC = () => {
               <span className="absolute bottom-2 left-2 h-2 w-2 rounded-full bg-[#b86f50] opacity-50" />
               <span className="absolute bottom-2 right-2 h-2 w-2 rounded-full bg-[#b86f50] opacity-50" />
 
-              <img src="/assets/ben-256.png" alt="" width={88} height={88} className="mb-5 h-[88px] w-[88px] drop-shadow-[0_6px_0_rgba(184,111,80,0.35)]" />
+              <img src="/assets/ben-256.png?v=5" alt="" width={88} height={88} className="mb-5 h-[88px] w-[88px] drop-shadow-[0_6px_0_rgba(184,111,80,0.35)]" />
 
               <h2 className="mb-2 text-2xl font-extrabold uppercase tracking-wide text-[#5d4037]">{G.loadingTitle}</h2>
               <div className="mb-7 inline-block -rotate-2 rounded bg-[#b86f50] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#ead4aa]">
@@ -71,7 +71,7 @@ export const LoadingScreen: React.FC = () => {
                     className="loader-cow absolute -bottom-[7px] h-12 w-12 transition-[left] duration-300 ease-out"
                     style={{
                       left: `calc(${progress}% - 44px)`,
-                      backgroundImage: 'url("/assets/sprout-lands/Characters/Free Cow Sprites.png")',
+                      backgroundImage: 'url("/assets/sprout-lands/Characters/Free Cow Sprites.png?v=5")',
                       backgroundSize: '144px 96px',
                       imageRendering: 'pixelated',
                       animation: 'loader-cow-walk 0.5s steps(2) infinite',

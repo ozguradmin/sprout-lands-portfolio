@@ -467,19 +467,24 @@ def build_atlas():
     # Bu iki sprite "eşya" olarak beyaz dış hatla çizilmiş; karada dururken suya aitmiş gibi
     # görünüyor. Dışa bakan beyaz halkayı siliyoruz (içerideki açık renkler kalıyor).
     def strip_white_edge(im):
+        """Dışa bakan beyazımsı halkayı temizle. Halka yer yer iki piksel; hiçbir beyaz
+        piksel şeffaflığa komşu kalmayana kadar tekrarlanır."""
         px = im.load()
-        edge = []
-        for yy in range(im.height):
-            for xx in range(im.width):
-                if px[xx, yy][3] < 128 or min(px[xx, yy][:3]) <= 225:
-                    continue
-                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                    nx, ny = xx + dx, yy + dy
-                    if not (0 <= nx < im.width and 0 <= ny < im.height) or px[nx, ny][3] < 128:
-                        edge.append((xx, yy))
-                        break
-        for xx, yy in edge:
-            px[xx, yy] = (0, 0, 0, 0)
+        for _ in range(4):
+            edge = []
+            for yy in range(im.height):
+                for xx in range(im.width):
+                    if px[xx, yy][3] < 128 or min(px[xx, yy][:3]) <= 215:
+                        continue
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+                        nx, ny = xx + dx, yy + dy
+                        if not (0 <= nx < im.width and 0 <= ny < im.height) or px[nx, ny][3] < 128:
+                            edge.append((xx, yy))
+                            break
+            if not edge:
+                break
+            for xx, yy in edge:
+                px[xx, yy] = (0, 0, 0, 0)
         return im
 
     WHITE_EDGED = {'milk', 'hay'}

@@ -62,7 +62,7 @@ export const WelcomeCard: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
               {/* Portre + selam */}
               <div className="flex items-center gap-3 min-[380px]:gap-4">
-                <img src="/assets/ben-256.png" alt="Özgür Güler" width={84} height={84} className="h-16 w-16 shrink-0 min-[380px]:h-[84px] min-[380px]:w-[84px]" />
+                <img src="/assets/ben-256.png?v=5" alt="Özgür Güler" width={84} height={84} className="h-16 w-16 shrink-0 min-[380px]:h-[84px] min-[380px]:w-[84px]" />
                 <div className="min-w-0">
                   <h2 id="welcome-title" className="font-pixel text-xl uppercase text-[#5d4037]">
                     {G.welcomeTitle}
@@ -81,7 +81,7 @@ export const WelcomeCard: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 {G.welcomePlaces.map((p) => (
                   <li key={p.key} className="flex flex-col items-center rounded-lg border-2 border-[#d9b88c] bg-[#f3e5c2] px-1 pb-2 pt-2 text-center">
                     <img
-                      src={`/assets/buildings/${p.key}-${GAME_LANG}.png`}
+                      src={`/assets/buildings/${p.key}-${GAME_LANG}.png?v=5`}
                       alt=""
                       className="h-12 w-auto [image-rendering:pixelated]"
                     />

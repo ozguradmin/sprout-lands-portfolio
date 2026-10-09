@@ -166,7 +166,7 @@ export const ArcadeView: React.FC = () => {
             {/* Sol: posta kutusu ve açıklama */}
             <div className="flex gap-4 md:block">
               <img
-                src="/assets/accounts/cat-sign.png"
+                src="/assets/accounts/cat-chest.png?v=5"
                 alt=""
                 width={84}
                 height={48}
@@ -282,18 +282,19 @@ export const ArcadeView: React.FC = () => {
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {CONTENT_ACCOUNTS.map((a, i) => (
           <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate className="h-full">
-            <div className={`${CARD_BASE} flex h-full flex-col overflow-hidden hover:-translate-y-0.5`}>
-              {/* Hesabın konusunu anlatan piksel sahne (kendi çizimimiz) */}
+            <div className={`${CARD_BASE} relative flex h-full flex-col overflow-hidden hover:-translate-y-0.5`}>
+              {/* Hesabın konusunu anlatan piksel sahne kartın arka planı; üstüne okunurluk perdesi gelir */}
               <img
-                src={`/assets/accounts/${a.art}.png`}
+                src={`/assets/accounts/${a.art}.png?v=5`}
                 alt=""
-                width={128}
-                height={48}
+                width={192}
+                height={128}
                 aria-hidden="true"
-                className="h-20 w-full [image-rendering:pixelated] object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover [image-rendering:pixelated] transition-transform duration-500 group-hover:scale-105"
               />
-              <span aria-hidden="true" className="block h-[3px] w-full" style={{ background: a.tint }} />
-              <div className="flex flex-1 flex-col p-5">
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[linear-gradient(140deg,rgba(255,253,249,0.93),rgba(255,253,249,0.9)_55%,rgba(255,253,249,0.74))]" />
+              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px]" style={{ background: a.tint }} />
+              <div className="relative flex flex-1 flex-col p-5">
               <p className="relative font-heading text-lg font-bold leading-tight">{a.name}</p>
               {a.count ? (
                 <>
