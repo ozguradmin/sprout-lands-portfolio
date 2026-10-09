@@ -23,8 +23,11 @@ const WORK_LINKS = [
 // art: kartın arka planındaki piksel motif (scripts/village/build_account_art.py üretir).
 type Account = {
   name: string;
+  /** Kartta gosterilen kullanici adi. */
+  handle: string;
   count?: number;
-  countNote?: L;
+  /** Sayacin ustundeki kisa etiket (TAKIPCI, ABONE...). */
+  countLabel?: L;
   tint: string;
   art: string;
   links: { kind: 'instagram' | 'youtube'; href: string; label: string }[];
@@ -36,10 +39,11 @@ const YT = '#b3261e';
 const CONTENT_ACCOUNTS: Account[] = [
   {
     name: 'Tarihsel Wojak',
+    handle: '@tarihselwojak',
     count: 1_000_000,
-    countNote: { tr: 'Instagram · geçmişte', en: 'Instagram · in the past' },
+    countLabel: { tr: 'TAKİPÇİ · GEÇMİŞTE', en: 'FOLLOWERS · PAST' },
     tint: IG,
-    art: 'card-wojak',
+    art: 'acc-wojak',
     links: [
       { kind: 'instagram', href: 'https://instagram.com/tarihselwojak', label: '@tarihselwojak' },
       { kind: 'youtube', href: 'https://www.youtube.com/@Tarihselwojak', label: 'YouTube' },
@@ -47,45 +51,45 @@ const CONTENT_ACCOUNTS: Account[] = [
   },
   {
     name: 'WTF Çeviri',
+    handle: '@wtfceviri',
     count: 200_000,
-    countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
+    countLabel: { tr: 'TAKİPÇİ', en: 'FOLLOWERS' },
     tint: IG,
-    art: 'card-subtitle',
+    art: 'acc-ceviri',
     links: [{ kind: 'instagram', href: 'https://instagram.com/wtfceviri', label: '@wtfceviri' }],
   },
   {
     name: 'Galaktik Uzay',
+    handle: '@galaktikuzay',
     count: 200_000,
-    countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
+    countLabel: { tr: 'TAKİPÇİ', en: 'FOLLOWERS' },
     tint: IG,
-    art: 'card-space',
+    art: 'acc-uzay',
     links: [{ kind: 'instagram', href: 'https://instagram.com/galaktikuzay', label: '@galaktikuzay' }],
   },
-  { name: 'Manipulatix', tint: IG, art: 'card-puppet', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
-  { name: 'WTF Minecraft', tint: IG, art: 'card-voxel', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+  {
+    name: 'Manipulatix',
+    handle: '@manipulatix',
+    tint: IG,
+    art: 'acc-manipulatix',
+    links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }],
+  },
+  {
+    name: 'WTF Minecraft',
+    handle: '@wtfmcraft',
+    tint: IG,
+    art: 'acc-minecraft',
+    links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }],
+  },
   {
     name: 'Kırmızı ya da Mavi',
+    handle: '@kirmiziyadamavi0',
     count: 250_000,
-    countNote: { tr: 'YouTube abonesi', en: 'YouTube subscribers' },
+    countLabel: { tr: 'ABONE', en: 'SUBSCRIBERS' },
     tint: YT,
-    art: 'card-pills',
+    art: 'acc-kirmizimavi',
     links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
   },
-];
-
-// Kart görselleri Wikimedia Commons'tan; CC BY / CC BY-SA olanlarda yazar belirtmek zorunlu.
-// Her kart biraz farklı eğik dursun; üstüne gelince düzelir.
-const TILTS = ['-0.7deg', '0.5deg', '-0.35deg', '0.65deg', '-0.5deg', '0.4deg'];
-const TAPE_ROT = ['-5deg', '4deg', '-3deg', '5deg', '-4deg', '3deg'];
-const TAPES = ['#f7d58a', '#eeb49a', '#b9d7ee', '#c9e3b2', '#e7bcd8', '#f3c79a'];
-
-const CARD_CREDITS = [
-  { label: 'Wojak (CC0)', href: 'https://commons.wikimedia.org/wiki/File:Wojak_(meme)_simplified_%26_vectorized.svg' },
-  { label: 'Elephants Dream · Blender Foundation (CC BY 2.5)', href: 'https://commons.wikimedia.org/wiki/File:Elephants_Dream_Subtitles_German.jpg' },
-  { label: 'Yengeç Bulutsusu · NASA/ESA (kamu malı)', href: 'https://commons.wikimedia.org/wiki/File:Crab_Nebula.jpg' },
-  { label: 'Marionetten · Jürgen Howaldt (CC BY-SA 2.0 DE)', href: 'https://commons.wikimedia.org/wiki/File:PloenMarionetten_1.jpg' },
-  { label: 'Minetest · Kotolegokot (CC BY-SA 3.0)', href: 'https://commons.wikimedia.org/wiki/File:Minetest_screenshot_2.png' },
-  { label: 'Red and blue pill · W. Carter (CC BY-SA 4.0)', href: 'https://commons.wikimedia.org/wiki/File:Red_and_blue_pill.jpg' },
 ];
 
 const inputClass =
@@ -294,70 +298,61 @@ export const ArcadeView: React.FC = () => {
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[#5b6075]">{G.contentLead}</p>
       </Reveal>
 
-      <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
         {CONTENT_ACCOUNTS.map((a, i) => (
-          <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate>
-            <div
-              className="acc-card group"
-              style={{ ['--tilt' as string]: TILTS[i % TILTS.length], ['--tape' as string]: TAPES[i % TAPES.length] } as React.CSSProperties}
-            >
-              {/* Fotoğraf: kağıda bantlanmış baskı */}
-              <div className="acc-print">
-                <span
-                  className="acc-tape"
-                  aria-hidden="true"
-                  style={{ left: `${18 + (i % 3) * 9}%`, rotate: TAPE_ROT[i % TAPE_ROT.length] }}
-                />
-                <img src={`/assets/accounts/${a.art}.webp?v=5`} alt="" width={480} height={320} loading="lazy" decoding="async" />
-              </div>
+          <Reveal key={a.name} slot={9} delay={(i % 2) * 0.06} immediate>
+            <article className="acc-card group">
+              <img className="acc-photo" src={`/assets/accounts/${a.art}.webp?v=6`} alt="" width={1200} height={800} loading="lazy" decoding="async" />
+              <span className="acc-shade" aria-hidden="true" />
+              {/* Kartin tamami birincil hesaba gider; ikinci baglanti ustte ayri durur */}
+              <a
+                href={a.links[0].href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${a.name} - ${a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}`}
+                className="absolute inset-0 z-10 rounded-[18px] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#e4a672]"
+              />
 
-              <div className="flex flex-col px-5 pb-5 pt-4">
-                <p className="flex items-center gap-1.5 font-pixel text-[8px] uppercase tracking-[0.14em]" style={{ color: a.tint }}>
-                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: a.tint }} />
-                  {a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}
-                </p>
-                <p className="mt-1.5 font-heading text-lg font-bold leading-tight text-[#262b44]">{a.name}</p>
-                {a.count ? (
-                  <>
-                    <CountUp to={a.count} className="mt-2 font-heading text-[30px] font-extrabold leading-none tracking-tight text-[#262b44]" />
-                    <span className="mt-1 text-[12.5px] leading-tight text-[#5b6075]">{a.countNote?.[GAME_LANG]}</span>
-                  </>
-                ) : null}
-                <div className="flex flex-wrap gap-2 pt-4">
-                  {a.links.map((l) => (
-                    <a
-                      key={l.href}
-                      href={l.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: l.kind === 'youtube' ? YT : IG }}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3d6bf] bg-[#fffdf9] px-3 text-sm font-semibold transition hover:border-current/40 hover:bg-[#f6efe2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f6fd6] active:scale-[0.98]"
-                    >
-                      {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
-                      {l.label}
-                    </a>
-                  ))}
+              <div className="pointer-events-none relative z-20 flex h-full flex-col justify-between p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[12.5px] font-semibold text-white/90 backdrop-blur-md">
+                    {a.links[0].kind === 'youtube' ? <Youtube size={15} /> : <Instagram size={15} />}
+                    {a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}
+                  </span>
+                  <span className="truncate font-mono text-[12.5px] text-white/65">{a.handle}</span>
+                </div>
+
+                <div className="flex items-end justify-between gap-4 border-t border-white/15 pt-4">
+                  <div className="min-w-0">
+                    <p className="font-pixel text-[8px] uppercase tracking-[0.16em] text-white/45">{G.accountLabel}</p>
+                    <h3 className="mt-2 truncate font-heading text-[21px] font-extrabold leading-none text-white sm:text-[24px]">{a.name}</h3>
+                  </div>
+                  {a.count ? (
+                    <div className="flex-none text-right">
+                      <p className="font-pixel text-[8px] uppercase tracking-[0.16em] text-white/45">{a.countLabel?.[GAME_LANG]}</p>
+                      <CountUp to={a.count} className="mt-2 block font-heading text-[21px] font-extrabold leading-none text-white sm:text-[24px]" />
+                    </div>
+                  ) : null}
                 </div>
               </div>
-            </div>
+
+              {/* Ikinci hesap (varsa) kendi baglantisi olarak durur */}
+              {a.links[1] && (
+                <a
+                  href={a.links[1].href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute right-5 top-[62px] z-30 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-[12px] font-semibold text-white/85 backdrop-blur-md transition hover:border-white/40 hover:bg-black/70 sm:right-6"
+                >
+                  {a.links[1].kind === 'youtube' ? <Youtube size={14} /> : <Instagram size={14} />}
+                  {a.links[1].kind === 'youtube' ? 'YouTube' : a.links[1].label}
+                </a>
+              )}
+            </article>
           </Reveal>
         ))}
       </div>
 
-      {/* Serbest lisanslı görseller: lisans gereği kaynak ve yazar belirtiliyor */}
-      <Reveal slot={10} immediate>
-        <p className="mt-4 text-[11.5px] leading-relaxed text-[#8d5d42]/90">
-          {G.cardCredits}{' '}
-          {CARD_CREDITS.map((c, i) => (
-            <React.Fragment key={c.href}>
-              {i > 0 && ' · '}
-              <a href={c.href} target="_blank" rel="noopener noreferrer" className="underline decoration-[#b86f50]/40 underline-offset-2 hover:text-[#9a5438]">
-                {c.label}
-              </a>
-            </React.Fragment>
-          ))}
-        </p>
-      </Reveal>
     </Interior>
   );
 };
