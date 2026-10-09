@@ -74,6 +74,11 @@ const CONTENT_ACCOUNTS: Account[] = [
 ];
 
 // Kart görselleri Wikimedia Commons'tan; CC BY / CC BY-SA olanlarda yazar belirtmek zorunlu.
+// Her kart biraz farklı eğik dursun; üstüne gelince düzelir.
+const TILTS = ['-0.7deg', '0.5deg', '-0.35deg', '0.65deg', '-0.5deg', '0.4deg'];
+const TAPE_ROT = ['-5deg', '4deg', '-3deg', '5deg', '-4deg', '3deg'];
+const TAPES = ['#f7d58a', '#eeb49a', '#b9d7ee', '#c9e3b2', '#e7bcd8', '#f3c79a'];
+
 const CARD_CREDITS = [
   { label: 'Wojak (CC0)', href: 'https://commons.wikimedia.org/wiki/File:Wojak_(meme)_simplified_%26_vectorized.svg' },
   { label: 'Elephants Dream · Blender Foundation (CC BY 2.5)', href: 'https://commons.wikimedia.org/wiki/File:Elephants_Dream_Subtitles_German.jpg' },
@@ -289,51 +294,50 @@ export const ArcadeView: React.FC = () => {
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[#5b6075]">{G.contentLead}</p>
       </Reveal>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-5 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CONTENT_ACCOUNTS.map((a, i) => (
-          <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate className="h-full">
-            <div className={`${CARD_BASE} relative flex h-full min-h-[250px] flex-col justify-end overflow-hidden hover:-translate-y-0.5`}>
-              {/* Hesabın konusunu anlatan gerçek görsel; yazılar altta perdenin üstünde durur */}
-              <img
-                src={`/assets/accounts/${a.art}.webp?v=5`}
-                alt=""
-                width={480}
-                height={320}
-                loading="lazy"
-                decoding="async"
-                aria-hidden="true"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 bg-[linear-gradient(to_top,rgba(255,253,249,0.98)_38%,rgba(255,253,249,0.9)_54%,rgba(255,253,249,0.28)_76%,rgba(255,253,249,0.04))]"
-              />
-              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px]" style={{ background: a.tint }} />
-              <div className="relative flex flex-col p-5 pt-20">
-              <p className="relative font-heading text-lg font-bold leading-tight">{a.name}</p>
-              {a.count ? (
-                <>
-                  <CountUp to={a.count} className="relative mt-2 font-heading text-3xl font-extrabold leading-none tracking-tight text-[#262b44]" />
-                  <p className="relative mt-1 text-[13px] text-[#5b6075]">{a.countNote?.[GAME_LANG]}</p>
-                </>
-              ) : (
-                <p className="relative mt-2 text-[13px] text-[#5b6075]">{a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}</p>
-              )}
-              <div className="relative mt-auto flex flex-wrap gap-2 pt-4">
-                {a.links.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: l.kind === 'youtube' ? YT : IG }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3d6bf] bg-[#fffdf9]/80 px-3 text-sm font-semibold transition hover:bg-[#f6efe2] active:scale-[0.98]"
-                  >
-                    {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
-                    {l.label}
-                  </a>
-                ))}
+          <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate>
+            <div
+              className="acc-card group"
+              style={{ ['--tilt' as string]: TILTS[i % TILTS.length], ['--tape' as string]: TAPES[i % TAPES.length] } as React.CSSProperties}
+            >
+              {/* Fotoğraf: kağıda bantlanmış baskı */}
+              <div className="acc-print">
+                <span
+                  className="acc-tape"
+                  aria-hidden="true"
+                  style={{ left: `${18 + (i % 3) * 9}%`, rotate: TAPE_ROT[i % TAPE_ROT.length] }}
+                />
+                <img src={`/assets/accounts/${a.art}.webp?v=5`} alt="" width={480} height={320} loading="lazy" decoding="async" />
               </div>
+
+              <div className="flex flex-col px-5 pb-5 pt-4">
+                <p className="flex items-center gap-1.5 font-pixel text-[8px] uppercase tracking-[0.14em]" style={{ color: a.tint }}>
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: a.tint }} />
+                  {a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}
+                </p>
+                <p className="mt-1.5 font-heading text-lg font-bold leading-tight text-[#262b44]">{a.name}</p>
+                {a.count ? (
+                  <>
+                    <CountUp to={a.count} className="mt-2 font-heading text-[30px] font-extrabold leading-none tracking-tight text-[#262b44]" />
+                    <span className="mt-1 text-[12.5px] leading-tight text-[#5b6075]">{a.countNote?.[GAME_LANG]}</span>
+                  </>
+                ) : null}
+                <div className="flex flex-wrap gap-2 pt-4">
+                  {a.links.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: l.kind === 'youtube' ? YT : IG }}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3d6bf] bg-[#fffdf9] px-3 text-sm font-semibold transition hover:border-current/40 hover:bg-[#f6efe2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f6fd6] active:scale-[0.98]"
+                    >
+                      {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           </Reveal>
