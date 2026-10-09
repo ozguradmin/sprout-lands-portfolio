@@ -21,7 +21,7 @@ ATLAS_JSON = ROOT / 'public' / 'assets' / 'village' / 'atlas.json'
 PLAYER = ROOT / 'public' / 'assets' / 'characters' / 'player.png'
 
 CELL = 48                # player.png'de bir karenin ölçüsü
-CHEST_W, CHEST_H = 22, 40  # sandık şeridinde bir kare (mektubun yükseleceği boşlukla)
+CHEST_W, CHEST_H = 22, 34  # sandık şeridinde bir kare (mektubun yükseleceği boşlukla)
 
 # Köyün paletinden kağıt ve çizgi renkleri
 PAPER = (251, 243, 228, 255)
@@ -91,13 +91,13 @@ def build_chest() -> int:
         (4, None, 1.0),
         (4, 0, 1.0),
         (4, 2, 1.0),
-        (4, 4, 1.0),
-        (4, 6, 1.0),
-        (4, 8, 0.9),
-        (4, 10, 0.75),
-        (4, 12, 0.55),
-        (4, 14, 0.35),
-        (4, 16, 0.15),
+        (4, 3, 1.0),
+        (4, 5, 1.0),
+        (4, 6, 0.9),
+        (4, 8, 0.72),
+        (4, 10, 0.5),
+        (4, 11, 0.25),
+        (4, None, 1.0),
         (3, None, 1.0),
         (2, None, 1.0),
         (0, None, 1.0),

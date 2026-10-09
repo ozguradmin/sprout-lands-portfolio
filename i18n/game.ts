@@ -34,6 +34,7 @@ const STRINGS = {
     loadingBadge: 'PORTFOLYOSU',
     loadingBar: 'KÖY YÜKLENİYOR...',
     credit: 'Köy görselleri: Sprout Lands · Cup Nooble',
+    footerSign: 'görüşmek üzere',
     loadingStages: ['Çimenler ekiliyor...', 'Evler kuruluyor...', 'Hayvanlar uyandırılıyor...', 'Köy hazır!'],
     loadingTips: [
       'İpucu: Bir binaya girmek için kapısına doğru yukarı yürü.',
@@ -138,6 +139,7 @@ const STRINGS = {
     loadingBadge: 'PORTFOLIO',
     loadingBar: 'LOADING VILLAGE...',
     credit: 'Village art: Sprout Lands by Cup Nooble',
+    footerSign: 'see you around',
     loadingStages: ['Planting the grass...', 'Building the houses...', 'Waking up the animals...', 'The village is ready!'],
     loadingTips: [
       'Tip: walk up into a door to enter a building.',

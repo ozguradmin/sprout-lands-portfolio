@@ -34,7 +34,7 @@ export const Interior: React.FC<{
           <div className="ml-auto">{aside}</div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-5 pb-24 pt-8 md:px-8 md:pt-12">
+      <main className="mx-auto max-w-5xl px-5 pb-16 pt-8 md:px-8 md:pt-12">
         <div className="relative">
           {eyebrow && (
             <Reveal slot={0} immediate>
@@ -56,6 +56,24 @@ export const Interior: React.FC<{
         </div>
         {children}
       </main>
+
+      {/* Sayfanın sonu: aşağı kadar inen biri köye dönmek için yukarı kaydırmasın */}
+      <footer className="border-t border-[#e3d6bf] bg-[#f1e7d4]">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-5 px-5 py-10 text-center md:px-8">
+          <span className="font-hand text-[26px] leading-none text-[#9a5438] [rotate:-3deg]">{G.footerSign} — Özgür</span>
+          <button type="button" onClick={onBack} className="group relative">
+            <span className="absolute inset-0 translate-y-[3px] rounded-xl bg-[#b86f50]" />
+            <span className="relative flex h-12 items-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] px-5 font-pixel text-[10px] text-[#4a2f22] transition-transform group-hover:brightness-105 group-active:translate-y-[3px]">
+              <ArrowLeft size={14} strokeWidth={3} aria-hidden="true" />
+              {G.backToVillage}
+            </span>
+          </button>
+          <p className="font-pixel text-[8px] uppercase leading-relaxed tracking-[0.14em] text-[#8d5d42]/75">
+            © {new Date().getFullYear()} Özgür Güler · {G.credit}
+          </p>
+        </div>
+      </footer>
+      <PixelBanner className="pixel-banner-alt border-t-[3px] border-[#b86f50]" />
     </div>
   );
 };

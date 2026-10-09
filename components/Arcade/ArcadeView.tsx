@@ -183,7 +183,7 @@ export const ArcadeView: React.FC = () => {
 
           <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] md:gap-10">
             {/* Sol: posta kutusu ve açıklama */}
-            <div className="flex gap-4 md:block">
+            <div className="flex items-center gap-4 md:block md:items-start">
               {/* Kedi sandığın yanında bekler, sandık arada bir açılıp mektup salar (sprite şeritleri) */}
               <span className="msg-scene flex-none" aria-hidden="true">
                 <span className="msg-chest" />
@@ -197,7 +197,7 @@ export const ArcadeView: React.FC = () => {
                   href={PROFILE.cv[GAME_LANG]}
                   target="_blank"
                   rel="noopener"
-                  className="mt-4 hidden h-10 items-center gap-2 rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-3.5 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98] md:inline-flex"
+                  className="mt-3 inline-flex h-10 items-center gap-2 rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-3.5 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98] md:mt-4"
                 >
                   <FileText size={16} /> {G.cvLabel}
                 </a>
@@ -249,14 +249,6 @@ export const ArcadeView: React.FC = () => {
                 </button>
                 <Mark kind="arrowLeft" immediate delay={0.4} className="h-7 w-14 flex-none text-[#b86f50]" />
                 <span className="font-hand text-[20px] leading-none text-[#9a5438] [rotate:-3deg]">{G.socialNote}</span>
-                <a
-                  href={PROFILE.cv[GAME_LANG]}
-                  target="_blank"
-                  rel="noopener"
-                  className="ml-auto inline-flex h-10 items-center gap-2 rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-3.5 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98] md:hidden"
-                >
-                  <FileText size={16} /> {G.cvLabel}
-                </a>
               </div>
 
               {status === 'error' && (
@@ -300,7 +292,7 @@ export const ArcadeView: React.FC = () => {
         {CONTENT_ACCOUNTS.map((a, i) => (
           <Reveal key={a.name} slot={9} delay={(i % 2) * 0.06} immediate>
             <article className="acc-card group">
-              <img className="acc-photo" src={`/assets/accounts/${a.art}.webp?v=6`} alt="" width={1200} height={800} loading="lazy" decoding="async" />
+              <img className="acc-photo" src={`/assets/accounts/${a.art}.webp?v=7`} alt="" width={1200} height={800} loading="lazy" decoding="async" />
               <span className="acc-shade" aria-hidden="true" />
               {/* Kartin tamami birincil hesaba gider; ikinci baglanti ustte ayri durur */}
               <a

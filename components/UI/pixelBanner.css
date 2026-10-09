@@ -10,7 +10,8 @@
   --cross: 30s;
   /* Tur: bir geçiş (%47) + boşluk, sonra ters yönde aynısı */
   --loop: calc(var(--cross) * 2.128);
-  --lead: -10s;
+  --lead0: -10s;
+  --lead: var(--lead0);
   position: relative;
   height: calc(32px * var(--s));
   overflow: hidden;
@@ -40,6 +41,11 @@
 }
 /* ART:END */
 
+/* Sayfanın altındaki kopya turun öbür yarısından başlar: üstte inek geçerken altta tavuk olur. */
+.pixel-banner-alt {
+  --lead: calc(var(--lead0) - var(--cross));
+}
+
 /* Yürüyenler: hepsi köyün kendi sprite sayfalarından kare kare.
    Bir tur boyunca önce karakter+inek sağdan sola geçer, ikinci turda karakter+tavuk
    soldan sağa döner. Her biri turun yarısında yürür, kalan yarıda ekran dışında bekler. */
@@ -60,7 +66,7 @@
   width: calc(48px * var(--s));
   height: calc(48px * var(--s));
   top: calc(-8px * var(--s));
-  background-image: url('/assets/characters/player.png?v=6');
+  background-image: url('/assets/characters/player.png?v=7');
   background-size: calc(192px * var(--s)) calc(192px * var(--s));
 }
 .pixel-banner-walker {
@@ -88,7 +94,7 @@
   width: calc(32px * var(--s));
   height: calc(32px * var(--s));
   top: calc(-4px * var(--s));
-  background-image: url('/assets/sprout-lands/Characters/Free Cow Sprites.png?v=6');
+  background-image: url('/assets/sprout-lands/Characters/Free Cow Sprites.png?v=7');
   background-size: calc(96px * var(--s)) calc(64px * var(--s));
   background-position: 0 calc(-32px * var(--s));
 }
@@ -101,7 +107,7 @@
   width: calc(16px * var(--s));
   height: calc(16px * var(--s));
   top: calc(12px * var(--s));
-  background-image: url('/assets/sprout-lands/Characters/Free Chicken Sprites.png?v=6');
+  background-image: url('/assets/sprout-lands/Characters/Free Chicken Sprites.png?v=7');
   background-size: calc(64px * var(--s)) calc(32px * var(--s));
   background-position: 0 calc(-16px * var(--s));
 }
@@ -168,6 +174,6 @@
     --s: 2;
     /* Dar ekranda yol kısa; tur da kısalsın ki yürüyüş aynı hızda görünsün */
     --cross: 19s;
-    --lead: -7s;
+    --lead0: -7s;
   }
 }
