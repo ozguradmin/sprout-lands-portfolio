@@ -1,3 +1,4 @@
+@import '../components/UI/pixelBanner.css';
 /* Profesyonel görünüm. Bütün kurallar .pro altında; oyunun Tailwind stilleriyle çakışmaz. */
 
 @font-face {
@@ -137,10 +138,17 @@ html[data-theme='dark'] .pro {
 }
 
 /* Köyün piksel çitini hatırlatan şerit */
-.pro-pixel-strip {
-  height: 6px;
-  background-image: linear-gradient(90deg, var(--wood) 50%, var(--wood-dark) 50%);
-  background-size: 12px 6px;
+.pro-banner {
+  border-bottom: 3px solid var(--wood-dark);
+}
+/* Koyu temada manzara kısılır ki sayfanın geri kalanını bastırmasın */
+html[data-theme='dark'] .pro-banner {
+  filter: saturate(0.72) brightness(0.58) contrast(0.95);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .pro-banner {
+    filter: saturate(0.72) brightness(0.58) contrast(0.95);
+  }
 }
 
 .pro-app-icon {
@@ -324,6 +332,7 @@ html[data-theme='dark'] .pro {
   margin-top: 10px;
 }
 .pro-cta {
+  align-items: flex-start;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -948,20 +957,20 @@ html[data-theme='dark'] .pro {
   .pro-section {
     padding-top: 80px;
   }
-  /* Geniş ekranda detaylar hep açık, aç/kapa düğmesi yok */
-  .pro-details-toggle {
-    display: none;
-  }
-  .pro-story,
-  .pro-project:not(.is-open) .pro-story {
-    display: grid;
-    margin-top: 18px;
-  }
+  /* Detaylar her ekranda kapalı başlar: tek proje için sayfalarca kaydırmak gerekmesin. */
   .pro-project:not(.is-open) .pro-kind {
     display: block;
   }
   .pro-project {
     grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
+  }
+  /* Teknolojiler listesi sayfayı uzatmasın: geniş ekranda üç sütun, daha dar satırlar */
+  .pro-skills {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 28px;
+  }
+  .pro-skills > div {
+    padding: 10px 0;
   }
   .pro-project-body {
     padding: 28px 28px 26px;
@@ -973,7 +982,7 @@ html[data-theme='dark'] .pro {
   .pro-village-card,
   .pro-copy,
   .pro-details-toggle,
-  .pro-pixel-strip {
+  .pro-banner {
     display: none;
   }
   .pro-story {
@@ -1140,20 +1149,29 @@ html[data-theme='dark'] .pro {
   color: var(--accent);
   rotate: -4deg;
 }
-.pro-note-row {
-  display: flex;
+.pro-cv-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.pro-cv-row {
+  display: inline-flex;
+  gap: 10px;
+}
+.pro-cv-note {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 14px;
+  gap: 2px;
+  padding-left: 10px;
 }
 .pro-note-arrow {
-  width: 54px;
-  height: 34px;
+  width: 42px;
+  height: 26px;
   color: var(--accent);
   flex: none;
-  /* Ucu yukarı sağa, yani CV düğmesine baksın */
-  transform: scaleY(-1) rotate(-4deg);
-  margin-left: 2px;
+  /* Ucu yukarı sağa: tam üstündeki CV düğmesini gösterir */
+  transform: scaleY(-1) rotate(-6deg);
 }
 .pro-note-arrow path {
   fill: none;
@@ -1236,18 +1254,19 @@ html[data-theme='dark'] .pro {
   list-style: none;
 }
 .pro-chips li {
-  padding: 5px 11px;
+  padding: 4px 9px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ink-2);
 }
 .pro-skill-also {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
 }
 
 /* --- alt bilgi: Mardin saati ve imza --------------------------------------- */

@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { G } from '../../i18n/game';
 import { Marked } from './marks';
+import { PixelBanner } from './PixelBanner';
 import { Reveal } from './motionKit';
 
 // Binaların içi: profesyonel görünümle aynı kağıt/ahşap paleti, üstte köye dönüş tabelası.
@@ -20,7 +21,7 @@ export const Interior: React.FC<{
   const head = markWord && title.endsWith(markWord) ? title.slice(0, -markWord.length) : title;
   return (
     <div className="interior-paper h-full w-full overflow-y-auto bg-[#f6efe2] text-[#262b44] font-sans selection:bg-[#e4a672]/60">
-      <div className="h-1.5 bg-[linear-gradient(90deg,#e4a672_50%,#b86f50_50%)] bg-[length:12px_6px]" aria-hidden="true" />
+      <PixelBanner className="border-b-[3px] border-[#b86f50]" />
       <header className="sticky top-0 z-20 border-b border-[#e3d6bf] bg-[#f6efe2]/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-5 md:px-8">
           <button type="button" onClick={onBack} className="group relative">

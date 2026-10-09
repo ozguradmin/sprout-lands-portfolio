@@ -227,17 +227,6 @@ export const PortfolioView: React.FC = () => {
       subtitle={G.projectsSub}
       eyebrow={<Eyebrow n="01">{G.eyebrowProjects}</Eyebrow>}
       onBack={back}
-      note={
-        <>
-          <Reveal slot={3} immediate className="pointer-events-none absolute right-0 top-0 hidden w-44 lg:block">
-            <p className="font-hand text-[22px] leading-tight text-[#9a5438] [rotate:-4deg]">{G.projectsNote}</p>
-            <Mark kind="arrow" delay={0.9} className="ml-10 mt-1 h-14 w-20 text-[#b86f50] [rotate:12deg]" />
-          </Reveal>
-          <Reveal slot={3} immediate className="lg:hidden">
-            <p className="mt-3 font-hand text-[21px] leading-tight text-[#9a5438] [rotate:-2deg]">{G.projectsNote}</p>
-          </Reveal>
-        </>
-      }
     >
       {/* Rakamlar: iddia değil, sayfadaki işlerin özeti */}
       <Reveal slot={3} immediate className="mt-7 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-y border-[#e3d6bf] py-4">

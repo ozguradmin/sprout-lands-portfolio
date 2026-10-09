@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowUpRight, FileText, Github, Instagram, Linkedin, Mail, MessageSquare, Send, X, Youtube } from 'lucide-react';
+import { ArrowUpRight, FileText, Github, Instagram, Linkedin, Mail, Send, Youtube } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ViewState } from '../../types';
 import { G, GAME_LANG } from '../../i18n/game';
 import { PROFILE } from '../../professional/data';
 import { Interior } from '../UI/Interior';
 import { Mark } from '../UI/marks';
-import { CARD_BASE, CountUp, Eyebrow, Reveal, useLocalClock } from '../UI/motionKit';
+import { CARD_BASE, CountUp, Eyebrow, Reveal } from '../UI/motionKit';
 
 type L = { tr: string; en: string };
 
@@ -20,11 +20,13 @@ const WORK_LINKS = [
 ];
 
 // İçerik hesapları. Sayılar CV'den; "geçmişte" ibaresi CV'deki ifadeyle aynı.
+// art: kartın arka planındaki piksel motif (scripts/village/build_account_art.py üretir).
 type Account = {
   name: string;
   count?: number;
   countNote?: L;
   tint: string;
+  art: string;
   links: { kind: 'instagram' | 'youtube'; href: string; label: string }[];
 };
 
@@ -37,6 +39,7 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 1_000_000,
     countNote: { tr: 'Instagram · geçmişte', en: 'Instagram · in the past' },
     tint: IG,
+    art: 'wojak',
     links: [
       { kind: 'instagram', href: 'https://instagram.com/tarihselwojak', label: '@tarihselwojak' },
       { kind: 'youtube', href: 'https://www.youtube.com/@Tarihselwojak', label: 'YouTube' },
@@ -47,6 +50,7 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 250_000,
     countNote: { tr: 'YouTube abonesi', en: 'YouTube subscribers' },
     tint: YT,
+    art: 'pills',
     links: [{ kind: 'youtube', href: 'https://www.youtube.com/@kirmiziyadamavi0', label: 'YouTube' }],
   },
   {
@@ -54,6 +58,7 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 200_000,
     countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
     tint: IG,
+    art: 'bubble',
     links: [{ kind: 'instagram', href: 'https://instagram.com/wtfceviri', label: '@wtfceviri' }],
   },
   {
@@ -61,31 +66,29 @@ const CONTENT_ACCOUNTS: Account[] = [
     count: 200_000,
     countNote: { tr: 'Instagram takipçisi', en: 'Instagram followers' },
     tint: IG,
+    art: 'planet',
     links: [{ kind: 'instagram', href: 'https://instagram.com/galaktikuzay', label: '@galaktikuzay' }],
   },
-  { name: 'Manipulatix', tint: IG, links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
-  { name: 'WTF Minecraft', tint: IG, links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
+  { name: 'Manipulatix', tint: IG, art: 'frame', links: [{ kind: 'instagram', href: 'https://instagram.com/manipulatix', label: '@manipulatix' }] },
+  { name: 'WTF Minecraft', tint: IG, art: 'pickaxe', links: [{ kind: 'instagram', href: 'https://instagram.com/wtfmcraft', label: '@wtfmcraft' }] },
 ];
 
 const inputClass =
-  'w-full rounded-xl border border-[#e3d6bf] bg-white px-4 py-3 text-[15px] text-[#262b44] placeholder:text-[#9a9eb0] outline-none transition focus:border-[#b86f50] focus:ring-4 focus:ring-[#e4a672]/35';
-const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#5b6075]';
+  'w-full rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-4 py-3 text-[15px] text-[#262b44] placeholder:text-[#9a9eb0] outline-none transition focus:border-[#b86f50] focus:ring-4 focus:ring-[#e4a672]/35';
+const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wider text-[#8d5d42]';
 
 export const ArcadeView: React.FC = () => {
   const { setCurrentView } = useApp();
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', instagram: '', message: '' });
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const clock = useLocalClock();
   const still = useReducedMotion();
 
   useEffect(() => {
-    if (!isMessageOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setIsMessageOpen(false);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isMessageOpen]);
+    if (status !== 'success') return;
+    const id = window.setTimeout(() => setStatus('idle'), 6000);
+    return () => window.clearTimeout(id);
+  }, [status]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,10 +106,6 @@ export const ArcadeView: React.FC = () => {
       if (response.ok) {
         setStatus('success');
         setFormData({ name: '', phone: '', instagram: '', message: '' });
-        setTimeout(() => {
-          setIsMessageOpen(false);
-          setStatus('idle');
-        }, 2200);
       } else {
         setStatus('error');
       }
@@ -129,17 +128,6 @@ export const ArcadeView: React.FC = () => {
       subtitle={G.socialSub}
       eyebrow={<Eyebrow n="01">{G.eyebrowContact}</Eyebrow>}
       onBack={back}
-      note={
-        <>
-          <Reveal slot={3} immediate className="pointer-events-none absolute right-0 top-0 hidden w-44 lg:block">
-            <p className="font-hand text-[22px] leading-tight text-[#9a5438] [rotate:-4deg]">{G.socialNote}</p>
-            <Mark kind="arrow" delay={0.9} className="ml-10 mt-1 h-14 w-20 text-[#b86f50] [rotate:12deg]" />
-          </Reveal>
-          <Reveal slot={3} immediate className="lg:hidden">
-            <p className="mt-3 font-hand text-[21px] leading-tight text-[#9a5438] [rotate:-2deg]">{G.socialNote}</p>
-          </Reveal>
-        </>
-      }
     >
       {/* İletişim kartları */}
       <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -164,39 +152,129 @@ export const ArcadeView: React.FC = () => {
         ))}
       </div>
 
-      {/* Mesaj kartı: masaya bırakılmış bir mektup */}
-      <Reveal slot={6} immediate className="relative mt-8">
-        <span className="tape" aria-hidden="true" />
-        <div className="flex flex-col gap-4 rounded-2xl border-2 border-[#b86f50] bg-[#fbe6d3] p-5 pt-6 shadow-[0_10px_26px_rgba(35,40,64,0.10)] sm:flex-row sm:items-center">
-          <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-[#e4a672] text-[#4a2f22]">
-            <MessageSquare size={20} />
-          </span>
-          <div>
-            <p className="font-heading text-lg font-bold">{G.messageCardTitle}</p>
-            <p className="text-sm text-[#5b6075]">{G.messageCardText}</p>
+      {/* Mesaj: köy masasına bırakılmış bir mektup. Form burada, ayrı pencere yok. */}
+      <Reveal slot={6} immediate className="mt-12">
+        <Eyebrow n="02">{G.eyebrowWrite}</Eyebrow>
+      </Reveal>
+
+      <Reveal slot={6} delay={0.05} immediate className="relative mt-3">
+        <div className="relative overflow-hidden rounded-3xl border-2 border-[#d9c7a8] bg-[#fbf3e4] shadow-[0_12px_30px_rgba(35,40,64,0.08)]">
+          {/* Üstte ahşap bir bant: köyün tabelalarıyla aynı desen */}
+          <div className="h-2 bg-[linear-gradient(90deg,#e4a672_50%,#b86f50_50%)] bg-[length:12px_8px]" aria-hidden="true" />
+
+          <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] md:gap-10">
+            {/* Sol: posta kutusu ve açıklama */}
+            <div className="flex gap-4 md:block">
+              <img
+                src="/assets/accounts/mailbox.png"
+                alt=""
+                width={48}
+                height={48}
+                className="h-16 w-16 flex-none [image-rendering:pixelated] md:h-24 md:w-24"
+              />
+              <div className="md:mt-4">
+                <h2 className="font-heading text-xl font-extrabold tracking-tight md:text-2xl">{G.messageCardTitle}</h2>
+                <p className="mt-1.5 text-[14px] leading-relaxed text-[#5b6075]">{G.messageCardText}</p>
+                <p className="mt-3 hidden text-[13px] leading-relaxed text-[#8d5d42] md:block">{G.contactNote}</p>
+                <a
+                  href={PROFILE.cv[GAME_LANG]}
+                  target="_blank"
+                  rel="noopener"
+                  className="mt-4 hidden h-10 items-center gap-2 rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-3.5 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98] md:inline-flex"
+                >
+                  <FileText size={16} /> {G.cvLabel}
+                </a>
+              </div>
+            </div>
+
+            {/* Sağ: formun kendisi */}
+            <form onSubmit={handleSendMessage} className={`transition-opacity ${status === 'success' ? 'pointer-events-none opacity-20' : ''}`}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block">
+                  <span className={labelClass}>{G.nameLabel}</span>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder={G.namePlaceholder}
+                    className={inputClass}
+                  />
+                </label>
+                <label className="block">
+                  <span className={labelClass}>{G.instagramLabel}</span>
+                  <input
+                    type="text"
+                    value={formData.instagram}
+                    onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                    placeholder={G.instagramPlaceholder}
+                    className={inputClass}
+                  />
+                </label>
+              </div>
+              <label className="mt-3 block">
+                <span className={labelClass}>{G.messageLabel}</span>
+                <textarea
+                  required
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  placeholder={G.messagePlaceholder}
+                  className={`${inputClass} h-28 resize-none`}
+                />
+              </label>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button type="submit" disabled={isSending} className="group relative disabled:opacity-70">
+                  <span className="absolute inset-0 translate-y-[3px] rounded-xl bg-[#b86f50]" />
+                  <span className="relative inline-flex h-12 items-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] px-5 text-sm font-bold text-[#4a2f22] transition-transform group-hover:brightness-105 group-active:translate-y-[3px]">
+                    {isSending ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-[#4a2f22]/30 border-t-[#4a2f22]" /> : <Send size={16} />}
+                    {G.send}
+                  </span>
+                </button>
+                <Mark kind="arrow" immediate delay={0.4} className="h-8 w-11 flex-none text-[#b86f50] [transform:scaleX(-1)_rotate(-8deg)]" />
+                <span className="font-hand text-[20px] leading-none text-[#9a5438] [rotate:-3deg]">{G.socialNote}</span>
+                <a
+                  href={PROFILE.cv[GAME_LANG]}
+                  target="_blank"
+                  rel="noopener"
+                  className="ml-auto inline-flex h-10 items-center gap-2 rounded-xl border border-[#d9c7a8] bg-[#fffdf9] px-3.5 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98] md:hidden"
+                >
+                  <FileText size={16} /> {G.cvLabel}
+                </a>
+              </div>
+
+              {status === 'error' && (
+                <p role="alert" className="mt-3 rounded-lg border border-[#b3261e]/20 bg-[#b3261e]/5 px-3 py-2 text-sm font-medium text-[#b3261e]">
+                  {G.error}{' '}
+                  <a href={`mailto:${PROFILE.email}`} className="underline underline-offset-2">
+                    {PROFILE.email}
+                  </a>
+                </p>
+              )}
+              <p className="mt-3 text-[12px] leading-relaxed text-[#8d5d42] md:hidden">{G.contactNote}</p>
+            </form>
           </div>
-          <div className="flex flex-wrap gap-2 sm:ml-auto">
-            <button type="button" onClick={() => setIsMessageOpen(true)} className="group relative">
-              <span className="absolute inset-0 translate-y-[3px] rounded-xl bg-[#b86f50]" />
-              <span className="relative inline-flex h-11 items-center gap-2 rounded-xl border-2 border-[#b86f50] bg-[#e4a672] px-4 text-sm font-bold text-[#4a2f22] transition-transform group-hover:brightness-105 group-active:translate-y-[3px]">
-                <Send size={16} /> {G.writeMessage}
-              </span>
-            </button>
-            <a
-              href={PROFILE.cv[GAME_LANG]}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex h-11 items-center gap-2 rounded-xl border border-[#b86f50]/40 bg-[#fffdf9] px-4 text-sm font-semibold transition hover:border-[#b86f50] active:scale-[0.98]"
-            >
-              <FileText size={16} /> {G.cvLabel}
-            </a>
-          </div>
+
+          {/* Gönderildi: mektubun üstüne damga */}
+          <AnimatePresence>
+            {status === 'success' && (
+              <motion.div
+                initial={still ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="pointer-events-none absolute inset-0 grid place-content-center justify-items-center"
+                role="status"
+              >
+                <Mark kind="stamp" immediate className="h-20 w-20 text-[#3f7d2c]" />
+                <p className="mt-1 font-hand text-[30px] text-[#3f7d2c] [rotate:-6deg]">{G.sentStamp}</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </Reveal>
 
       {/* Hesaplar: sayılar bu bölümün en görünür parçası */}
       <Reveal slot={7} immediate className="mt-12">
-        <Eyebrow n="02">{G.eyebrowAccounts}</Eyebrow>
+        <Eyebrow n="03">{G.eyebrowAccounts}</Eyebrow>
         <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight">{G.contentTitle}</h2>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[#5b6075]">{G.contentLead}</p>
       </Reveal>
@@ -205,16 +283,25 @@ export const ArcadeView: React.FC = () => {
         {CONTENT_ACCOUNTS.map((a, i) => (
           <Reveal key={a.name} slot={9} delay={(i % 3) * 0.05} immediate className="h-full">
             <div className={`${CARD_BASE} flex h-full flex-col overflow-hidden p-5 hover:-translate-y-0.5`} style={{ borderTop: `3px solid ${a.tint}` }}>
-              <p className="font-heading text-lg font-bold leading-tight">{a.name}</p>
+              {/* Hesabın konusunu anlatan piksel motif; okunurluğu bozmasın diye soluk */}
+              <img
+                src={`/assets/accounts/${a.art}.png`}
+                alt=""
+                width={48}
+                height={48}
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-3 -top-2 h-28 w-28 opacity-[0.22] [image-rendering:pixelated] transition-[opacity,transform] duration-300 group-hover:-translate-y-0.5 group-hover:opacity-40"
+              />
+              <p className="relative font-heading text-lg font-bold leading-tight">{a.name}</p>
               {a.count ? (
                 <>
-                  <CountUp to={a.count} className="mt-2 font-heading text-3xl font-extrabold leading-none tracking-tight text-[#262b44]" />
-                  <p className="mt-1 text-[13px] text-[#5b6075]">{a.countNote?.[GAME_LANG]}</p>
+                  <CountUp to={a.count} className="relative mt-2 font-heading text-3xl font-extrabold leading-none tracking-tight text-[#262b44]" />
+                  <p className="relative mt-1 text-[13px] text-[#5b6075]">{a.countNote?.[GAME_LANG]}</p>
                 </>
               ) : (
-                <p className="mt-2 text-[13px] text-[#5b6075]">{a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}</p>
+                <p className="relative mt-2 text-[13px] text-[#5b6075]">{a.links[0].kind === 'youtube' ? 'YouTube' : 'Instagram'}</p>
               )}
-              <div className="mt-auto flex flex-wrap gap-2 pt-4">
+              <div className="relative mt-auto flex flex-wrap gap-2 pt-4">
                 {a.links.map((l) => (
                   <a
                     key={l.href}
@@ -222,7 +309,7 @@ export const ArcadeView: React.FC = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: l.kind === 'youtube' ? YT : IG }}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3d6bf] px-3 text-sm font-semibold transition hover:bg-[#f6efe2] active:scale-[0.98]"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3d6bf] bg-[#fffdf9]/80 px-3 text-sm font-semibold transition hover:bg-[#f6efe2] active:scale-[0.98]"
                   >
                     {l.kind === 'youtube' ? <Youtube size={16} /> : <Instagram size={16} />}
                     {l.label}
@@ -233,134 +320,6 @@ export const ArcadeView: React.FC = () => {
           </Reveal>
         ))}
       </div>
-
-      {/* Köyde biri var: Mardin saati */}
-      <Reveal slot={10} immediate className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-[#e3d6bf] pt-5">
-        <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
-          {!still && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3f7d2c]/60" />}
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#3f7d2c]" />
-        </span>
-        <span className="font-pixel text-[9px] uppercase tracking-wider text-[#8d5d42]">
-          {G.localTime} {clock}
-        </span>
-        <span className="font-hand text-[20px] text-[#9a5438] [rotate:-2deg]">{G.aroundNote}</span>
-      </Reveal>
-
-      {/* Mesaj formu */}
-      <AnimatePresence>
-        {isMessageOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-end justify-center bg-[#1b1f31]/70 backdrop-blur-sm sm:items-center sm:p-6"
-            onClick={() => setIsMessageOpen(false)}
-          >
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="message-title"
-              initial={still ? false : { y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={still ? undefined : { y: 40, opacity: 0 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-[#fffdf9] p-6 text-[#262b44] shadow-2xl sm:rounded-3xl sm:p-7"
-            >
-              <div className="flex items-center justify-between">
-                <h2 id="message-title" className="font-heading text-2xl font-extrabold tracking-tight">
-                  {G.messageCardTitle}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setIsMessageOpen(false)}
-                  aria-label={G.close}
-                  className="grid h-10 w-10 place-items-center rounded-full text-[#5b6075] transition hover:bg-[#f2ebde] active:scale-95"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <form onSubmit={handleSendMessage} className={`mt-5 space-y-4 transition-opacity ${status === 'success' ? 'opacity-25' : ''}`}>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="block">
-                    <span className={labelClass}>{G.nameLabel}</span>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder={G.namePlaceholder}
-                      className={inputClass}
-                    />
-                  </label>
-                  <label className="block">
-                    <span className={labelClass}>{G.instagramLabel}</span>
-                    <input
-                      type="text"
-                      value={formData.instagram}
-                      onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                      placeholder={G.instagramPlaceholder}
-                      className={inputClass}
-                    />
-                  </label>
-                </div>
-                <label className="block">
-                  <span className={labelClass}>{G.phoneLabel}</span>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="05xx xxx xx xx"
-                    className={inputClass}
-                  />
-                </label>
-                <label className="block">
-                  <span className={labelClass}>{G.messageLabel}</span>
-                  <textarea
-                    required
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder={G.messagePlaceholder}
-                    className={`${inputClass} h-32 resize-none`}
-                  />
-                </label>
-
-                <button
-                  type="submit"
-                  disabled={isSending || status === 'success'}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#262b44] font-semibold text-[#faf6ee] transition hover:brightness-125 disabled:opacity-70 active:scale-[0.99]"
-                >
-                  {isSending ? (
-                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  ) : (
-                    <>
-                      {G.send} <Send size={16} />
-                    </>
-                  )}
-                </button>
-
-                {status === 'error' && (
-                  <p role="alert" className="rounded-lg border border-[#b3261e]/20 bg-[#b3261e]/5 px-3 py-2 text-center text-sm font-medium text-[#b3261e]">
-                    {G.error}{' '}
-                    <a href={`mailto:${PROFILE.email}`} className="underline underline-offset-2">
-                      {PROFILE.email}
-                    </a>
-                  </p>
-                )}
-                <p className="text-center text-xs leading-relaxed text-[#5b6075]">{G.contactNote}</p>
-              </form>
-
-              {/* Gönderildi: formun üstüne damga çizilir */}
-              {status === 'success' && (
-                <div className="pointer-events-none absolute inset-0 grid place-content-center justify-items-center" role="status">
-                  <Mark kind="stamp" immediate className="h-20 w-20 text-[#3f7d2c]" />
-                  <p className="mt-1 font-hand text-[28px] text-[#3f7d2c] [rotate:-6deg]">{G.sentStamp}</p>
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </Interior>
   );
 };

@@ -1,0 +1,111 @@
+/* Üstteki piksel manzara şeridi. Görseller scripts/village/build_banner.py ile üretildi;
+   karakter ve tavuk köyün sprite sayfalarından geliyor. Hepsi 32 piksel yüksekliğinde çizildi,
+   --s kadar büyütülüyor. Hareket yalnızca kullanıcı istiyorsa oynar. */
+
+.pixel-banner {
+  --s: 3;
+  position: relative;
+  height: calc(32px * var(--s));
+  overflow: hidden;
+  background: linear-gradient(#bfe3ec 0%, #d6ecea 55%, #e4f0df 100%);
+  isolation: isolate;
+}
+
+.pixel-banner > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background-repeat: repeat-x;
+  background-size: calc(256px * var(--s)) calc(32px * var(--s));
+  image-rendering: pixelated;
+}
+
+.pixel-banner-hills {
+  background-image: url('/assets/banner/hills.png');
+}
+.pixel-banner-clouds {
+  background-image: url('/assets/banner/clouds.png');
+}
+.pixel-banner-ground {
+  background-image: url('/assets/banner/ground.png');
+}
+
+/* Karakter ve tavuk: sprite sayfasından kare kare */
+.pixel-banner-walker,
+.pixel-banner-chick {
+  position: absolute;
+  left: 0;
+  image-rendering: pixelated;
+  will-change: transform;
+}
+.pixel-banner-walker {
+  width: calc(48px * var(--s));
+  height: calc(48px * var(--s));
+  top: calc(-8px * var(--s));
+  background-image: url('/assets/characters/player.png');
+  background-size: calc(192px * var(--s)) calc(192px * var(--s));
+  background-position: calc(-96px * var(--s)) calc(-144px * var(--s));
+  transform: translateX(-120px);
+}
+.pixel-banner-chick {
+  width: calc(16px * var(--s));
+  height: calc(16px * var(--s));
+  top: calc(10px * var(--s));
+  background-image: url('/assets/sprout-lands/Characters/Free Chicken Sprites.png');
+  background-size: calc(64px * var(--s)) calc(32px * var(--s));
+  background-position: 0 calc(-16px * var(--s));
+  transform: translateX(-200px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pixel-banner-clouds {
+    animation: banner-drift 150s linear infinite;
+  }
+  .pixel-banner-walker {
+    animation:
+      banner-step-player 0.5s steps(2) infinite,
+      banner-cross 34s linear infinite;
+  }
+  .pixel-banner-chick {
+    animation:
+      banner-step-chick 0.55s steps(4) infinite,
+      banner-cross 34s linear infinite;
+    animation-delay: 0s, 1.6s;
+  }
+}
+
+@keyframes banner-drift {
+  to {
+    background-position-x: calc(-256px * var(--s));
+  }
+}
+@keyframes banner-step-player {
+  from {
+    background-position-x: calc(-96px * var(--s));
+  }
+  to {
+    background-position-x: calc(-192px * var(--s));
+  }
+}
+@keyframes banner-step-chick {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: calc(-64px * var(--s));
+  }
+}
+@keyframes banner-cross {
+  from {
+    transform: translateX(-120px);
+  }
+  to {
+    transform: translateX(calc(100vw + 120px));
+  }
+}
+
+@media (max-width: 640px) {
+  .pixel-banner {
+    --s: 2;
+  }
+}

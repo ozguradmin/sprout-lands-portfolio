@@ -83,23 +83,6 @@ export const CountUp: React.FC<{ to: number; suffix?: string; className?: string
   );
 };
 
-/** Mardin'deki saat; köyün "burada biri var" detayı. */
-export const useLocalClock = () => {
-  const [time, setTime] = useState('');
-  useEffect(() => {
-    const fmt = new Intl.DateTimeFormat(GAME_LANG === 'en' ? 'en-GB' : 'tr-TR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Europe/Istanbul',
-    });
-    const tick = () => setTime(fmt.format(new Date()));
-    tick();
-    const id = window.setInterval(tick, 30_000);
-    return () => window.clearInterval(id);
-  }, []);
-  return time;
-};
-
 /** Kartların ortak dokunma hissi: hafif kalkar, basınca geri oturur. */
 export const CARD_BASE =
   'group relative rounded-2xl border border-[#e3d6bf] bg-[#fffdf9] shadow-[0_1px_2px_rgba(35,40,64,0.05),0_8px_22px_rgba(35,40,64,0.05)] transition-[transform,translate,scale,box-shadow,border-color] duration-200 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-[#b86f50]/60 hover:shadow-[0_14px_32px_rgba(35,40,64,0.12)] active:translate-y-0 active:scale-[0.995] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[#2f6fd6]';

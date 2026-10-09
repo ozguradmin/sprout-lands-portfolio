@@ -18,6 +18,7 @@ import {
   type Lang,
   type LinkKind,
 } from './data';
+import { PixelBanner } from '../components/UI/PixelBanner';
 import './professional.css';
 
 export interface ProfessionalPageProps {
@@ -119,7 +120,6 @@ const ProjectCard: React.FC<{
         />
       </div>
       <div className="pro-project-body">
-        <p className="pro-metric">{p.metric[lang]}</p>
         <div className="pro-project-title">
           {p.icon && <img className="pro-app-icon" src={p.icon} width={40} height={40} alt="" loading="lazy" decoding="async" />}
           <div>
@@ -298,7 +298,7 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
       <a className="pro-skip" href="#main">
         {t.skip}
       </a>
-      <div className="pro-pixel-strip" aria-hidden="true" />
+      <PixelBanner className="pro-banner" />
       <header className="pro-header">
         <div className="pro-progress" ref={barRef} aria-hidden="true" />
         <div className="pro-container pro-header-inner">
@@ -376,17 +376,22 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
                   <a className="pro-btn pro-btn-primary" href="#projects">
                     {t.seeProjects} <ArrowRight size={17} aria-hidden="true" />
                   </a>
-                  <a className="pro-btn" href={PROFILE.cv[lang]} target="_blank" rel="noopener">
-                    <FileText size={17} aria-hidden="true" /> {t.cv}
-                  </a>
-                  <a className="pro-btn pro-btn-icon" href={PROFILE.cv[lang]} download aria-label={t.cvDownload} title={t.cvDownload}>
-                    <Download size={17} aria-hidden="true" />
-                  </a>
+                  {/* Not ve ok CV düğmesinin hemen altında duruyor ki neyi gösterdiği şaşmasın. */}
+                  <span className="pro-cv-group">
+                    <span className="pro-cv-row">
+                      <a className="pro-btn" href={PROFILE.cv[lang]} target="_blank" rel="noopener">
+                        <FileText size={17} aria-hidden="true" /> {t.cv}
+                      </a>
+                      <a className="pro-btn pro-btn-icon" href={PROFILE.cv[lang]} download aria-label={t.cvDownload} title={t.cvDownload}>
+                        <Download size={17} aria-hidden="true" />
+                      </a>
+                    </span>
+                    <span className="pro-cv-note">
+                      <NoteArrow />
+                      <span className="pro-note">{t.heroNote}</span>
+                    </span>
+                  </span>
                 </div>
-                <p className="pro-note-row pro-rise" style={rd(0.33)}>
-                  <span className="pro-note">{t.heroNote}</span>
-                  <NoteArrow />
-                </p>
                 <ul className="pro-links pro-rise" style={rd(0.38)}>
                   <li>
                     <External href={PROFILE.links.github} t={t}>
