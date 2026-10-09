@@ -142,27 +142,62 @@
 /* ---------------------------------------------------------- hesap kartları */
 /* Sinematik kart: tam kadraj görsel, üstünde karartma ve iki yönlü degrade;
    bilgiler üstte ve altta, aradaki alan görsele bırakılıyor. */
-/* "Bana yaz" sahnesi: kedi bekler, sandık açılır, içinden mektup çıkıp uçar.
-   Kareler scripts/village/build_message_scene.py ile köyün kendi sprite'larından üretildi. */
+/* "Bana yaz" sahnesi: kedi sandığın yanında bekler, sandık arada bir açılıp mektup salar.
+   Kareler scripts/village/build_message_scene.py ile köyün kendi sprite'larından üretildi.
+   Kedi ile sandık ayrı şeritler: kedinin beklemesi hiç durmaz, sandık turlar arası mola verir. */
 .msg-scene {
-  --f: 14; /* şeritteki kare sayısı */
   --s: 2; /* büyütme */
+  display: flex;
+  align-items: flex-end;
+  gap: calc(3px * var(--s));
+}
+.msg-scene > span {
   display: block;
-  width: calc(44px * var(--s));
-  height: calc(40px * var(--s));
-  background-image: url('/assets/accounts/message-scene.png?v=6');
   background-repeat: no-repeat;
-  background-size: calc(44px * var(--f) * var(--s)) calc(40px * var(--s));
   image-rendering: pixelated;
 }
+
+/* Oyundaki 'idle-down' ile aynı: iki kare, saniyede dört */
+.msg-cat {
+  width: calc(14px * var(--s));
+  height: calc(16px * var(--s));
+  background-image: url('/assets/accounts/message-cat.png?v=6');
+  background-size: calc(28px * var(--s)) calc(16px * var(--s));
+}
+
+.msg-chest {
+  --cw: 22px; /* bir karenin genişliği */
+  --cn: 16; /* şeritteki kare sayısı */
+  width: calc(var(--cw) * var(--s));
+  height: calc(40px * var(--s));
+  background-image: url('/assets/accounts/message-chest.png?v=6');
+  background-size: calc(var(--cw) * var(--cn) * var(--s)) calc(40px * var(--s));
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .msg-scene {
-    animation: msg-scene 4.2s steps(14) infinite;
+  .msg-cat {
+    animation: msg-cat 0.5s steps(2) infinite;
+  }
+  .msg-chest {
+    animation: msg-chest 7s linear infinite;
   }
 }
-@keyframes msg-scene {
+@keyframes msg-cat {
   to {
-    background-position-x: calc(-44px * var(--f) * var(--s));
+    background-position-x: calc(-28px * var(--s));
+  }
+}
+/* Turun ilk dörtte üçü kapalı sandıkta bekler, kalanı 16 kareyi saniyede ona yakın oynatır */
+@keyframes msg-chest {
+  0% {
+    background-position-x: 0;
+  }
+  76% {
+    background-position-x: 0;
+    animation-timing-function: steps(16, jump-none);
+  }
+  100% {
+    background-position-x: calc(var(--cw) * (1 - var(--cn)) * var(--s));
   }
 }
 

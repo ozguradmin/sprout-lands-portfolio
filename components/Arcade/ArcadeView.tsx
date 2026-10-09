@@ -184,8 +184,11 @@ export const ArcadeView: React.FC = () => {
           <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] md:gap-10">
             {/* Sol: posta kutusu ve açıklama */}
             <div className="flex gap-4 md:block">
-              {/* Kedi sandığın yanında bekler, sandık açılır, içinden mektup çıkar (sprite şeridi) */}
-              <span className="msg-scene flex-none" aria-hidden="true" />
+              {/* Kedi sandığın yanında bekler, sandık arada bir açılıp mektup salar (sprite şeritleri) */}
+              <span className="msg-scene flex-none" aria-hidden="true">
+                <span className="msg-chest" />
+                <span className="msg-cat" />
+              </span>
               <div className="md:mt-4">
                 <h2 className="font-heading text-xl font-extrabold tracking-tight md:text-2xl">{G.messageCardTitle}</h2>
                 <p className="mt-1.5 text-[14px] leading-relaxed text-[#5b6075]">{G.messageCardText}</p>
