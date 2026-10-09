@@ -22,7 +22,7 @@ export const Interior: React.FC<{
   return (
     <div className="interior-paper h-full w-full overflow-y-auto bg-[#f6efe2] text-[#262b44] font-sans selection:bg-[#e4a672]/60">
       <PixelBanner className="border-b-[3px] border-[#b86f50]" />
-      <header className="sticky top-0 z-20 border-b border-[#e3d6bf] bg-[#f6efe2]/90 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-[#e3d6bf] bg-[#f6efe2]/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-5xl items-center gap-3 px-5 md:px-8">
           <button type="button" onClick={onBack} className="group relative">
             <span className="absolute inset-0 translate-y-[3px] rounded-lg bg-[#b86f50]" />

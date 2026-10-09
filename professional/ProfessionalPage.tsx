@@ -5,6 +5,8 @@ import {
   MEDIA,
   MORE_PROJECTS,
   PROFILE,
+  hrefFor,
+  imageSrcFor,
   projectsFor,
   SKILLS,
   STORE_APPS,
@@ -109,8 +111,8 @@ const ProjectCard: React.FC<{
     <article id={p.slug} className={`pro-project${active ? ' is-active' : ''}${open ? ' is-open' : ''}`} aria-labelledby={`${p.slug}-title`}>
       <div className="pro-project-media" style={{ background: p.image.bg }}>
         <img
-          src={`${p.image.src}.webp`}
-          srcSet={`${p.image.src}-720.webp 720w, ${p.image.src}.webp 1200w`}
+          src={`${imageSrcFor(p, lang)}.webp`}
+          srcSet={`${imageSrcFor(p, lang)}-720.webp 720w, ${imageSrcFor(p, lang)}.webp 1200w`}
           sizes="(min-width: 900px) 520px, 100vw"
           width={1200}
           height={750}
@@ -139,7 +141,7 @@ const ProjectCard: React.FC<{
         <ul className="pro-project-links">
           {p.links.map((l) => (
             <li key={l.href}>
-              <External href={l.href} t={t}>
+              <External href={hrefFor(l, lang)} t={t}>
                 {linkIcon(l.kind)}
                 {labelOf(l.label, lang)}
               </External>
@@ -246,7 +248,6 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
   // Okuma ilerlemesi + menüde bulunduğun bölüm. Katman modunda sayfa .pro-overlay içinde kayar.
   const [section, setSection] = useState<string | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
-  const [clock, setClock] = useState('');
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -278,16 +279,10 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
       if (el) io.observe(el);
     }
 
-    const fmt = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'tr-TR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Istanbul' });
-    const tick = () => setClock(fmt.format(new Date()));
-    tick();
-    const clockId = window.setInterval(tick, 30_000);
-
     return () => {
       cancelAnimationFrame(frame);
       target.removeEventListener('scroll', read);
       io.disconnect();
-      window.clearInterval(clockId);
     };
   }, [lang]);
 
@@ -589,10 +584,6 @@ export const ProfessionalPage: React.FC<ProfessionalPageProps> = ({ mode, path, 
       <footer className="pro-footer">
         <div className="pro-container pro-footer-inner">
           <span className="pro-sign">{t.signOff} — Özgür</span>
-          <span className="pro-clock">
-            <span aria-hidden="true" />
-            {t.clockLabel} {clock}
-          </span>
           <span>
             © {new Date().getFullYear()} Özgür Güler ·{' '}
             <a href="https://cupnooble.itch.io/sprout-lands-asset-pack" target="_blank" rel="noopener noreferrer" className="pro-credit">

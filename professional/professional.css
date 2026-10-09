@@ -1276,38 +1276,6 @@ html[data-theme='dark'] .pro-banner {
   color: var(--accent);
   rotate: -3deg;
 }
-.pro-clock {
-  font-family: var(--font-pixel);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-.pro-clock span {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #3f7d2c;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .pro-clock span {
-    animation: pro-pulse 2.6s ease-in-out infinite;
-  }
-  @keyframes pro-pulse {
-    0%,
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.55;
-      transform: scale(1.22);
-    }
-  }
-}
-
 /* Yeni parçaların yerleşimi ------------------------------------------------- */
 .pro-project-body {
   display: flex;

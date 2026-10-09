@@ -7,12 +7,16 @@ Renkler köyün tileset'inden alındı; şerit 32 piksel yüksekliğinde çizili
 
 from __future__ import annotations
 
+import base64
+import io
 import math
 from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-OUT = Path(__file__).resolve().parents[2] / 'public' / 'assets' / 'banner'
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / 'public' / 'assets' / 'banner'
+CSS = ROOT / 'components' / 'UI' / 'pixelBanner.css'
 W, H = 256, 32
 
 # Köyün paleti (Grass.png / Hills.png / atlas.png'den)
@@ -108,11 +112,33 @@ def ground() -> Image.Image:
     return im
 
 
+def data_uri(im: Image.Image) -> str:
+    """Katmanlar birkaç yüz bayt; ayrı istek beklememeleri için CSS'e gömülüyor."""
+    buf = io.BytesIO()
+    im.save(buf, 'PNG', optimize=True)
+    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode('ascii')
+
+
+def write_css(layers: dict[str, Image.Image]) -> None:
+    """Katman kurallarını pixelBanner.css'teki ART işaretleri arasına yazar."""
+    s = CSS.read_text(encoding='utf-8')
+    a = s.index('\n', s.index('gömülü.', s.index('/* ART:START'))) + 1
+    b = s.index('/* ART:END */')
+    body = ''.join(
+        ".pixel-banner-%s {\n  background-image: url('%s');\n}\n" % (name, data_uri(im))
+        for name, im in layers.items()
+    )
+    CSS.write_text(s[:a] + body + s[b:], encoding='utf-8')
+    print('pixelBanner.css güncellendi', len(body), 'bayt')
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, im in (('hills.png', hills()), ('clouds.png', clouds()), ('ground.png', ground())):
-        im.save(OUT / name, optimize=True)
-        print(name, im.size, (OUT / name).stat().st_size, 'bayt')
+    layers = {'hills': hills(), 'clouds': clouds(), 'ground': ground()}
+    for name, im in layers.items():
+        im.save(OUT / f'{name}.png', optimize=True)
+        print(name, im.size, (OUT / f'{name}.png').stat().st_size, 'bayt')
+    write_css(layers)
 
 
 if __name__ == '__main__':

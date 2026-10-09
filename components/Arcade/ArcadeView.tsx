@@ -184,13 +184,8 @@ export const ArcadeView: React.FC = () => {
           <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-[minmax(0,260px)_minmax(0,1fr)] md:gap-10">
             {/* Sol: posta kutusu ve açıklama */}
             <div className="flex gap-4 md:block">
-              <img
-                src="/assets/accounts/cat-chest.png?v=5"
-                alt=""
-                width={84}
-                height={48}
-                className="h-14 w-auto flex-none [image-rendering:pixelated] md:h-20"
-              />
+              {/* Kedi sandığın yanında bekler, sandık açılır, içinden mektup çıkar (sprite şeridi) */}
+              <span className="msg-scene flex-none" aria-hidden="true" />
               <div className="md:mt-4">
                 <h2 className="font-heading text-xl font-extrabold tracking-tight md:text-2xl">{G.messageCardTitle}</h2>
                 <p className="mt-1.5 text-[14px] leading-relaxed text-[#5b6075]">{G.messageCardText}</p>
@@ -342,7 +337,7 @@ export const ArcadeView: React.FC = () => {
                   href={a.links[1].href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute right-5 top-[62px] z-30 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-[12px] font-semibold text-white/85 backdrop-blur-md transition hover:border-white/40 hover:bg-black/70 sm:right-6"
+                  className="absolute left-5 top-[60px] z-30 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-[12px] font-semibold text-white/85 backdrop-blur-md transition hover:border-white/40 hover:bg-black/70 sm:left-6"
                 >
                   {a.links[1].kind === 'youtube' ? <Youtube size={14} /> : <Instagram size={14} />}
                   {a.links[1].kind === 'youtube' ? 'YouTube' : a.links[1].label}

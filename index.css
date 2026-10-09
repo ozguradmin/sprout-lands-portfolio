@@ -142,8 +142,35 @@
 /* ---------------------------------------------------------- hesap kartları */
 /* Sinematik kart: tam kadraj görsel, üstünde karartma ve iki yönlü degrade;
    bilgiler üstte ve altta, aradaki alan görsele bırakılıyor. */
+/* "Bana yaz" sahnesi: kedi bekler, sandık açılır, içinden mektup çıkıp uçar.
+   Kareler scripts/village/build_message_scene.py ile köyün kendi sprite'larından üretildi. */
+.msg-scene {
+  --f: 14; /* şeritteki kare sayısı */
+  --s: 2; /* büyütme */
+  display: block;
+  width: calc(44px * var(--s));
+  height: calc(40px * var(--s));
+  background-image: url('/assets/accounts/message-scene.png?v=6');
+  background-repeat: no-repeat;
+  background-size: calc(44px * var(--f) * var(--s)) calc(40px * var(--s));
+  image-rendering: pixelated;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .msg-scene {
+    animation: msg-scene 4.2s steps(14) infinite;
+  }
+}
+@keyframes msg-scene {
+  to {
+    background-position-x: calc(-44px * var(--f) * var(--s));
+  }
+}
+
 .acc-card {
   position: relative;
+  /* Kartin icindeki z-index'ler karttan disari tasmasin: yoksa yapiskan baslik altinda kaliyor */
+  isolation: isolate;
+  z-index: 0;
   overflow: hidden;
   aspect-ratio: 3 / 2;
   border-radius: 18px;

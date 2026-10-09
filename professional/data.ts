@@ -73,6 +73,8 @@ export type LinkKind = 'live' | 'github' | 'store';
 export interface ProLink {
   label: L | string;
   href: string;
+  /** Ingilizce surumde farkli adres gerekiyorsa (orn. sitenin /en sayfasi). */
+  hrefEn?: string;
   kind: LinkKind;
 }
 
@@ -80,7 +82,7 @@ export interface FeaturedProject {
   slug: string;
   name: string;
   icon?: string;
-  image: { src: string; bg: string; alt: L };
+  image: { src: string; /** Ingilizce surum icin ayri ekran goruntusu. */ srcEn?: string; bg: string; alt: L };
   kind: L;
   status: L;
   summary: L;
@@ -145,7 +147,12 @@ export const PROJECTS: FeaturedProject[] = [
     slug: 'galaktik-uzay',
     metric: { tr: 'Altı dilde yayın', en: 'Publishing in six languages' },
     name: 'Galaktik Uzay',
-    image: { src: '/pro/img/galaktikuzay', bg: '#262b44', alt: { tr: 'galaktikuzay.com ana sayfası', en: 'galaktikuzay.com home page' } },
+    image: {
+      src: '/pro/img/galaktikuzay',
+      srcEn: '/pro/img/galaktikuzay-en',
+      bg: '#262b44',
+      alt: { tr: 'galaktikuzay.com ana sayfası', en: 'galaktikuzay.com/en home page' },
+    },
     kind: { tr: 'Yayın otomasyonu · Cloudflare, Azure OpenAI', en: 'Publishing automation · Cloudflare, Azure OpenAI' },
     status: { tr: 'Canlı · Açık kaynak', en: 'Live · Open source' },
     summary: {
@@ -176,7 +183,7 @@ export const PROJECTS: FeaturedProject[] = [
     },
     stack: ['Cloudflare Workers', 'Hono', 'D1', 'TypeScript', 'Azure OpenAI', 'Next.js', 'WordPress REST API', 'GitHub Actions'],
     links: [
-      { label: 'galaktikuzay.com', href: 'https://galaktikuzay.com/', kind: 'live' },
+      { label: 'galaktikuzay.com', href: 'https://galaktikuzay.com/', hrefEn: 'https://galaktikuzay.com/en/', kind: 'live' },
       { label: 'GitHub', href: 'https://github.com/ozguradmin/galaktikuzay', kind: 'github' },
     ],
   },
@@ -348,6 +355,12 @@ export interface SmallProject {
   text: L;
   links: { label: L | string; href: string }[];
 }
+
+/** Proje görseli dile göre: İngilizcede sitenin İngilizce sürümünün ekran görüntüsü. */
+export const imageSrcFor = (p: FeaturedProject, lang: Lang) => (lang === 'en' && p.image.srcEn ? p.image.srcEn : p.image.src);
+
+/** Bağlantı dile göre: İngilizcede sitenin /en adresi. */
+export const hrefFor = (l: ProLink, lang: Lang) => (lang === 'en' && l.hrefEn ? l.hrefEn : l.href);
 
 /** Sıralama dile göre: Dönerci başta; Coğrafist tamamen Türkçe olduğu için İngilizcede sonda. */
 const PROJECT_ORDER: Record<Lang, string[]> = {
@@ -549,7 +562,6 @@ export const UI = {
     heroNote: 'CV burada',
     alsoLabel: 'Ayrıca',
     signOff: 'görüşmek üzere',
-    clockLabel: 'MARDİN',
     credit: 'Köy görselleri: Sprout Lands · Cup Nooble',
   },
   en: {
@@ -597,7 +609,6 @@ export const UI = {
     heroNote: 'CV is right here',
     alsoLabel: 'Also',
     signOff: 'see you around',
-    clockLabel: 'MARDIN',
     credit: 'Village art: Sprout Lands by Cup Nooble',
   },
 };

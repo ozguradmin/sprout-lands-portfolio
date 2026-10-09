@@ -5,6 +5,10 @@
 
 .pixel-banner {
   --s: 3;
+  /* Bir turun süresi ve turun ne kadar ilerlemiş sayılacağı. Negatif gecikme sayesinde
+     sayfa açılır açılmaz karakter ekranda: sağ kenardan girmesini beklemek gerekmiyor. */
+  --cross: 30s;
+  --lead: -10s;
   position: relative;
   height: calc(32px * var(--s));
   overflow: hidden;
@@ -21,15 +25,18 @@
   image-rendering: pixelated;
 }
 
+/* ART:START — scripts/village/build_banner.py yazar, elle değiştirme.
+   Üç katman da birkaç yüz bayt; ayrı istek beklemesin diye CSS'in içine gömülü. */
 .pixel-banner-hills {
-  background-image: url('/assets/banner/hills.png?v=5');
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAAgCAYAAAD9qabkAAABdElEQVR42u3cvVXDMBQGUJmTmjFgsGzgCagpvAFbsAyMwQJJBSfxwZg4tvUk3VslKWxH0vssKT8pAQAAAAAAAAAAAAAF6vY82XHoT5fP3/qh0wWQz0Ou4p96DagsAP4qdCEADcwAgHgOmiAfeyIIAMV/9ZoQEOgp6qcAW6zXWxzwc+0YtU222q+pYQxMtU3099ZF3pyrNRxKCAD9X3+gXy0Bbunw56fHxSf8+Pz6Ocb34yUNa6pcX8Hr/wwBMNXI9xT5GkFyTzi4Y5Vb9C1ce6Q27I5Df9qj2NcyFwxRjcMhx5pR0bR9c/it/7vX95cqBkWpwbDVIFHsbYfDuP+nbvLVBEDkYPjPUueWWVgNYUee8dbc9wCWLG8uCyzi8mjumgREytZ/40Dfoi/WfE++CJR50Gxxrqlj1hoMkfewou+vCYDGg620UIheUCVtqAsAws4WSiuk5LcAtDKtXiscFLkAoNI195JPN0j+DwAwA8DOPDs4A/BvqewarFBNAAAAAElFTkSuQmCC');
 }
 .pixel-banner-clouds {
-  background-image: url('/assets/banner/clouds.png?v=5');
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAAgCAYAAAD9qabkAAAA7klEQVR42u3YvQ6CMBQGUJowueiCq9H3fyaNqyy6uOLk5gAF079zZiDhtnz3ltAlNk3TOPfaEMLQAZvplSD/4GspCOfURSOoIABiPoDvPTYANQV7yv3cpyzAbXy9lz7/POx3rXb+moNwSV00goaPADUsekzwlRaEMUG3pC65vf+aYE8ZaH3KAsxdxJqSPoQwXB/PuyCs7/3XBHuqQAs5jbY2e9s/N0vfF2uC/XI8nIoPgC1G21/JKAAEgMaQ+RFgq9HWIpfvH42gtp/B2RyllICcRuHcR2YAAAAAAAAAAAAAAAAAAAAAAAAAAACAOB/Oi3Oe+XJL/wAAAABJRU5ErkJggg==');
 }
 .pixel-banner-ground {
-  background-image: url('/assets/banner/ground.png?v=5');
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAAgCAYAAAD9qabkAAABzElEQVR42u3aPUjDQACG4UspdBAEcREFwc3VvTrq7KZSJ6EOdrcOTu6d6tCCiFgcunTQpYuU1l0QB50aRUVEu6iIIMQpJVpjk+bvkrwPBNqQO3LfXY5cEiEAAAAAAAAAAAAAAAAAAAAAAAAAhIJCBMF6PD/S9N9jMyuK3+URb0kiCFazeizGp0YDK494SxABwB0AJHBWzmmkACYAF63vZHouqtJ2hbUyedJ+EfGHgHpnLSzOdvfVay2pOq26tazpa/h0tqj4XT5qedJ+JgDTzpKx04wXsFNeTgBhyZP2i8EfAuYPliyvQcN2rB1hO18Z2ha2fDnW5C1ApblmubAfxz7d5DUn9eqzs9l/q/Vel8ua1zmks0VF305Sz0Kd/vix76/tof1i+wJ0ku9/eco2dvr1n5167YwnN9tm7B8vMkv8LpCZ21OsVu7HsYWGOlC9xtuxeq3V3fo9uDGrdz91GmgObnCSb788Rya/pBs7Zv03SL1WxpMXbSs0VE/HjnKhbkb61dPu4X3Pvo3VCWnO76p02/2QZ3h+yPfyUcuT9tsT+QkAgLlk5+2TFADBp8AAmAAAxGYJcNd5JQUgrhPAZfudFACWAACYAADExjelDXncgC3mvQAAAABJRU5ErkJggg==');
 }
+/* ART:END */
 
 /* Karakter ve inek: sprite sayfasından kare kare */
 .pixel-banner-walker,
@@ -41,25 +48,30 @@
 }
 .pixel-banner-walker {
   --flip: 1;
+  /* Turun başı ve sonu: ikisi de 100vw + 360px yol gider, yani aynı hızda yürürler. */
+  --x0: calc(100vw + 140px);
+  --x1: -220px;
   width: calc(48px * var(--s));
   height: calc(48px * var(--s));
   top: calc(-8px * var(--s));
-  background-image: url('/assets/characters/player.png?v=5');
+  background-image: url('/assets/characters/player.png?v=6');
   background-size: calc(192px * var(--s)) calc(192px * var(--s));
   /* sola yürüyüş karesi (sprite sayfasının üçüncü satırı) */
   background-position: calc(-96px * var(--s)) calc(-96px * var(--s));
-  transform: translateX(calc(100vw + 140px));
+  transform: translateX(var(--x0));
 }
 .pixel-banner-cow {
   /* İnek sayfasında sola bakan kare yok; yatayda aynalanıyor. */
   --flip: -1;
+  --x0: calc(100vw + 260px);
+  --x1: -100px;
   width: calc(32px * var(--s));
   height: calc(32px * var(--s));
   top: calc(-4px * var(--s));
-  background-image: url('/assets/sprout-lands/Characters/Free Cow Sprites.png?v=5');
+  background-image: url('/assets/sprout-lands/Characters/Free Cow Sprites.png?v=6');
   background-size: calc(96px * var(--s)) calc(64px * var(--s));
   background-position: 0 calc(-32px * var(--s));
-  transform: translateX(calc(100vw + 260px)) scaleX(-1);
+  transform: translateX(var(--x0)) scaleX(-1);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -69,13 +81,15 @@
   .pixel-banner-walker {
     animation:
       banner-step-player 0.5s steps(2) infinite,
-      banner-cross 36s linear infinite;
+      banner-cross var(--cross) linear infinite;
+    animation-delay: 0s, var(--lead);
   }
   .pixel-banner-cow {
     animation:
       banner-step-cow 0.7s steps(2) infinite,
-      banner-cross 36s linear infinite;
-    animation-delay: 0s, 2.4s;
+      banner-cross var(--cross) linear infinite;
+    /* İnek karakterin biraz arkasında kalsın */
+    animation-delay: 0s, calc(var(--lead) + 2.6s);
   }
 }
 
@@ -103,15 +117,18 @@
 /* Sağ kenardan girip sol kenardan çıkar; --flip ineği aynalar */
 @keyframes banner-cross {
   from {
-    transform: translateX(calc(100vw + 140px)) scaleX(var(--flip));
+    transform: translateX(var(--x0)) scaleX(var(--flip));
   }
   to {
-    transform: translateX(-220px) scaleX(var(--flip));
+    transform: translateX(var(--x1)) scaleX(var(--flip));
   }
 }
 
 @media (max-width: 640px) {
   .pixel-banner {
     --s: 2;
+    /* Dar ekranda yol kısa; tur da kısalsın ki yürüyüş aynı hızda görünsün */
+    --cross: 19s;
+    --lead: -7s;
   }
 }

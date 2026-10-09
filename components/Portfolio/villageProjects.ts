@@ -1,7 +1,7 @@
 // Köydeki "Projeler" binasının listesi. Öne çıkan projeler profesyonel görünümle aynı veriden gelir
 // (professional/data.ts); burada yalnızca kategori ve köye özel küçük projeler eklenir.
 import { GAME_LANG } from '../../i18n/game';
-import { MORE_PROJECTS, projectsFor, type Lang, type LinkKind } from '../../professional/data';
+import { MORE_PROJECTS, hrefFor, imageSrcFor, projectsFor, type Lang, type LinkKind } from '../../professional/data';
 
 type L = Record<Lang, string>;
 
@@ -39,11 +39,11 @@ const featured: VillageProject[] = projectsFor(GAME_LANG).map((p) => ({
   categories: FEATURED_CATEGORIES[p.slug] ?? ['web'],
   summary: p.summary,
   status: p.status,
-  image: { src: p.image.src, bg: p.image.bg },
+  image: { src: imageSrcFor(p, GAME_LANG), bg: p.image.bg },
   icon: p.icon,
   stack: p.stack,
   details: { goal: p.goal, built: p.built, result: p.result },
-  links: p.links,
+  links: p.links.map((l) => ({ ...l, href: hrefFor(l, GAME_LANG) })),
   proSlug: p.slug,
 }));
 
