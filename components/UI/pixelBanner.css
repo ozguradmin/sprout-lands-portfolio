@@ -87,7 +87,7 @@
 
 .pixel-banner-cow {
   --step: -64px; /* iki kare ileri: steps(2) aradaki kareyi gösterir */
-  /* İnek sayfasında sola bakan kare yok; yatayda aynalanıyor. */
+  /* İnek sayfada sağa bakıyor; sola yürüdüğü için yatayda aynalanıyor. */
   --flip: -1;
   --x0: calc(100vw + 260px);
   --x1: -100px;
@@ -100,8 +100,8 @@
 }
 .pixel-banner-chicken {
   --step: -32px; /* iki kare ileri: steps(2) aradaki kareyi gösterir */
-  /* Tavuk sayfası da sola bakıyor; sağa giderken aynalanıyor. */
-  --flip: -1;
+  /* Tavuk sayfada zaten sağa bakıyor; sağa yürürken aynalanmıyor. */
+  --flip: 1;
   --x0: -140px;
   --x1: calc(100vw + 220px);
   width: calc(16px * var(--s));
