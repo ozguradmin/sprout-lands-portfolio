@@ -40,15 +40,15 @@ export const PROFILE = {
     linkedin: 'https://www.linkedin.com/in/%C3%B6zg%C3%BCr-g-133a33219/',
     x: 'https://x.com/ozguramdin',
   },
-  role: { tr: 'Yazılım & Dijital Ürün Geliştirici', en: 'Software & Digital Product Developer' } as L,
+  role: { tr: 'Mobil, Oyun ve Web Geliştirici', en: 'Mobile, Game & Web Developer' } as L,
   location: { tr: 'Mardin', en: 'Mardin, Türkiye' } as L,
   intro: {
     tr: [
-      'Mobil uygulama, web ürünü ve otomasyon geliştiriyorum. Coğrafist, Dönerci ve Print Fast App Store ile Google Play’de; WTF Yapay Zekâ’nın Android uygulaması 50.000’den fazla indirildi.',
+      'Mobil uygulama, oyun, web ürünü ve otomasyon geliştiriyorum. Coğrafist, Dönerci ve Print Fast App Store ile Google Play’de; WTF Yapay Zekâ’nın Android uygulaması 50.000’den fazla indirildi.',
       'Bu projelerin çoğunda tek geliştiriciyim. Arayüz, backend, ödeme entegrasyonu ve mağaza yayını bende.',
     ],
     en: [
-      'I build mobile apps, web products and automations. Coğrafist, Dönerci and Print Fast are on the App Store and Google Play, and the WTF Yapay Zekâ Android app has passed 50,000 downloads.',
+      'I build mobile apps, games, web products and automations. Coğrafist, Dönerci and Print Fast are on the App Store and Google Play, and the WTF Yapay Zekâ Android app has passed 50,000 downloads.',
       'On most of these I’m the only developer, so the interface, backend, payments and store releases are all mine.',
     ],
   } as Record<Lang, string[]>,
@@ -643,8 +643,8 @@ export const metaFor = (lang: Lang, slug: string | null): PageMeta => {
     title: `Özgür Güler | ${PROFILE.role[lang]}`,
     description:
       lang === 'en'
-        ? 'Mobile apps, web products and automations. Three apps on the App Store and Google Play, services running on Cloudflare Workers, and open-source projects.'
-        : 'Mobil uygulama, web ürünü ve otomasyon. App Store ve Google Play’de üç uygulama, Cloudflare Workers üzerinde çalışan servisler ve açık kaynak projeler.',
+        ? 'Mobile apps, games, web products and automations. Three apps on the App Store and Google Play, services running on Cloudflare Workers, and open-source projects.'
+        : 'Mobil uygulama, oyun, web ürünü ve otomasyon. App Store ve Google Play’de üç uygulama, Cloudflare Workers üzerinde çalışan servisler ve açık kaynak projeler.',
     url: `${SITE_URL}${proBase(lang)}`,
     image,
     lang,
