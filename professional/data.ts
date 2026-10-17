@@ -45,10 +45,12 @@ export const PROFILE = {
   intro: {
     tr: [
       'Mobil uygulama, oyun, web ürünü ve otomasyon geliştiriyorum. Coğrafist, Dönerci ve Print Fast App Store ile Google Play’de; WTF Yapay Zekâ’nın Android uygulaması 50.000’den fazla indirildi.',
+      'Açık kaynak Türkçe seslendirme modeli Ahenk’i yayınladım; küçük sürümü tarayıcıda çalışıyor.',
       'Bu projelerin çoğunda tek geliştiriciyim. Arayüz, backend, ödeme entegrasyonu ve mağaza yayını bende.',
     ],
     en: [
       'I build mobile apps, games, web products and automations. Coğrafist, Dönerci and Print Fast are on the App Store and Google Play, and the WTF Yapay Zekâ Android app has passed 50,000 downloads.',
+      'I released Ahenk, an open-source Turkish text-to-speech model; its small version runs in the browser.',
       'On most of these I’m the only developer, so the interface, backend, payments and store releases are all mine.',
     ],
   } as Record<Lang, string[]>,
@@ -98,6 +100,51 @@ export interface FeaturedProject {
 const both = (s: string): L => ({ tr: s, en: s });
 
 export const PROJECTS: FeaturedProject[] = [
+  {
+    slug: 'ahenk',
+    metric: { tr: 'TR-Zor testinde 2,54 hata oranı · Trendyol-TTS 3,98', en: '2.54 word error rate on TR-Zor · Trendyol-TTS 3.98' },
+    name: 'Ahenk',
+    image: {
+      src: '/pro/img/ahenk',
+      srcEn: '/pro/img/ahenk-en',
+      bg: '#262b44',
+      alt: { tr: 'Ahenk Cep’in tarayıcıda çalışan seslendirme sayfası', en: 'The Ahenk Cep speech page running in the browser' },
+    },
+    kind: { tr: 'Türkçe seslendirme modeli · Açık kaynak', en: 'Turkish text-to-speech model · Open source' },
+    status: { tr: 'Yayında · Açık kaynak', en: 'Released · Open source' },
+    summary: {
+      tr: 'Türkçe metni sese çeviren açık model ailesi; küçük olanı tarayıcıda, sunucuya hiçbir şey göndermeden çalışıyor.',
+      en: 'An open Turkish text-to-speech family; the small model runs in the browser without sending anything to a server.',
+    },
+    goal: {
+      tr: 'Türkçe için ücretsiz, açık ve cihazın kendisinde çalışabilen bir seslendirme modeli olsun istedim; soru tonlamasını ve duyguyu da taşısın.',
+      en: 'I wanted a free, open Turkish speech model that can run on the device itself and still carry question intonation and emotion.',
+    },
+    built: {
+      tr: [
+        'Ahenk: VoxCPM2 üzerine Türkçe LoRA (2B + 36M). Soru tonlaması, altı duygu ve gülme; Türkçe ya da İngilizce üslup talimatı alıyor',
+        'Ahenk Cep: 8,6 milyon parametrelik, 34 MB’lık öğrenci model. CPU’da ve tarayıcıda WebAssembly ile çalışıyor',
+        'trnorm: sayı, tarih, saat, para, yüzde, kısaltma ve telefon numaralarını okunuşa çeviren, bağımlılıksız Python kütüphanesi',
+        'TR-Zor: 13 kategoride 155 zor cümlelik ölçüm seti. Çıktılar faster-whisper ile yazıya dökülüp hata oranı, UTMOS ile doğallık ölçülüyor',
+      ],
+      en: [
+        'Ahenk: a Turkish LoRA on top of VoxCPM2 (2B + 36M). Question intonation, six emotions and laughter; takes style instructions in Turkish or English',
+        'Ahenk Cep: an 8.6M-parameter, 34 MB student model that runs on the CPU and in the browser through WebAssembly',
+        'trnorm: a dependency-free Python library that turns numbers, dates, times, money, percentages, abbreviations and phone numbers into how they are read aloud',
+        'TR-Zor: a 155-sentence benchmark across 13 categories. Output is transcribed with faster-whisper for word error rate and scored with UTMOS for naturalness',
+      ],
+    },
+    result: {
+      tr: 'TR-Zor’da 2,54 hata oranıyla Trendyol-TTS’in (3,98) altında kaldı; doğallık tahmininde Trendyol önde. Ağırlıklar Hugging Face’te, kod ve ölçüm setleri Apache-2.0.',
+      en: 'On TR-Zor it reached a 2.54 word error rate against Trendyol-TTS’s 3.98, while Trendyol scores higher on predicted naturalness. Weights are on Hugging Face; code and benchmarks are Apache-2.0.',
+    },
+    stack: ['Python', 'PyTorch', 'VoxCPM2', 'LoRA', 'EMA Lightning', 'WebAssembly', 'Hugging Face'],
+    links: [
+      { label: { tr: 'Tarayıcıda dene', en: 'Try it in the browser' }, href: 'https://ozguradmin.github.io/ahenk-turkish-tts/', kind: 'live' },
+      { label: 'GitHub', href: 'https://github.com/ozguradmin/ahenk-turkish-tts', kind: 'github' },
+      { label: 'Hugging Face', href: 'https://huggingface.co/ozgurguler/ahenk-cep-tr', kind: 'live' },
+    ],
+  },
   {
     slug: 'cografist',
     metric: { tr: 'Nisan 2026’dan beri yayında', en: 'Live since April 2026' },
@@ -364,8 +411,8 @@ export const hrefFor = (l: ProLink, lang: Lang) => (lang === 'en' && l.hrefEn ? 
 
 /** Sıralama dile göre: Dönerci başta; Coğrafist tamamen Türkçe olduğu için İngilizcede sonda. */
 const PROJECT_ORDER: Record<Lang, string[]> = {
-  tr: ['donerci', 'cografist', 'galaktik-uzay', 'print-fast', 'ofile-opaste', 'whisper-web-scribe'],
-  en: ['donerci', 'galaktik-uzay', 'print-fast', 'ofile-opaste', 'whisper-web-scribe', 'cografist'],
+  tr: ['donerci', 'ahenk', 'cografist', 'galaktik-uzay', 'print-fast', 'ofile-opaste', 'whisper-web-scribe'],
+  en: ['donerci', 'ahenk', 'galaktik-uzay', 'print-fast', 'ofile-opaste', 'whisper-web-scribe', 'cografist'],
 };
 
 export const projectsFor = (lang: Lang): FeaturedProject[] =>
@@ -444,10 +491,10 @@ export const SKILLS: { title: string; primary: string[]; also?: L }[] = [
   },
   {
     title: 'AI & Automation',
-    primary: ['Azure OpenAI', 'Transformers.js'],
+    primary: ['PyTorch', 'Azure OpenAI', 'Transformers.js'],
     also: {
-      tr: 'OpenAI uyumlu API’ler, LLM değerlendirme, zamanlanmış içerik akışları',
-      en: 'OpenAI-compatible APIs, LLM evaluation, scheduled content pipelines',
+      tr: 'Ses modeli eğitimi (TTS, LoRA), OpenAI uyumlu API’ler, LLM değerlendirme, zamanlanmış içerik akışları',
+      en: 'Speech model training (TTS, LoRA), OpenAI-compatible APIs, LLM evaluation, scheduled content pipelines',
     },
   },
   {

@@ -26,6 +26,7 @@ export interface VillageProject {
 
 const FEATURED_CATEGORIES: Record<string, VillageCategory[]> = {
   cografist: ['mobile', 'web'],
+  ahenk: ['ai', 'web'],
   'galaktik-uzay': ['web', 'ai'],
   donerci: ['mobile'],
   'print-fast': ['mobile'],
